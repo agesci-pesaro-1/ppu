@@ -98,5 +98,6 @@ Fase 0 — Fondamenta. Ordine suggerito:
 ## Comandi
 
 - `pnpm check`: lint e formattazione (Biome).
-- `pnpm test`: test (schema su SQLite in memoria con `node:sqlite`).
+- `pnpm test`: test dello schema (`node:sqlite`) e del Worker (Vitest nel runtime Workers).
+- `pnpm typecheck`: controllo dei tipi TypeScript.
 - `pnpm seed:demo`: rigenera `seed/demo/demo.sql` da `scripts/genera-seed-demo.ts`.

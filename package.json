@@ -11,8 +11,9 @@
   "scripts": {
     "check": "biome check .",
     "format": "biome check --write .",
-    "test": "node --test 'tests/**/*.test.ts'",
-    "seed:demo": "node scripts/genera-seed-demo.ts"
+    "test": "node --test 'tests/**/*.test.ts' && pnpm -r test",
+    "seed:demo": "node scripts/genera-seed-demo.ts",
+    "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3"

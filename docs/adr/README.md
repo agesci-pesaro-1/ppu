@@ -26,3 +26,4 @@ Ogni scelta architetturale di PPU è registrata qui come ADR (Architecture Decis
 | [0010](0010-open-source-un-installazione-per-gruppo.md) | Progetto open source, un'installazione separata per ogni gruppo | Accettata |
 | [0011](0011-licenza-agpl.md) | Licenza AGPL-3.0 per il codice | Accettata |
 | [0012](0012-strumenti-di-sviluppo.md) | Strumenti di sviluppo: Node 26, pnpm, Biome | Proposta |
+| [0013](0013-unita-nel-database.md) | Unità nel database, gestite dall'MCP admin | Proposta |

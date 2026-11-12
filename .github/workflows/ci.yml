@@ -1,0 +1,60 @@
+# Controlli su ogni pull request e su main: lint, tipi, test, firma DCO.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  controlli:
+    name: Lint, tipi e test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Abilita pnpm (Corepack)
+        run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  dco:
+    name: Firma DCO
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Ogni commit ha "Signed-off-by" dell'autore
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mancanti=0
+          for sha in $(git rev-list --no-merges "$BASE..$HEAD"); do
+            autore="$(git log -1 --format='%an <%ae>' "$sha")"
+            if ! git log -1 --format='%B' "$sha" | grep -qiF "Signed-off-by: $autore"; then
+              echo "::error::Il commit $sha non ha la riga 'Signed-off-by: $autore'"
+              mancanti=$((mancanti + 1))
+            fi
+          done
+          if [ "$mancanti" -gt 0 ]; then
+            echo "Firma i commit con 'git commit -s' (vedi CONTRIBUTING.md)."
+            exit 1
+          fi
+          echo "Tutti i commit sono firmati."

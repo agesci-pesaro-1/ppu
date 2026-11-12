@@ -5,12 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+    "db:locale": "scripts/prepara-db-locale.sh",
+    "dev:e2e": "scripts/prepara-db-locale.sh .wrangler/e2e && wrangler dev --persist-to .wrangler/e2e --var MODALITA_TEST:attiva --var DOMINIO:example.org",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cfworker/json-schema": "4.1.1",
+    "@cloudflare/workers-oauth-provider": "1.2.4",
+    "@modelcontextprotocol/sdk": "1.32.2",
     "hono": "4.13.14",
-    "jose": "6.2.13"
+    "jose": "6.2.13",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.4.10",

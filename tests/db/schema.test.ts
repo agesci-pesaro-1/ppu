@@ -8,7 +8,7 @@ const conta = (db: ReturnType<typeof creaDatabase>, sql: string): number =>
 describe('migrazioni e seed base', () => {
   it('si applicano su un database vuoto', () => {
     const db = creaDatabase();
-    assert.equal(conta(db, 'SELECT count(*) n FROM unita'), 7);
+    assert.equal(conta(db, 'SELECT count(*) n FROM unita'), 8);
     assert.equal(conta(db, 'SELECT count(*) n FROM branche'), 4);
   });
 
@@ -16,7 +16,7 @@ describe('migrazioni e seed base', () => {
     const db = creaDatabase();
     const prima = conta(db, 'SELECT count(*) n FROM catalogo_progressione');
     for (const s of fileSql('seed/base')) db.exec(s);
-    assert.equal(conta(db, 'SELECT count(*) n FROM unita'), 7);
+    assert.equal(conta(db, 'SELECT count(*) n FROM unita'), 8);
     assert.equal(conta(db, 'SELECT count(*) n FROM catalogo_progressione'), prima);
   });
 

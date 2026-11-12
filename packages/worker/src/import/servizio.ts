@@ -13,7 +13,7 @@ import { ErrorePpu } from '../errori.ts';
 import type { Utente } from '../identita/index.ts';
 import { puoAmministrare, richiedi } from '../servizi/permessi.ts';
 import { nuovaOperazione } from '../servizi/registro.ts';
-import { ErroreCsv, leggiCsv, type TabellaCsv } from './csv.ts';
+import { chiaveColonna, ErroreCsv, leggiCsv, type TabellaCsv } from './csv.ts';
 import {
   type CampoAssociatoImportabile,
   colonneUsate,
@@ -34,6 +34,8 @@ export interface TutorePiano {
   relazione: string;
   cognome: string;
   nome: string;
+  data_nascita: Valore;
+  luogo_nascita: Valore;
   codice_fiscale: Valore;
   cellulare: Valore;
   email: Valore;
@@ -67,21 +69,21 @@ export interface ContestoPiano {
 // ---------------------------------------------------------------------------
 
 function indiceColonne(tabella: TabellaCsv): Map<string, number> {
-  return new Map(tabella.intestazioni.map((h, i) => [h.toLowerCase(), i]));
+  return new Map(tabella.intestazioni.map((h, i) => [chiaveColonna(h), i]));
 }
 
 export function pianifica(tabella: TabellaCsv, m: Mappatura, contesto: ContestoPiano): Piano {
   const indice = indiceColonne(tabella);
-  const mancanti = colonneUsate(m).filter((c) => !indice.has(c.trim().toLowerCase()));
+  const mancanti = colonneUsate(m).filter((c) => !indice.has(chiaveColonna(c)));
   if (mancanti.length > 0) {
     throw new ErrorePpu(
       'richiesta_non_valida',
       `Colonne della mappatura assenti nel file: ${mancanti.map((c) => `"${c}"`).join(', ')}.`,
     );
   }
-  const usate = new Set(colonneUsate(m).map((c) => c.trim().toLowerCase()));
+  const usate = new Set(colonneUsate(m).map(chiaveColonna));
   const colonneIgnorate = tabella.intestazioni.filter(
-    (h) => h !== '' && !usate.has(h.toLowerCase()),
+    (h) => h !== '' && !usate.has(chiaveColonna(h)),
   );
 
   const valoriUnita = new Map(
@@ -92,7 +94,7 @@ export function pianifica(tabella: TabellaCsv, m: Mappatura, contesto: ContestoP
 
   const righe = tabella.righe.map((r): RigaPiano => {
     const cella = (colonna: string): string =>
-      r.valori[indice.get(colonna.trim().toLowerCase()) ?? -1] ?? '';
+      r.valori[indice.get(chiaveColonna(colonna)) ?? -1] ?? '';
     const errori: string[] = [];
     const avvisi: string[] = [];
 
@@ -160,6 +162,8 @@ export function pianifica(tabella: TabellaCsv, m: Mappatura, contesto: ContestoP
         relazione: t.relazione,
         cognome: String(cognome ?? ''),
         nome: String(valori.nome),
+        data_nascita: valori.data_nascita ?? null,
+        luogo_nascita: valori.luogo_nascita ?? null,
         codice_fiscale: valori.codice_fiscale ?? null,
         cellulare: valori.cellulare ?? null,
         email: valori.email ?? null,
@@ -487,6 +491,8 @@ export async function confermaImport(
             'relazione',
             'cognome',
             'nome',
+            'data_nascita',
+            'luogo_nascita',
             'codice_fiscale',
             'cellulare',
             'email',

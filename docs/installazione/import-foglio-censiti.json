@@ -1,0 +1,62 @@
+{
+  "versione": 1,
+  "formatoData": "gg/mm/aaaa",
+  "associato": {
+    "codice_censimento": "Codice censimento AGESCI",
+    "cognome": "Cognome",
+    "nome": "Nome",
+    "luogo_nascita": "Luogo di nascita",
+    "data_nascita": "Data di Nascita (gg/mm/aaaa)",
+    "informativa": "Informativa",
+    "consenso_2a": "2A",
+    "consenso_2b": "2B",
+    "consenso_2c": "2C",
+    "note_privacy": "NOTE su Privacy",
+    "indirizzo": "Residenza",
+    "comune": "Comune",
+    "cellulare": "CELL",
+    "telefono_casa": "Telefono Casa",
+    "email": "EMAIL PERSONALE"
+  },
+  "unita": {
+    "colonna": "Unità",
+    "valori": {
+      "Lupetti": "lupetti",
+      "Coccinelle": "coccinelle",
+      "Esploratori": "esploratori",
+      "Guide": "guide",
+      "Noviziato": "noviziato",
+      "Clan": "clan",
+      "Fuoco": "fuoco",
+      "Comunità Capi": "coca"
+    }
+  },
+  "tutori": [
+    {
+      "relazione": "padre",
+      "campi": {
+        "cognome": "Cognome Padre",
+        "nome": "Nome Padre",
+        "data_nascita": "data di nascita padre",
+        "luogo_nascita": "luogo di nascita padre",
+        "codice_fiscale": "CF padre",
+        "cellulare": "Cell padre",
+        "email": "email padre"
+      }
+    },
+    {
+      "relazione": "madre",
+      "campi": {
+        "cognome": "Cognome Madre",
+        "nome": "Nome Madre",
+        "data_nascita": "data di nascita madre",
+        "luogo_nascita": "luogo di nascita madre",
+        "codice_fiscale": "CF madre",
+        "cellulare": "Cell madre",
+        "email": "email madre"
+      }
+    }
+  ],
+  "note": [{ "colonna": "NOTE", "tipo": "nota" }],
+  "valoriSi": ["ok"]
+}

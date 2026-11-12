@@ -9,6 +9,7 @@ coverage/
 .dev.vars
 .dev.vars.*
 !.dev.vars.example
+wrangler.generato.json
 
 # Playwright
 test-results/

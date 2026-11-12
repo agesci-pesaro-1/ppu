@@ -1,0 +1,10 @@
+{
+  "name": "PPU",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:26",
+  "postCreateCommand": "corepack enable && pnpm install",
+  "customizations": {
+    "vscode": {
+      "extensions": ["biomejs.biome", "svelte.svelte-vscode", "ms-playwright.playwright"]
+    }
+  }
+}

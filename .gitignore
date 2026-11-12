@@ -1,0 +1,28 @@
+node_modules/
+dist/
+build/
+.svelte-kit/
+coverage/
+
+# Cloudflare
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
+# Ambiente locale
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+
+# Mai dati reali nel repository
+*.xlsx
+*.ods
+*.csv
+!seed/**/*.csv

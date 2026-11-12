@@ -8,7 +8,7 @@ Negli esempi il dominio del gruppo è `example.org` e il team di Cloudflare Acce
 
 ## Indirizzi
 
-Il Worker di beta e produzione risponde su un dominio personalizzato del gruppo, che Cloudflare crea al primo deploy (il dominio deve essere già gestito da Cloudflare):
+Il Worker di beta e produzione risponde su un dominio personalizzato del gruppo, che Cloudflare crea al primo deploy. Il dominio deve essere già una **zona dello stesso account Cloudflare** in cui si usano Zero Trust e i Worker (vedi passo 2.1):
 
 | Ambiente | Indirizzo del Worker (esempio) |
 | --- | --- |
@@ -63,6 +63,8 @@ Servono due client OAuth nello stesso progetto: uno per il login MCP del Worker,
 
 Dashboard → **Workers e Pages** (o la home dell'account): l'**Account ID** è nella colonna a destra. Servirà come `CLOUDFLARE_ACCOUNT_ID`.
 
+Nella home dell'account, alla voce **Domini** (o **Siti web**), controlla che ci sia il dominio del gruppo (`example.org`). Se manca: **Aggiungi un dominio** → piano **Free**, poi imposta presso il registrar i due nameserver indicati da Cloudflare. Se il dominio è in un altro account Cloudflare va spostato in questo: le applicazioni Access accettano solo domini dello stesso account, altrimenti la creazione fallisce con `domain does not belong to zone` (errore 12130).
+
 ### 2.2 Token API per GitHub Actions
 
 1. In alto a destra → **Profilo → Token API → Crea token → Token personalizzato**.
@@ -85,6 +87,7 @@ Dashboard → **Workers e Pages** (o la home dell'account): l'**Account ID** è 
 1. **Archiviazione e database → D1 → Crea database**:
    - nome: `ppu`;
    - **Località: Giurisdizione → UE**. ⚠️ La giurisdizione si sceglie **solo alla creazione**: se sbagli, devi creare un nuovo database.
+   - Via API: `POST /accounts/{account_id}/d1/database` con `{"name": "ppu", "jurisdiction": "eu"}`. Per verificare, `GET /accounts/{account_id}/d1/database/{id}` deve restituire `"jurisdiction": "eu"`.
 2. Copia il **Database ID**: servirà come `PPU_D1_ID` (e `PPU_D1_NOME` = `ppu`).
 3. **Archiviazione e database → KV → Crea namespace**, nome `ppu-oauth`. Copia l'**ID**: servirà come `PPU_KV_OAUTH_ID`. Contiene solo token e client OAuth (cifrati o sotto hash), nessun dato degli associati.
 
@@ -92,14 +95,15 @@ Non applicare migrazioni né seed a mano: lo fa la pipeline al primo rilascio.
 
 ### 2.4 Zero Trust (Access)
 
-1. Dashboard → **Zero Trust**. Al primo accesso scegli il **nome del team** (per esempio `esempio`): il team domain sarà `esempio.cloudflareaccess.com` e servirà come `PPU_ACCESS_TEAM_DOMAIN`.
+1. Dashboard → **Zero Trust**. Al primo accesso scegli il **nome del team** (per esempio `esempio`): il team domain sarà `esempio.cloudflareaccess.com` e servirà come `PPU_ACCESS_TEAM_DOMAIN`. Conta il team domain (**Impostazioni → Personalizzazione**, o `auth_domain` nell'API), non il nome dell'organizzazione, che può restare quello generato automaticamente.
 2. Scegli il piano **Free** (fino a 50 utenti). Se la procedura chiede un metodo di pagamento anche per il piano gratuito, è una richiesta di Cloudflare: il piano Free non ha addebiti.
 
-### 2.5 Metodo di accesso Google
+### 2.5 Provider di identità Google
 
-1. **Zero Trust → Impostazioni → Autenticazione → Metodi di accesso → Aggiungi nuovo → Google**.
+1. **Zero Trust → Integrazioni → Provider di identità → Aggiungi nuovo → Google**.
    Usa **Google**, non "Google Workspace": quest'ultimo chiede l'Admin SDK per leggere i gruppi, che PPU non usa (ADR 0003).
-2. Incolla ID client e Client secret del client `PPU Access` (passo 1.3) → **Salva** → **Test**.
+2. Incolla ID client e Client secret del client `PPU Access` (passo 1.3) → **Salva** → **Test**. Il secret si inserisce solo qui, nella dashboard.
+3. Accanto resta il provider predefinito "One-time PIN": non va abilitato nelle applicazioni di PPU.
 
 ### 2.6 Applicazioni Access per l'API
 
@@ -110,12 +114,12 @@ Crea due applicazioni: **Zero Trust → Accesso → Applicazioni → Aggiungi un
 - Nome: `PPU API`.
 - Durata della sessione: breve, per esempio 12 ore.
 - Dominio pubblico: sottodominio `ppu-api`, dominio `example.org`, **percorso `api`**.
-- Metodi di accesso: solo **Google**; attiva "Accetta istantaneamente" se è l'unico metodo.
+- Provider di identità: solo **Google**; attiva "Accetta istantaneamente" (reindirizzamento diretto al login Google) se è l'unico metodo.
 - Criterio: nome `Capi`, azione **Consenti**, regola **Includi → Email che terminano con → `@example.org`**.
 
 **Beta**
 
-- Nome: `PPU API beta`, dominio `ppu-api-beta.example.org`, **percorso `api`**.
+- Nome: `PPU API beta`, dominio `ppu-api-beta.example.org`, **percorso `api`**. Durata della sessione e provider di identità come per la produzione.
 - Criterio: azione **Consenti**, regola **Includi → Email** con l'elenco dei tester. Il Worker in beta controlla comunque il flag `beta_tester` della tabella `utenti`.
 
 Per ciascuna, dopo il salvataggio: **Panoramica → Application Audience (AUD) Tag**. Copialo: servirà come `PPU_ACCESS_AUD` nell'environment GitHub corrispondente.
@@ -182,6 +186,7 @@ Repository → **Settings**.
 | --- | --- |
 | Il rilascio è "saltato" con un avviso | mancano `CLOUDFLARE_API_TOKEN` o `CLOUDFLARE_ACCOUNT_ID` |
 | `PPU_KV_OAUTH_ID mancante` (o un'altra variabile) | variabile del repository o dell'environment non impostata |
+| Creazione dell'applicazione Access: `domain does not belong to zone` | il dominio non è una zona dell'account Cloudflare di Zero Trust (passo 2.1) |
 | Errore di autorizzazione nel deploy | permessi del token (passo 2.2), in particolare sulla zona per il dominio personalizzato |
 | `/api/io` risponde 401 anche dopo il login | `PPU_ACCESS_AUD` dell'environment diverso dall'AUD dell'applicazione Access |
 | Google: `redirect_uri_mismatch` | URI di reindirizzamento del client `PPU MCP` diverso dall'indirizzo del Worker |

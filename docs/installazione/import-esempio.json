@@ -1,0 +1,56 @@
+{
+  "versione": 1,
+  "formatoData": "gg/mm/aaaa",
+  "associato": {
+    "cognome": "Cognome",
+    "nome": "Nome",
+    "data_nascita": "Data di nascita",
+    "luogo_nascita": "Luogo di nascita",
+    "codice_fiscale": "Codice fiscale",
+    "codice_censimento": "Censimento",
+    "indirizzo": "Indirizzo",
+    "cap": "CAP",
+    "comune": "Comune",
+    "provincia": "Prov",
+    "cellulare": "Cellulare",
+    "email": "Email",
+    "informativa": "Informativa",
+    "consenso_2a": "2A",
+    "consenso_2b": "2B",
+    "consenso_2c": "2C"
+  },
+  "unita": {
+    "colonna": "Unità",
+    "valori": {
+      "L": "lupetti",
+      "C": "coccinelle",
+      "E": "esploratori",
+      "G": "guide",
+      "N": "noviziato",
+      "R": "clan",
+      "S": "clan",
+      "Capo": "coca"
+    }
+  },
+  "tutori": [
+    {
+      "relazione": "madre",
+      "campi": {
+        "nome": "Madre nome",
+        "cognome": "Madre cognome",
+        "cellulare": "Madre cellulare",
+        "email": "Madre email"
+      }
+    },
+    {
+      "relazione": "padre",
+      "campi": {
+        "nome": "Padre nome",
+        "cognome": "Padre cognome",
+        "cellulare": "Padre cellulare"
+      }
+    }
+  ],
+  "note": [{ "colonna": "Note", "tipo": "nota" }],
+  "valoriSi": ["ok"]
+}

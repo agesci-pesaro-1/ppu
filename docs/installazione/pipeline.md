@@ -55,11 +55,11 @@ Le variabili dell'environment hanno la precedenza su quelle del repository con l
 Una sola volta, da chi amministra l'account Cloudflare del gruppo:
 
 1. Creare il D1 di produzione **con giurisdizione UE**. La giurisdizione si sceglie solo alla creazione: dalla dashboard (*Storage & Databases → D1 → Create*, *Jurisdiction: EU*) oppure con `wrangler d1 create ppu --jurisdiction eu`. Annotare nome e ID in `PPU_D1_NOME` e `PPU_D1_ID`.
-2. Creare in Cloudflare Access un'applicazione per ciascun indirizzo pubblico (beta e produzione), con Google Workspace come provider e la regola sul dominio; per la beta, la regola ammette solo i tester. Copiare l'*Application Audience (AUD) Tag* in `PPU_ACCESS_AUD` dell'environment corrispondente.
+2. Creare in Cloudflare Access, per ciascun indirizzo pubblico (beta e produzione), un'applicazione su tutto l'indirizzo con Google come provider e la regola sul dominio (per la beta solo i tester), più un'applicazione **Bypass** sui percorsi dell'MCP (`mcp`, `oauth`, `authorize`, `.well-known`). Copiare l'*Application Audience (AUD) Tag* dell'applicazione principale in `PPU_ACCESS_AUD` dell'environment corrispondente. Dettagli in [cloudflare-e-google.md](cloudflare-e-google.md), passo 2.6.
 3. Creare il KV namespace per l'OAuth dell'MCP e annotarne l'ID in `PPU_KV_OAUTH_ID`.
 4. Il rilascio applica migrazioni e seed base (idempotente) e registra il primo webmaster. La guida completa passo passo è in [cloudflare-e-google.md](cloudflare-e-google.md).
 
-Il Worker di beta e produzione **non** è pubblicato su `workers.dev`: è raggiungibile solo dalla rotta configurata, protetta da Access. Senza il JWT di Access ogni chiamata risponde 401.
+Il Worker di beta e produzione **non** è pubblicato su `workers.dev`: è raggiungibile solo dalla rotta configurata, protetta da Access. Serve anche la PWA come asset statici (ADR 0014): la pipeline esegue `pnpm --filter @ppu/pwa build` prima di `wrangler deploy`. Senza il JWT di Access ogni chiamata all'API risponde 401.
 
 ## Preview
 

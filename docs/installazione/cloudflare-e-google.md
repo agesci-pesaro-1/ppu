@@ -15,12 +15,12 @@ Il Worker di beta e produzione risponde su un dominio personalizzato del gruppo,
 | beta | `ppu-api-beta.example.org` |
 | produzione | `ppu-api.example.org` |
 
-Su ogni indirizzo:
+Lo stesso Worker serve sia la PWA sia l'API (ADR 0014). Su ogni indirizzo:
 
-- `/api/*` è l'API della PWA, protetta da **Cloudflare Access**;
-- `/mcp/*`, `/oauth/*`, `/authorize` e `/.well-known/*` sono l'MCP, protetto dall'**OAuth Google** del Worker. Questi percorsi **non** vanno messi dietro Access, altrimenti gli assistenti AI non riescono a collegarsi.
+- la **PWA** (`/`, i suoi file) e l'**API** (`/api/*`) sono protette da **Cloudflare Access**: chi apre l'indirizzo fa il login Google prima di vedere qualsiasi cosa;
+- `/mcp`, `/oauth/*`, `/authorize` e `/.well-known/*` sono l'MCP, protetto dall'**OAuth Google** del Worker. Questi percorsi **non** vanno dietro Access, altrimenti gli assistenti AI non riescono a collegarsi: per loro si crea un'applicazione Access di tipo **Bypass** (passo 2.6).
 
-In entrambi i casi il Worker verifica l'identità a ogni chiamata: un'applicazione Access configurata male non apre l'API.
+In entrambi i casi il Worker verifica l'identità a ogni chiamata dell'API: un'applicazione Access configurata male non apre i dati.
 
 ---
 
@@ -105,24 +105,34 @@ Non applicare migrazioni né seed a mano: lo fa la pipeline al primo rilascio.
 2. Incolla ID client e Client secret del client `PPU Access` (passo 1.3) → **Salva** → **Test**. Il secret si inserisce solo qui, nella dashboard.
 3. Accanto resta il provider predefinito "One-time PIN": non va abilitato nelle applicazioni di PPU.
 
-### 2.6 Applicazioni Access per l'API
+### 2.6 Applicazioni Access
 
-Crea due applicazioni: **Zero Trust → Accesso → Applicazioni → Aggiungi un'applicazione → Self-hosted**.
+Per ogni indirizzo servono **due** applicazioni: una che protegge tutto (PWA e API) e una di tipo Bypass, più specifica, che lascia passare i percorsi dell'MCP. Access applica l'applicazione con il percorso più specifico.
 
-**Produzione**
+Si creano da **Zero Trust → Accesso → Applicazioni → Aggiungi un'applicazione → Self-hosted**.
 
-- Nome: `PPU API`.
+**Produzione: `PPU`**
+
+- Nome: `PPU`.
 - Durata della sessione: breve, per esempio 12 ore.
-- Dominio pubblico: sottodominio `ppu-api`, dominio `example.org`, **percorso `api`**.
+- Dominio pubblico: sottodominio `ppu-api`, dominio `example.org`, **nessun percorso** (tutto l'indirizzo).
 - Provider di identità: solo **Google**; attiva "Accetta istantaneamente" (reindirizzamento diretto al login Google) se è l'unico metodo.
 - Criterio: nome `Capi`, azione **Consenti**, regola **Includi → Email che terminano con → `@example.org`**.
 
-**Beta**
+**Produzione: `PPU MCP`** (Bypass)
 
-- Nome: `PPU API beta`, dominio `ppu-api-beta.example.org`, **percorso `api`**. Durata della sessione e provider di identità come per la produzione.
-- Criterio: azione **Consenti**, regola **Includi → Email** con l'elenco dei tester. Il Worker in beta controlla comunque il flag `beta_tester` della tabella `utenti`.
+- Nome: `PPU MCP`.
+- Domini pubblici (uno per riga, stesso host `ppu-api.example.org`): percorsi `mcp`, `oauth`, `authorize`, `.well-known`.
+- Criterio: nome `Assistenti AI`, azione **Bypass**, regola **Includi → Tutti**. L'accesso a questi percorsi lo controlla l'OAuth Google del Worker.
 
-Per ciascuna, dopo il salvataggio: **Panoramica → Application Audience (AUD) Tag**. Copialo: servirà come `PPU_ACCESS_AUD` nell'environment GitHub corrispondente.
+**Beta: `PPU beta` e `PPU MCP beta`**
+
+- Come sopra, con dominio `ppu-api-beta.example.org`.
+- Criterio di `PPU beta`: azione **Consenti**, regola **Includi → Email** con l'elenco dei tester. Il Worker in beta controlla comunque il flag `beta_tester` della tabella `utenti`.
+
+Per `PPU` e `PPU beta`, dopo il salvataggio: **Panoramica → Application Audience (AUD) Tag**. Copialo: servirà come `PPU_ACCESS_AUD` nell'environment GitHub corrispondente. Le applicazioni Bypass non hanno bisogno dell'AUD.
+
+Se avevi già creato le applicazioni sul solo percorso `api` (versioni precedenti di questa guida): togli il percorso dall'applicazione principale e aggiungi quella Bypass.
 
 ---
 
@@ -189,5 +199,6 @@ Repository → **Settings**.
 | Creazione dell'applicazione Access: `domain does not belong to zone` | il dominio non è una zona dell'account Cloudflare di Zero Trust (passo 2.1) |
 | Errore di autorizzazione nel deploy | permessi del token (passo 2.2), in particolare sulla zona per il dominio personalizzato |
 | `/api/io` risponde 401 anche dopo il login | `PPU_ACCESS_AUD` dell'environment diverso dall'AUD dell'applicazione Access |
+| L'assistente AI non riesce a collegarsi all'MCP (pagina di login di Access) | manca l'applicazione Bypass sui percorsi `mcp`, `oauth`, `authorize`, `.well-known` |
 | Google: `redirect_uri_mismatch` | URI di reindirizzamento del client `PPU MCP` diverso dall'indirizzo del Worker |
 | L'MCP risponde "permesso negato" | l'utente non è webmaster nella tabella `utenti` |

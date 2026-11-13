@@ -10,7 +10,7 @@ Il piano completo è in `docs/piano.md`. Le decisioni architetturali sono in `do
   - endpoint MCP remoto (Streamable HTTP) per gli assistenti AI, con OAuth Google tramite `workers-oauth-provider`, limitato al dominio configurato;
   - API REST per la PWA.
 - **Database:** Cloudflare D1 (SQLite), creato con `--jurisdiction eu`. La giurisdizione si imposta solo alla creazione.
-- **PWA:** Svelte + Vite + `vite-plugin-pwa`, build statica su Cloudflare Pages, protetta da Cloudflare Access (Google Workspace come provider, regola sul dominio). Il Worker verifica il JWT di Access su ogni chiamata della PWA.
+- **PWA:** Svelte + Vite + `vite-plugin-pwa` in `packages/pwa`, build statica servita dallo stesso Worker come asset statici (ADR 0014), protetta da Cloudflare Access (Google come provider, regola sul dominio). Il Worker verifica il JWT di Access su ogni chiamata della PWA. In modalità di test la PWA mostra "Scegli un ruolo" con gli utenti del seed demo.
 - **MCP admin:** strumenti riservati al webmaster (utenti, ruoli, unità, revisione dei tag).
 - **Notifiche:** webhook in ingresso di Google Chat.
 - **Test:** unit test + E2E con Playwright.
@@ -104,3 +104,5 @@ Fase 0 — Fondamenta. Ordine suggerito:
 - `pnpm e2e`: test E2E Playwright contro `wrangler dev` con D1 locale e seed demo (con `E2E_BASE_URL` contro una preview).
 - `pnpm --filter @ppu/worker db:locale`: ricrea il D1 locale con migrazioni, seed base e demo.
 - Pipeline (GitHub Actions) e configurazione per gruppo: `docs/installazione/pipeline.md`. La configurazione di deploy si genera con `scripts/configura-wrangler.ts`.
+- `pnpm --filter @ppu/pwa dev` / `build` / `typecheck`: PWA (Vite, svelte-check). I file `.svelte` sono esclusi da Biome.
+- `PW_CHROMIUM_PATH=/percorso/chrome pnpm e2e`: E2E con un Chromium già installato (versione di Playwright diversa).

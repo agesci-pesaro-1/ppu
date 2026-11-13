@@ -5,6 +5,30 @@ import { emailDaAccess } from './access.ts';
 /** Header usato dalla modalità di test (solo locale e preview). */
 export const HEADER_UTENTE_TEST = 'X-Ppu-Utente-Test';
 
+/**
+ * Cookie della modalità di test: il browser non può inviare l'header, quindi la
+ * PWA in preview sceglie il ruolo con questo cookie. Ignorato fuori da locale e
+ * preview (lo garantisce `config.modalitaTest`, che `leggiConfig` rifiuta altrove).
+ */
+export const COOKIE_UTENTE_TEST = 'ppu_utente_test';
+
+/** Legge un cookie dalla richiesta, senza dipendenze. */
+export function leggiCookie(request: Request, nome: string): string | null {
+  const intestazione = request.headers.get('Cookie');
+  if (!intestazione) return null;
+  for (const parte of intestazione.split(';')) {
+    const [chiave, ...valore] = parte.trim().split('=');
+    if (chiave === nome) {
+      try {
+        return decodeURIComponent(valore.join('='));
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
 export interface Utente {
   email: string;
   /** Scheda associato del capo, per "i propri dati". */
@@ -34,11 +58,11 @@ export function emailNelDominio(email: string, dominio: string): boolean {
   return at > 0 && e.slice(at + 1) === dominio;
 }
 
-/** Ricava l'email dalla richiesta: JWT di Access, oppure header di test. */
+/** Ricava l'email dalla richiesta: JWT di Access, oppure header o cookie di test. */
 export async function emailDallaRichiesta(request: Request, config: Config): Promise<string> {
   let email: string | null = null;
   if (config.modalitaTest) {
-    email = request.headers.get(HEADER_UTENTE_TEST);
+    email = request.headers.get(HEADER_UTENTE_TEST) || leggiCookie(request, COOKIE_UTENTE_TEST);
   }
   if (!email && config.access) {
     email = await emailDaAccess(request, config.access);

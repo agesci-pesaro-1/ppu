@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "db:locale": "scripts/prepara-db-locale.sh",
-    "dev:e2e": "scripts/prepara-db-locale.sh .wrangler/e2e && wrangler dev --persist-to .wrangler/e2e --var MODALITA_TEST:attiva --var DOMINIO:example.org",
+    "dev:e2e": "pnpm --filter @ppu/pwa build && scripts/prepara-db-locale.sh .wrangler/e2e && wrangler dev --persist-to .wrangler/e2e --var MODALITA_TEST:attiva --var DOMINIO:example.org",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

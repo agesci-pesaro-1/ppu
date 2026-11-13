@@ -126,6 +126,10 @@ jobs:
               WHERE changes() > 0;"
 
       - if: steps.prerequisiti.outputs.attiva == 'true'
+        name: Build della PWA
+        run: pnpm --filter @ppu/pwa build
+
+      - if: steps.prerequisiti.outputs.attiva == 'true'
         name: Pubblica il Worker
         working-directory: packages/worker
         run: |

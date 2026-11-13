@@ -7,7 +7,7 @@ import { rinnovaTokenGoogle } from './identita/google.ts';
 import { caricaUtente, emailNelDominio, HEADER_UTENTE_TEST } from './identita/index.ts';
 import { gestisciMcp, PERCORSO_MCP } from './mcp/index.ts';
 import { autorizzazione, type PropsMcp } from './oauth/autorizzazione.ts';
-import { api } from './rest/index.ts';
+import { api, demo } from './rest/index.ts';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -17,6 +17,7 @@ app.get('/salute', (c) => {
   return c.json({ stato: 'ok', ambiente: config.ambiente });
 });
 
+app.route('/api/demo', demo);
 app.route('/api', api);
 app.route('/', autorizzazione);
 

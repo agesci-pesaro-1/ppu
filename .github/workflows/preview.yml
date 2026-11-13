@@ -109,6 +109,10 @@ jobs:
           fi
 
       - if: steps.prerequisiti.outputs.attiva == 'true'
+        name: Build della PWA
+        run: pnpm --filter @ppu/pwa build
+
+      - if: steps.prerequisiti.outputs.attiva == 'true'
         name: Pubblica il Worker
         id: deploy
         working-directory: packages/worker
@@ -126,7 +130,7 @@ jobs:
         with:
           script: |
             const segno = '<!-- ppu-preview -->';
-            const corpo = `${segno}\n**Preview:** ${process.env.URL}\n\nSolo dati inventati. Identità simulata con l'header \`X-Ppu-Utente-Test\` (utenti del seed demo su example.org).\n\nCommit: ${context.payload.pull_request.head.sha}`;
+            const corpo = `${segno}\n**Preview:** ${process.env.URL}\n\nApri l'indirizzo dal telefono e scegli un ruolo: solo dati inventati del seed demo (utenti su example.org). Per le API l'identità si simula con l'header \`X-Ppu-Utente-Test\`.\n\nCommit: ${context.payload.pull_request.head.sha}`;
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;
             const commenti = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
@@ -136,6 +140,10 @@ jobs:
             } else {
               await github.rest.issues.createComment({ owner, repo, issue_number, body: corpo });
             }
+
+      - if: steps.prerequisiti.outputs.attiva == 'true'
+        name: Browser per i test E2E
+        run: pnpm --filter @ppu/e2e exec playwright install --with-deps chromium
 
       - if: steps.prerequisiti.outputs.attiva == 'true'
         name: Test E2E sulla preview

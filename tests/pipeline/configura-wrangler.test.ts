@@ -27,6 +27,7 @@ interface Sezione {
   vars: Record<string, string>;
   d1_databases: { database_id: string }[];
   kv_namespaces: { binding: string; id: string }[];
+  assets?: { directory: string; not_found_handling: string; run_worker_first: string[] };
   routes?: unknown;
 }
 const sezione = (c: Record<string, unknown>, a: string): Sezione =>
@@ -90,5 +91,28 @@ describe('configura-wrangler', () => {
     assert.equal(s.name, 'ppu-preview-pr-7');
     assert.equal(s.vars.DOMINIO, 'example.org');
     assert.equal(s.vars.MODALITA_TEST, 'attiva');
+  });
+
+  it('ogni ambiente pubblicato serve la PWA, con API, MCP e OAuth sempre al Worker', () => {
+    for (const ambiente of ['preview', 'beta', 'produzione'] as const) {
+      const c = generaConfig(base, {
+        ambiente,
+        ...pubblicato,
+        ...(ambiente === 'preview' ? { dominio: undefined } : {}),
+      });
+      const a = sezione(c, ambiente).assets;
+      assert.equal(a?.directory, '../pwa/dist', ambiente);
+      assert.equal(a?.not_found_handling, 'single-page-application', ambiente);
+      for (const percorso of [
+        '/api/*',
+        '/mcp',
+        '/mcp/*',
+        '/oauth/*',
+        '/authorize',
+        '/.well-known/*',
+      ]) {
+        assert.ok(a?.run_worker_first.includes(percorso), `${ambiente}: ${percorso}`);
+      }
+    }
   });
 });

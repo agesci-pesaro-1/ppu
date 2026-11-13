@@ -442,7 +442,7 @@ persone.forEach((p) => {
       nome: collegato ? 'Stefano' : nome,
       codice_fiscale: `DEMOT${String(tutore).padStart(11, '0')}`,
       cellulare: `+39 301 000 ${String(tutore).padStart(4, '0')}`,
-      email: `${slug(nome)}.${slug(p.cognome)}.${tutore}@${DOMINIO}`,
+      email: `${slug(collegato ? 'Stefano' : nome)}.${slug(p.cognome)}.${tutore}@${DOMINIO}`,
       riceve_comunicazioni: relazione === 'madre' || elenco.length === 1 ? 1 : 0,
       associato_collegato_id: collegato,
       archiviato: maggiorenne ? 1 : 0,

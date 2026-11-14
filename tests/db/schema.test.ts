@@ -370,7 +370,10 @@ describe('seed demo', () => {
   });
 
   it('ha la progressione dal catalogo risolta', () => {
-    assert.equal(conta(db, 'SELECT count(*) n FROM progressione WHERE catalogo_id IS NOT NULL'), 8);
+    assert.equal(
+      conta(db, 'SELECT count(*) n FROM progressione WHERE catalogo_id IS NOT NULL'),
+      10,
+    );
   });
 
   it('ha modifiche da riportare su Buona Strada', () => {
@@ -392,25 +395,51 @@ describe('seed demo', () => {
   });
 });
 
+describe('catalogo di progressione', () => {
+  it('ogni voce del seed base ha la versione del regolamento', () => {
+    const db = creaDatabase();
+    assert.equal(
+      conta(db, 'SELECT count(*) n FROM catalogo_progressione WHERE versione IS NULL'),
+      0,
+    );
+    assert.equal(conta(db, 'SELECT count(*) n FROM versioni_regolamento'), 1);
+  });
+
+  it('una nuova versione può ripetere le stesse voci', () => {
+    const db = creaDatabase();
+    db.exec("INSERT INTO versioni_regolamento (data, nome) VALUES ('2028-06-01', 'Prova')");
+    db.exec(
+      "INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome) VALUES ('2028-06-01', 'eg', 'tappa', 'Scoperta')",
+    );
+    assert.throws(() =>
+      db.exec(
+        "INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome) VALUES ('2028-06-01', 'eg', 'tappa', 'Scoperta')",
+      ),
+    );
+  });
+});
+
 describe('documentazione', () => {
   it('docs/catalogo-progressione.md coincide con il seed del catalogo', () => {
     const testo = readFileSync(
       new URL('../../docs/catalogo-progressione.md', import.meta.url),
       'utf8',
     );
+    const versione = testo.match(/^\*\*Versione:\*\* `([\d-]+)`/m)?.[1];
     const dalDocumento: string[] = [];
     let branca = '';
     for (const riga of testo.split('\n')) {
       const titolo = riga.match(/^## .*\(`(\w+)`\)$/);
       if (titolo) branca = titolo[1] ?? '';
       const voce = riga.match(/^\| (\d+) \| (\S+) \| (.+) \|$/);
-      if (branca && voce) dalDocumento.push(`${branca}|${voce[2]}|${voce[3]}|${voce[1]}`);
+      if (branca && voce)
+        dalDocumento.push(`${versione}|${branca}|${voce[2]}|${voce[3]}|${voce[1]}`);
     }
     const db = creaDatabase();
     const dalSeed = (
       db
         .prepare(
-          "SELECT branca_id || '|' || tipo || '|' || nome || '|' || ordine v FROM catalogo_progressione",
+          "SELECT versione || '|' || branca_id || '|' || tipo || '|' || nome || '|' || ordine v FROM catalogo_progressione",
         )
         .all() as { v: string }[]
     ).map((r) => r.v);

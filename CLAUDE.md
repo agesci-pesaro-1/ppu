@@ -59,7 +59,7 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 - `relazioni`: due associati + tipo; l'inversa si crea in automatico.
 - `anni_scout`: nome, data di inizio (data dei passaggi, variabile), attuale. Si crea con l'azione "Crea nuovo anno".
 - `progressione`: voci dal catalogo di branca o voci libere (data, tipo, descrizione).
-- `catalogo_progressione`: voci note per branca.
+- `catalogo_progressione`: voci note per branca, versionate per data di aggiornamento del Regolamento metodologico (`versioni_regolamento`). Leggibile in `docs/catalogo-progressione.md`.
 - `tag`: nome, tipo, stato (libero/ufficiale/archiviato), anno facoltativo, flag esclusivo, creato da. Qualsiasi capo crea e usa tag; il webmaster li rende ufficiali, li unisce o li archivia.
 - `associati_tag`: associato, tag, anno scout, nota.
 - `riunioni` e `presenze`: per ogni associato presente/assente/giustificato, motivazione facoltativa, registrabile anche prima della riunione.

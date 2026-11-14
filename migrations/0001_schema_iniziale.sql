@@ -136,14 +136,25 @@ CREATE TABLE relazioni (
 -- Progressione personale
 -- ---------------------------------------------------------------------------
 
+-- Versioni del Regolamento metodologico da cui viene il catalogo, identificate
+-- dalla data di aggiornamento del documento. La più recente è quella in vigore.
+CREATE TABLE versioni_regolamento (
+  data TEXT PRIMARY KEY CHECK (data IS date(data)),
+  nome TEXT NOT NULL,
+  note TEXT
+) STRICT;
+
+-- Una nuova versione del regolamento aggiunge nuove righe: le voci precedenti
+-- restano, così la progressione registrata punta alla voce in vigore allora.
 CREATE TABLE catalogo_progressione (
   id INTEGER PRIMARY KEY,
+  versione TEXT REFERENCES versioni_regolamento (data),  -- NULL: voce aggiunta dal gruppo
   branca_id TEXT NOT NULL REFERENCES branche (id),
   tipo TEXT NOT NULL,                        -- 'promessa', 'tappa', 'specialita', 'brevetto', ...
   nome TEXT NOT NULL,
   ordine INTEGER NOT NULL DEFAULT 0,
   attivo INTEGER NOT NULL DEFAULT 1 CHECK (attivo IN (0, 1)),
-  UNIQUE (branca_id, tipo, nome)
+  UNIQUE (versione, branca_id, tipo, nome)
 ) STRICT;
 
 -- Una voce viene dal catalogo oppure è libera (tipo + descrizione).

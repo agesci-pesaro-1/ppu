@@ -134,12 +134,10 @@ Ogni scelta architetturale si registra come ADR in `docs/adr/NNNN-titolo.md` nel
 3. Workspace solo per identità, ruoli nel database
 4. Un solo backend con endpoint MCP e API REST
 5. PWA in Svelte, non Next.js né AppSheet
-6. Allineamento manuale con Buona Strada, con conferma di una seconda persona
-7. Tag liberi con revisione del webmaster
-8. Beta e produzione sullo stesso database, migrazioni retrocompatibili
-9. Notifiche tramite webhook Google Chat
-10. Progetto open source, un'installazione separata per ogni gruppo
-11. Licenza AGPL-3.0 per il codice, per ora: permette l'uso commerciale ma obbliga chi offre il servizio a pubblicare le modifiche
+6. Beta e produzione sullo stesso database, migrazioni retrocompatibili
+7. Un'installazione separata per ogni gruppo
+
+Regole di dominio (allineamento Buona Strada, tag), strumenti di sviluppo e licenza non sono scelte architetturali: stanno in questo piano, in `CONTRIBUTING.md` e in `LICENSE`.
 
 **Open source e replicabilità**
 

@@ -88,7 +88,7 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 
 Fase 0 — Fondamenta. Ordine suggerito:
 1. Struttura del repository, README, LICENSE (AGPL-3.0), CONTRIBUTING con DCO.
-2. ADR 0001–0011 dalle decisioni del piano.
+2. ADR 0001–0007 dalle decisioni architetturali del piano.
 3. Prima migrazione dello schema + seed base + seed demo.
 4. Worker con login Google, lettura della tabella `utenti`, registro modifiche e accessi.
 5. Pipeline GitHub Actions (lint, test, build, preview, E2E).

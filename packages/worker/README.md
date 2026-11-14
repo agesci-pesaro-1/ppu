@@ -1,0 +1,38 @@
+# Worker PPU
+
+Backend unico di PPU (ADR 0004): API REST per la PWA, e in seguito endpoint MCP. Tutti gli ingressi passano dallo stesso livello di servizi.
+
+## Struttura
+
+- `src/config.ts`: legge e valida la configurazione dell'installazione.
+- `src/identita/`: identità dal JWT di Cloudflare Access (o dall'header di test in locale e preview) e caricamento di unità e ruoli da `utenti`.
+- `src/servizi/permessi.ts`: le regole di permesso, in un solo posto.
+- `src/servizi/registro.ts`: registro delle modifiche (nello stesso batch del dato) e delle letture sensibili.
+- `src/dominio/campi.ts`: quali campi sono anagrafica Buona Strada e quali sensibili.
+- `src/rest/`: API REST per la PWA.
+
+## Configurazione
+
+| Variabile | Obbligatoria | Descrizione |
+| --- | --- | --- |
+| `AMBIENTE` | sì | `locale`, `preview`, `beta`, `produzione`, `demo` |
+| `DOMINIO` | sì | Dominio Google Workspace del gruppo |
+| `NOME_GRUPPO` | no | Nome mostrato nell'interfaccia |
+| `ACCESS_TEAM_DOMAIN` | sì, tranne con la modalità di test | `<team>.cloudflareaccess.com` |
+| `ACCESS_AUD` | sì, tranne con la modalità di test | Audience dell'applicazione Access |
+| `MODALITA_TEST` | no | `attiva` per l'identità simulata: rifiutata fuori da `locale` e `preview` |
+
+In modalità di test l'identità si passa con l'header `X-Ppu-Utente-Test: <email>`, usando gli utenti finti del seed demo (`capo.lupetti@example.org`, `capogruppo@example.org`, `webmaster@example.org`, ...).
+
+## Sviluppo locale
+
+```bash
+cp .dev.vars.example .dev.vars
+pnpm exec wrangler d1 migrations apply DB --local
+pnpm exec wrangler d1 execute DB --local --file ../../seed/base/0001_branche_unita.sql
+pnpm dev
+```
+
+## Test
+
+`pnpm test` esegue i test dentro il runtime Workers (Miniflare), con le migrazioni reali e i seed base e demo applicati a un D1 locale.

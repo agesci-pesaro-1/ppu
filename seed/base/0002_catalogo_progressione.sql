@@ -4,6 +4,12 @@
 -- dalla data di aggiornamento del documento. Una nuova versione si aggiunge con
 -- nuove righe: le voci delle versioni precedenti restano per lo storico.
 
+-- Tipo 'tappa': tutti i traguardi del cammino (Promessa, fasi L/C, tappe E/G,
+-- salita in clan/fuoco, Partenza). Il regolamento usa termini diversi: «fasi»
+-- scoperta/competenza/responsabilità nella parte comune (Art. 30), «momenti» e
+-- «fasi» in L/C, «tappe» in E/G, «passi» in R/S; la Promessa sta nei fondamenti
+-- (Art. 9). Qui si usa un solo tipo; i nomi per branca si rivedranno con la UI.
+
 INSERT INTO versioni_regolamento (data, nome) VALUES
   ('2026-07-29', 'Regolamento metodologico AGESCI, aggiornato al Consiglio generale 2026')
 ON CONFLICT (data) DO NOTHING;
@@ -12,13 +18,13 @@ ON CONFLICT (data) DO NOTHING;
 -- E/G: immagini pubblicate da AGESCI su avventura.agesci.it/specialita (Geologo dal rivenditore);
 -- L/C: foto dei distintivi su ilcastoroscoutshop.com (Amico degli anziani su scoutshopcampania.it).
 INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, immagine_url) VALUES
-  ('2026-07-29', 'lc', 'promessa', 'Promessa', 1, NULL),
-  ('2026-07-29', 'lc', 'fase', 'Lupo della legge', 2, NULL),
-  ('2026-07-29', 'lc', 'fase', 'Lupo della rupe', 3, NULL),
-  ('2026-07-29', 'lc', 'fase', 'Lupo anziano', 4, NULL),
-  ('2026-07-29', 'lc', 'fase', 'Coccinella del prato', 5, NULL),
-  ('2026-07-29', 'lc', 'fase', 'Coccinella del bosco', 6, NULL),
-  ('2026-07-29', 'lc', 'fase', 'Coccinella della montagna', 7, NULL),
+  ('2026-07-29', 'lc', 'tappa', 'Promessa', 1, NULL),
+  ('2026-07-29', 'lc', 'tappa', 'Lupo della legge', 2, NULL),
+  ('2026-07-29', 'lc', 'tappa', 'Lupo della rupe', 3, NULL),
+  ('2026-07-29', 'lc', 'tappa', 'Lupo anziano', 4, NULL),
+  ('2026-07-29', 'lc', 'tappa', 'Coccinella del prato', 5, NULL),
+  ('2026-07-29', 'lc', 'tappa', 'Coccinella del bosco', 6, NULL),
+  ('2026-07-29', 'lc', 'tappa', 'Coccinella della montagna', 7, NULL),
 
   ('2026-07-29', 'lc', 'specialita', 'Amico degli animali', 101, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_a_d_animali.jpg?v=1611333610'),
   ('2026-07-29', 'lc', 'specialita', 'Amico degli anziani', 102, 'https://www.scoutshopcampania.it/wp-content/uploads/2025/02/amico_degli_anziani_4.jpg'),
@@ -63,7 +69,7 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, imma
 
   ('2026-07-29', 'lc', 'evento', 'Campetto Piccole Orme', 301, NULL),
 
-  ('2026-07-29', 'eg', 'promessa', 'Promessa', 1, NULL),
+  ('2026-07-29', 'eg', 'tappa', 'Promessa', 1, NULL),
   ('2026-07-29', 'eg', 'tappa', 'Scoperta', 2, NULL),
   ('2026-07-29', 'eg', 'tappa', 'Competenza', 3, NULL),
   ('2026-07-29', 'eg', 'tappa', 'Responsabilità', 4, NULL),
@@ -153,8 +159,8 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, imma
   ('2026-07-29', 'eg', 'evento', 'Campo di specialità', 301, NULL),
   ('2026-07-29', 'eg', 'evento', 'Campo di competenza', 302, NULL),
 
-  ('2026-07-29', 'rs', 'passaggio', 'Salita in clan/fuoco', 1, NULL),
-  ('2026-07-29', 'rs', 'partenza', 'Partenza', 2, NULL),
+  ('2026-07-29', 'rs', 'tappa', 'Salita in clan/fuoco', 1, NULL),
+  ('2026-07-29', 'rs', 'tappa', 'Partenza', 2, NULL),
 
   ('2026-07-29', 'rs', 'evento', 'Evento di progressione personale a partecipazione individuale (EPPPI)', 301, NULL),
   ('2026-07-29', 'rs', 'evento', 'Route d''orientamento alla scelta di servizio (ROSS)', 302, NULL),

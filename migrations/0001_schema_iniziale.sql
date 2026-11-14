@@ -150,7 +150,9 @@ CREATE TABLE catalogo_progressione (
   id INTEGER PRIMARY KEY,
   versione TEXT REFERENCES versioni_regolamento (data),  -- NULL: voce aggiunta dal gruppo
   branca_id TEXT NOT NULL REFERENCES branche (id),
-  tipo TEXT NOT NULL,                        -- 'promessa', 'tappa', 'specialita', 'brevetto', ...
+  -- 'tappa' (tutti i traguardi del cammino, vedi docs/catalogo-progressione.md),
+  -- 'specialita', 'brevetto', 'evento'
+  tipo TEXT NOT NULL,
   nome TEXT NOT NULL,
   ordine INTEGER NOT NULL DEFAULT 0,
   attivo INTEGER NOT NULL DEFAULT 1 CHECK (attivo IN (0, 1)),

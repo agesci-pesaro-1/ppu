@@ -32,8 +32,8 @@ può aggiungere voci del gruppo, senza versione.
 
 - **Ordine:** posizione nell'elenco dentro la branca. I momenti partono da 1, le
   specialità da 101, i brevetti da 201, gli eventi da 301.
-- **Tipo:** il valore della colonna `tipo` (`promessa`, `fase`, `tappa`,
-  `passaggio`, `partenza`, `specialita`, `brevetto`, `evento`).
+- **Tipo:** il valore della colonna `tipo`: `tappa`, `specialita`, `brevetto`,
+  `evento`. Vedi sotto, «Perché un solo tipo `tappa`».
 - **Immagine:** il distintivo della specialità. Per le E/G è l'immagine pubblicata
   da AGESCI su [avventura.agesci.it/specialita](https://avventura.agesci.it/specialita/)
   (tranne Geologo, che lì manca); per le L/C e per Geologo la foto del distintivo su
@@ -46,19 +46,38 @@ può aggiungere voci del gruppo, senza versione.
 - I nomi si possono declinare al maschile o al femminile, come dice il regolamento:
   nel catalogo compaiono come negli allegati.
 
+### Perché un solo tipo `tappa`
+
+Il tipo `tappa` raccoglie tutti i traguardi del cammino: Promessa, fasi L/C,
+tappe E/G, salita in clan/fuoco e Partenza. Il regolamento non usa un termine
+unico:
+
+- la parte comune (Art. 30, «Gradualità») parla di tre **fasi**: scoperta,
+  competenza, responsabilità;
+- in L/C sono i **momenti** della pista e del sentiero (Art. 36), vissuti nelle
+  **fasi** del gioco delle prede e dei voli (Art. 38);
+- in E/G sono le **tappe** (Art. 34);
+- in R/S sono i **passi** (Art. 34–36); la salita in clan/fuoco è un **momento di
+  passaggio** (Art. 31) e la Partenza ha un articolo proprio (Art. 37);
+- la **Promessa** sta nei fondamenti della proposta scout (Art. 9), ma ogni
+  branca la colloca all'inizio del cammino.
+
+Per non avere categorie con una sola voce si usa `tappa` per tutti. Il nome da
+mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
+
 ## L/C — Lupetti e Coccinelle (`lc`)
 
 ### Momenti
 
 | Ordine | Tipo | Voce |
 | --- | --- | --- |
-| 1 | promessa | Promessa |
-| 2 | fase | Lupo della legge |
-| 3 | fase | Lupo della rupe |
-| 4 | fase | Lupo anziano |
-| 5 | fase | Coccinella del prato |
-| 6 | fase | Coccinella del bosco |
-| 7 | fase | Coccinella della montagna |
+| 1 | tappa | Promessa |
+| 2 | tappa | Lupo della legge |
+| 3 | tappa | Lupo della rupe |
+| 4 | tappa | Lupo anziano |
+| 5 | tappa | Coccinella del prato |
+| 6 | tappa | Coccinella del bosco |
+| 7 | tappa | Coccinella della montagna |
 
 ### Specialità (Allegato 3)
 
@@ -117,7 +136,7 @@ può aggiungere voci del gruppo, senza versione.
 
 | Ordine | Tipo | Voce |
 | --- | --- | --- |
-| 1 | promessa | Promessa |
+| 1 | tappa | Promessa |
 | 2 | tappa | Scoperta |
 | 3 | tappa | Competenza |
 | 4 | tappa | Responsabilità |
@@ -225,8 +244,8 @@ può aggiungere voci del gruppo, senza versione.
 
 | Ordine | Tipo | Voce |
 | --- | --- | --- |
-| 1 | passaggio | Salita in clan/fuoco |
-| 2 | partenza | Partenza |
+| 1 | tappa | Salita in clan/fuoco |
+| 2 | tappa | Partenza |
 
 ### Eventi di progressione personale a partecipazione individuale (Allegato 1)
 

@@ -598,16 +598,16 @@ function voceCatalogo(chi: string, branca: string, tipo: string, nome: string, d
     `INSERT INTO progressione (associato_id, catalogo_id, data, anno_scout_id, creato_da) SELECT ${idDi(chi)}, id, ${sql(data)}, ${data >= '2026-10-04' ? ANNO_ATTUALE : ANNO_PRECEDENTE}, ${sql(`capo.eg@${DOMINIO}`)} FROM catalogo_progressione WHERE versione = (SELECT max(data) FROM versioni_regolamento) AND branca_id = ${sql(branca)} AND tipo = ${sql(tipo)} AND nome = ${sql(nome)};`,
   );
 }
-voceCatalogo('Orsolini Lorenzo', 'eg', 'promessa', 'Promessa', '2025-02-23');
+voceCatalogo('Orsolini Lorenzo', 'eg', 'tappa', 'Promessa', '2025-02-23');
 voceCatalogo('Orsolini Lorenzo', 'eg', 'tappa', 'Scoperta', '2025-06-15');
-voceCatalogo('Pacini Marco', 'eg', 'promessa', 'Promessa', '2024-04-21');
+voceCatalogo('Pacini Marco', 'eg', 'tappa', 'Promessa', '2024-04-21');
 voceCatalogo('Pacini Marco', 'eg', 'tappa', 'Competenza', '2026-05-10');
-voceCatalogo('Tarducci Giulia', 'eg', 'promessa', 'Promessa', '2024-03-17');
+voceCatalogo('Tarducci Giulia', 'eg', 'tappa', 'Promessa', '2024-03-17');
 voceCatalogo('Zanetti Alice', 'eg', 'tappa', 'Responsabilità', '2026-10-25');
-voceCatalogo('Fabbrini Davide', 'lc', 'promessa', 'Promessa', '2024-12-08');
-voceCatalogo('Morandi Camilla', 'rs', 'passaggio', 'Salita in clan/fuoco', '2025-10-05');
+voceCatalogo('Fabbrini Davide', 'lc', 'tappa', 'Promessa', '2024-12-08');
+voceCatalogo('Morandi Camilla', 'rs', 'tappa', 'Salita in clan/fuoco', '2025-10-05');
 voceCatalogo('Rinaldi Giacomo', 'eg', 'specialita', 'Topografo', '2026-03-01');
-voceCatalogo('Fabbrini Davide', 'lc', 'fase', 'Lupo della legge', '2025-05-18');
+voceCatalogo('Fabbrini Davide', 'lc', 'tappa', 'Lupo della legge', '2025-05-18');
 const libere: [string, string, string, string][] = [
   ['Ugolini Chiara', 'specialita', 'Specialità di cuciniera', '2026-04-12'],
   ['Arcangeli Emma', 'nota', 'Ha guidato il gioco della festa di Natale', '2025-12-20'],

@@ -150,12 +150,8 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine) VALU
   ('2026-07-29', 'eg', 'evento', 'Campo di specialità', 301),
   ('2026-07-29', 'eg', 'evento', 'Campo di competenza', 302),
 
-  ('2026-07-29', 'rs', 'promessa', 'Promessa', 1),
-  ('2026-07-29', 'rs', 'passi', 'Scoperta', 2),
-  ('2026-07-29', 'rs', 'impegno', 'Firma della Carta di clan', 3),
-  ('2026-07-29', 'rs', 'passi', 'Competenza', 4),
-  ('2026-07-29', 'rs', 'passi', 'Responsabilità', 5),
-  ('2026-07-29', 'rs', 'partenza', 'Partenza', 6),
+  ('2026-07-29', 'rs', 'passaggio', 'Salita in clan/fuoco', 1),
+  ('2026-07-29', 'rs', 'partenza', 'Partenza', 2),
 
   ('2026-07-29', 'rs', 'evento', 'Laboratori, botteghe, workshop', 301),
   ('2026-07-29', 'rs', 'evento', 'Campo di specializzazione', 302),

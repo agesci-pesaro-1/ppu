@@ -32,8 +32,8 @@ può aggiungere voci del gruppo, senza versione.
 
 - **Ordine:** posizione nell'elenco dentro la branca. I momenti partono da 1, le
   specialità da 101, i brevetti da 201, gli eventi da 301.
-- **Tipo:** il valore della colonna `tipo` (`promessa`, `fase`, `tappa`, `passi`,
-  `impegno`, `partenza`, `specialita`, `brevetto`, `evento`).
+- **Tipo:** il valore della colonna `tipo` (`promessa`, `fase`, `tappa`,
+  `passaggio`, `partenza`, `specialita`, `brevetto`, `evento`).
 - I nomi si possono declinare al maschile o al femminile, come dice il regolamento:
   nel catalogo compaiono come negli allegati.
 
@@ -216,12 +216,8 @@ può aggiungere voci del gruppo, senza versione.
 
 | Ordine | Tipo | Voce |
 | --- | --- | --- |
-| 1 | promessa | Promessa |
-| 2 | passi | Scoperta |
-| 3 | impegno | Firma della Carta di clan |
-| 4 | passi | Competenza |
-| 5 | passi | Responsabilità |
-| 6 | partenza | Partenza |
+| 1 | passaggio | Salita in clan/fuoco |
+| 2 | partenza | Partenza |
 
 ### Eventi di progressione personale a partecipazione individuale (Allegato 1)
 
@@ -244,8 +240,9 @@ può aggiungere voci del gruppo, senza versione.
 - **E/G:** la conclusione del sentiero (Art. 40) è una cerimonia di reparto, non
   una voce a sé: non è nel catalogo. Le specialità di squadriglia (Allegato 3 E/G)
   per ora non servono e non sono nel catalogo.
-- **R/S:** l'ordine dei momenti segue il cammino: passi di scoperta, firma della
-  Carta di clan (che li conclude), passi di competenza, passi di responsabilità,
-  Partenza. La Promessa vale per chi arriva in Comunità R/S dall'esterno.
+- **R/S:** per ora i soli momenti nel catalogo sono la salita in clan/fuoco
+  (fine del noviziato) e la Partenza. Promessa (per chi
+  arriva dall'esterno), passi di scoperta, competenza e responsabilità e firma
+  della Carta di clan restano fuori finché non si decide come registrarli.
 - **Date:** da decidere se la data di una tappa, fase o passo è l'inizio
   (quando si consegna il distintivo) o il riconoscimento della conclusione.

@@ -605,7 +605,7 @@ voceCatalogo('Pacini Marco', 'eg', 'tappa', 'Competenza', '2026-05-10');
 voceCatalogo('Tarducci Giulia', 'eg', 'promessa', 'Promessa', '2024-03-17');
 voceCatalogo('Zanetti Alice', 'eg', 'tappa', 'Responsabilità', '2026-10-25');
 voceCatalogo('Fabbrini Davide', 'lc', 'promessa', 'Promessa', '2024-12-08');
-voceCatalogo('Morandi Camilla', 'rs', 'impegno', 'Firma della Carta di clan', '2026-01-18');
+voceCatalogo('Morandi Camilla', 'rs', 'passaggio', 'Salita in clan/fuoco', '2025-10-05');
 voceCatalogo('Rinaldi Giacomo', 'eg', 'specialita', 'Topografo', '2026-03-01');
 voceCatalogo('Fabbrini Davide', 'lc', 'fase', 'Lupo della legge', '2025-05-18');
 const libere: [string, string, string, string][] = [

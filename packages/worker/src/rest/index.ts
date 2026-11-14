@@ -3,6 +3,7 @@ import { type Config, leggiConfig } from '../config.ts';
 import type { Env } from '../env.ts';
 import { ErrorePpu } from '../errori.ts';
 import { caricaUtente, emailDallaRichiesta, type Utente } from '../identita/index.ts';
+import { anteprimaImport, confermaImport } from '../import/servizio.ts';
 
 export interface Variabili {
   config: Config;
@@ -34,6 +35,44 @@ api.get('/io', (c) => {
     },
     associatoId: u.associatoId,
   });
+});
+
+async function corpoJson(req: Request): Promise<Record<string, unknown>> {
+  let corpo: unknown;
+  try {
+    corpo = await req.json();
+  } catch {
+    throw new ErrorePpu('richiesta_non_valida', 'Il corpo della richiesta deve essere JSON.');
+  }
+  if (typeof corpo !== 'object' || corpo === null || Array.isArray(corpo)) {
+    throw new ErrorePpu(
+      'richiesta_non_valida',
+      'Il corpo della richiesta deve essere un oggetto JSON.',
+    );
+  }
+  return corpo as Record<string, unknown>;
+}
+
+// Import dal foglio (solo webmaster: il permesso è controllato nel servizio).
+api.post('/admin/import/anteprima', async (c) => {
+  const corpo = await corpoJson(c.req.raw);
+  return c.json(
+    await anteprimaImport(c.env.DB, c.get('utente'), {
+      csv: corpo.csv,
+      mappatura: corpo.mappatura,
+    }),
+  );
+});
+
+api.post('/admin/import/conferma', async (c) => {
+  const corpo = await corpoJson(c.req.raw);
+  return c.json(
+    await confermaImport(c.env.DB, c.get('utente'), {
+      csv: corpo.csv,
+      mappatura: corpo.mappatura,
+      hash: corpo.hash,
+    }),
+  );
 });
 
 api.notFound(() => {

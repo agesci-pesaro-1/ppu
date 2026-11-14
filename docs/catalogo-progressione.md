@@ -44,6 +44,8 @@ può aggiungere voci del gruppo, senza versione.
   Nel database c'è solo il collegamento (`immagine_url`): le
   immagini non sono nostre e non stanno nel repository. Alcuni visualizzatori di
   Markdown non mostrano immagini esterne; su GitHub si vedono.
+  Nell'app le immagini le scarica e le serve il Worker
+  ([ADR 0015](adr/0015-immagini-dei-distintivi-dal-worker.md)).
 - I nomi si possono declinare al maschile o al femminile, come dice il regolamento:
   nel catalogo compaiono come negli allegati.
 

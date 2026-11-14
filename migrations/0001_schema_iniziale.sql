@@ -156,7 +156,7 @@ CREATE TABLE catalogo_progressione (
   nome TEXT NOT NULL,
   ordine INTEGER NOT NULL DEFAULT 0,
   attivo INTEGER NOT NULL DEFAULT 1 CHECK (attivo IN (0, 1)),
-  -- distintivo: collegamento all'immagine pubblicata da AGESCI (i file non stanno qui)
+  -- distintivo: fonte da cui il Worker scarica l'immagine (ADR 0015); i file non stanno qui
   immagine_url TEXT CHECK (immagine_url IS NULL OR immagine_url LIKE 'https://%'),
   UNIQUE (versione, branca_id, tipo, nome)
 ) STRICT;

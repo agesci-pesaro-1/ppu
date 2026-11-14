@@ -28,3 +28,4 @@ Ogni scelta architetturale di PPU è registrata qui come ADR (Architecture Decis
 | [0012](0012-strumenti-di-sviluppo.md) | Strumenti di sviluppo: Node 26, pnpm, Biome | Proposta |
 | [0013](0013-unita-nel-database.md) | Unità nel database, gestite dall'MCP admin | Proposta |
 | [0014](0014-tipi-di-tag-del-webmaster.md) | Tipi di tag gestiti dal webmaster, con il tipo "varie" | Proposta |
+| [0015](0015-immagini-dei-distintivi-dal-worker.md) | Immagini dei distintivi scaricate e servite dal Worker | Proposta |

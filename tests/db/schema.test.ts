@@ -431,15 +431,16 @@ describe('documentazione', () => {
     for (const riga of testo.split('\n')) {
       const titolo = riga.match(/^## .*\(`(\w+)`\)$/);
       if (titolo) branca = titolo[1] ?? '';
-      const voce = riga.match(/^\| (\d+) \| (\S+) \| (.+) \|$/);
+      const voce = riga.match(/^\| (\d+) \| (\S+) \| ([^|]+?)(?: \| (.+))? \|$/);
+      const immagine = voce?.[4]?.match(/src="([^"]+)"/)?.[1] ?? '';
       if (branca && voce)
-        dalDocumento.push(`${versione}|${branca}|${voce[2]}|${voce[3]}|${voce[1]}`);
+        dalDocumento.push(`${versione}|${branca}|${voce[2]}|${voce[3]}|${voce[1]}|${immagine}`);
     }
     const db = creaDatabase();
     const dalSeed = (
       db
         .prepare(
-          "SELECT versione || '|' || branca_id || '|' || tipo || '|' || nome || '|' || ordine v FROM catalogo_progressione",
+          "SELECT versione || '|' || branca_id || '|' || tipo || '|' || nome || '|' || ordine || '|' || coalesce(immagine_url, '') v FROM catalogo_progressione",
         )
         .all() as { v: string }[]
     ).map((r) => r.v);

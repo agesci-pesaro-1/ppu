@@ -34,6 +34,10 @@ può aggiungere voci del gruppo, senza versione.
   specialità da 101, i brevetti da 201, gli eventi da 301.
 - **Tipo:** il valore della colonna `tipo` (`promessa`, `fase`, `tappa`,
   `passaggio`, `partenza`, `specialita`, `brevetto`, `evento`).
+- **Immagine:** per le specialità E/G, il distintivo come pubblicato da AGESCI su
+  [avventura.agesci.it/specialita](https://avventura.agesci.it/specialita/). Nel
+  database c'è solo il collegamento (`immagine_url`): le immagini sono di AGESCI e
+  non stanno nel repository.
 - I nomi si possono declinare al maschile o al femminile, come dice il regolamento:
   nel catalogo compaiono come negli allegati.
 
@@ -115,73 +119,73 @@ può aggiungere voci del gruppo, senza versione.
 
 ### Specialità individuali (Allegato 2)
 
-| Ordine | Tipo | Voce |
-| --- | --- | --- |
-| 101 | specialita | Allevatore |
-| 102 | specialita | Alpinista |
-| 103 | specialita | Amico degli animali |
-| 104 | specialita | Amico del quartiere |
-| 105 | specialita | Archeologo |
-| 106 | specialita | Artigiano |
-| 107 | specialita | Artista di strada |
-| 108 | specialita | Astronomo |
-| 109 | specialita | Atleta |
-| 110 | specialita | Attore |
-| 111 | specialita | Batteliere |
-| 112 | specialita | Boscaiolo |
-| 113 | specialita | Botanico |
-| 114 | specialita | Campeggiatore |
-| 115 | specialita | Canoista |
-| 116 | specialita | Cantante |
-| 117 | specialita | Carpentiere navale |
-| 118 | specialita | Ciclista |
-| 119 | specialita | Collezionista |
-| 120 | specialita | Coltivatore |
-| 121 | specialita | Corrispondente |
-| 122 | specialita | Corrispondente radio |
-| 123 | specialita | Cuoco |
-| 124 | specialita | Danzatore |
-| 125 | specialita | Disegnatore |
-| 126 | specialita | Elettricista |
-| 127 | specialita | Elettronico |
-| 128 | specialita | Esperto del computer |
-| 129 | specialita | Europeista |
-| 130 | specialita | Falegname |
-| 131 | specialita | Fa tutto |
-| 132 | specialita | Folclorista |
-| 133 | specialita | Fotografo |
-| 134 | specialita | Geologo |
-| 135 | specialita | Giardiniere |
-| 136 | specialita | Giocattolaio |
-| 137 | specialita | Grafico |
-| 138 | specialita | Guida |
-| 139 | specialita | Guida marina |
-| 140 | specialita | Hebertista |
-| 141 | specialita | Idraulico |
-| 142 | specialita | Infermiere |
-| 143 | specialita | Interprete |
-| 144 | specialita | Lavoratore/ce in cuoio |
-| 145 | specialita | Maestro dei giochi |
-| 146 | specialita | Maestro dei nodi |
-| 147 | specialita | Meccanico |
-| 148 | specialita | Modellista |
-| 149 | specialita | Muratore |
-| 150 | specialita | Musicista |
-| 151 | specialita | Nuotatore |
-| 152 | specialita | Osservatore |
-| 153 | specialita | Osservatore meteo |
-| 154 | specialita | Pescatore |
-| 155 | specialita | Pompiere |
-| 156 | specialita | Redattore |
-| 157 | specialita | Regista |
-| 158 | specialita | Sarto |
-| 159 | specialita | Scenografo |
-| 160 | specialita | Segnalatore |
-| 161 | specialita | Servizio della Parola |
-| 162 | specialita | Servizio liturgico |
-| 163 | specialita | Servizio missionario |
-| 164 | specialita | Topografo |
-| 165 | specialita | Velista |
+| Ordine | Tipo | Voce | Immagine |
+| --- | --- | --- | --- |
+| 101 | specialita | Allevatore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_Allevatore.jpg" alt="" width="48"> |
+| 102 | specialita | Alpinista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_Alpinista.jpg" alt="" width="48"> |
+| 103 | specialita | Amico degli animali | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_amico-degli-animali.jpg" alt="" width="48"> |
+| 104 | specialita | Amico del quartiere | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_amico_del_quartiere.jpg" alt="" width="48"> |
+| 105 | specialita | Archeologo | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_archeologo.jpg" alt="" width="48"> |
+| 106 | specialita | Artigiano | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_artigiano-150x150.jpg" alt="" width="48"> |
+| 107 | specialita | Artista di strada | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_artista_di_strada.jpg" alt="" width="48"> |
+| 108 | specialita | Astronomo | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_astronomo.jpg" alt="" width="48"> |
+| 109 | specialita | Atleta | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_atleta.jpg" alt="" width="48"> |
+| 110 | specialita | Attore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_attore.jpg" alt="" width="48"> |
+| 111 | specialita | Batteliere | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_battelliere.jpg" alt="" width="48"> |
+| 112 | specialita | Boscaiolo | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_boscaiolo.jpg" alt="" width="48"> |
+| 113 | specialita | Botanico | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_botanico.jpg" alt="" width="48"> |
+| 114 | specialita | Campeggiatore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_campeggiatore.jpg" alt="" width="48"> |
+| 115 | specialita | Canoista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_canoista-150x150.jpg" alt="" width="48"> |
+| 116 | specialita | Cantante | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_cantante-150x150.jpg" alt="" width="48"> |
+| 117 | specialita | Carpentiere navale | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_carpentiere_navale.jpg" alt="" width="48"> |
+| 118 | specialita | Ciclista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_ciclista-150x150.jpg" alt="" width="48"> |
+| 119 | specialita | Collezionista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_collezionista-150x150.jpg" alt="" width="48"> |
+| 120 | specialita | Coltivatore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_coltivatore-150x150.jpg" alt="" width="48"> |
+| 121 | specialita | Corrispondente | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_corrispondente.jpg" alt="" width="48"> |
+| 122 | specialita | Corrispondente radio | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_corrispondenteradio-150x150.jpg" alt="" width="48"> |
+| 123 | specialita | Cuoco | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_cuoco.jpg" alt="" width="48"> |
+| 124 | specialita | Danzatore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_danzatore.jpg" alt="" width="48"> |
+| 125 | specialita | Disegnatore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_disegnatore.jpg" alt="" width="48"> |
+| 126 | specialita | Elettricista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_elettricista.jpg" alt="" width="48"> |
+| 127 | specialita | Elettronico | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_elettronico-150x150.jpg" alt="" width="48"> |
+| 128 | specialita | Esperto del computer | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_esperto_del_computer.jpg" alt="" width="48"> |
+| 129 | specialita | Europeista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_europeista.jpg" alt="" width="48"> |
+| 130 | specialita | Falegname | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_falegname.jpg" alt="" width="48"> |
+| 131 | specialita | Fa tutto | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_fatutto.jpg" alt="" width="48"> |
+| 132 | specialita | Folclorista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_folclorista.jpg" alt="" width="48"> |
+| 133 | specialita | Fotografo | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_fotografo-150x150.jpg" alt="" width="48"> |
+| 134 | specialita | Geologo | — |
+| 135 | specialita | Giardiniere | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_giardiniere.jpg" alt="" width="48"> |
+| 136 | specialita | Giocattolaio | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_giocattolaio.jpg" alt="" width="48"> |
+| 137 | specialita | Grafico | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_grafico-150x150.jpg" alt="" width="48"> |
+| 138 | specialita | Guida | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_Guida.jpg" alt="" width="48"> |
+| 139 | specialita | Guida marina | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_guida_marina.jpg" alt="" width="48"> |
+| 140 | specialita | Hebertista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_hebertista.jpg" alt="" width="48"> |
+| 141 | specialita | Idraulico | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_idraulico-150x150.jpg" alt="" width="48"> |
+| 142 | specialita | Infermiere | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_Infermiere.jpg" alt="" width="48"> |
+| 143 | specialita | Interprete | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_interprete.jpg" alt="" width="48"> |
+| 144 | specialita | Lavoratore/ce in cuoio | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_lavoratore_cuoio.jpg" alt="" width="48"> |
+| 145 | specialita | Maestro dei giochi | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_maestro_giochi.jpg" alt="" width="48"> |
+| 146 | specialita | Maestro dei nodi | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_maestro_nodi-150x150.jpg" alt="" width="48"> |
+| 147 | specialita | Meccanico | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_meccanico.jpg" alt="" width="48"> |
+| 148 | specialita | Modellista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_modellista-150x150.jpg" alt="" width="48"> |
+| 149 | specialita | Muratore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_muratore.jpg" alt="" width="48"> |
+| 150 | specialita | Musicista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_musicista-150x150.jpg" alt="" width="48"> |
+| 151 | specialita | Nuotatore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_nuotatore.jpg" alt="" width="48"> |
+| 152 | specialita | Osservatore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_osservatore.jpg" alt="" width="48"> |
+| 153 | specialita | Osservatore meteo | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_osservatore-meteo.jpg" alt="" width="48"> |
+| 154 | specialita | Pescatore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_pescatore-150x150.jpg" alt="" width="48"> |
+| 155 | specialita | Pompiere | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_pompiere.jpg" alt="" width="48"> |
+| 156 | specialita | Redattore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_redattore.jpg" alt="" width="48"> |
+| 157 | specialita | Regista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_regista.jpg" alt="" width="48"> |
+| 158 | specialita | Sarto | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_sarto.jpg" alt="" width="48"> |
+| 159 | specialita | Scenografo | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_scenografo-150x150.jpg" alt="" width="48"> |
+| 160 | specialita | Segnalatore | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_segnalatore-150x150.jpg" alt="" width="48"> |
+| 161 | specialita | Servizio della Parola | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_servizio_della_parola.jpg" alt="" width="48"> |
+| 162 | specialita | Servizio liturgico | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_servizio_liturgico.jpg" alt="" width="48"> |
+| 163 | specialita | Servizio missionario | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_servizio_missionario-150x150.jpg" alt="" width="48"> |
+| 164 | specialita | Topografo | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2018/05/topografo-e1525515313664.jpg" alt="" width="48"> |
+| 165 | specialita | Velista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/velista.jpg" alt="" width="48"> |
 
 ### Brevetti di competenza (Allegato 4)
 
@@ -236,6 +240,9 @@ può aggiungere voci del gruppo, senza versione.
 - **E/G:** la conclusione del sentiero (Art. 40) è una cerimonia di reparto, non
   una voce a sé: non è nel catalogo. Le specialità di squadriglia (Allegato 3 E/G)
   per ora non servono e non sono nel catalogo.
+- **Immagini E/G:** il sito non ha l'immagine di Geologo. Sul sito c'è anche
+  Naturalista, che nel regolamento in vigore è un brevetto e non una specialità:
+  non è abbinato. Il regolamento scrive «Batteliere», il sito «Battelliere».
 - **R/S:** per ora i soli momenti nel catalogo sono la salita in clan/fuoco
   (fine del noviziato) e la Partenza. Promessa (per chi
   arriva dall'esterno), passi di scoperta, competenza e responsabilità e firma

@@ -153,11 +153,7 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine) VALU
   ('2026-07-29', 'rs', 'passaggio', 'Salita in clan/fuoco', 1),
   ('2026-07-29', 'rs', 'partenza', 'Partenza', 2),
 
-  ('2026-07-29', 'rs', 'evento', 'Laboratori, botteghe, workshop', 301),
-  ('2026-07-29', 'rs', 'evento', 'Campo di specializzazione', 302),
-  ('2026-07-29', 'rs', 'evento', 'Campo Ora et Labora', 303),
-  ('2026-07-29', 'rs', 'evento', 'Route dello spirito', 304),
-  ('2026-07-29', 'rs', 'evento', 'Cantiere', 305),
-  ('2026-07-29', 'rs', 'evento', 'Route d''orientamento alla scelta di servizio (ROSS)', 306),
-  ('2026-07-29', 'rs', 'evento', 'Evento per partenti', 307)
+  ('2026-07-29', 'rs', 'evento', 'Evento di progressione personale a partecipazione individuale (EPPPI)', 301),
+  ('2026-07-29', 'rs', 'evento', 'Route d''orientamento alla scelta di servizio (ROSS)', 302),
+  ('2026-07-29', 'rs', 'evento', 'Evento per partenti', 303)
 ON CONFLICT (versione, branca_id, tipo, nome) DO NOTHING;

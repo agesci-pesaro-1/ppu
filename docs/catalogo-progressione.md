@@ -223,13 +223,9 @@ può aggiungere voci del gruppo, senza versione.
 
 | Ordine | Tipo | Voce |
 | --- | --- | --- |
-| 301 | evento | Laboratori, botteghe, workshop |
-| 302 | evento | Campo di specializzazione |
-| 303 | evento | Campo Ora et Labora |
-| 304 | evento | Route dello spirito |
-| 305 | evento | Cantiere |
-| 306 | evento | Route d'orientamento alla scelta di servizio (ROSS) |
-| 307 | evento | Evento per partenti |
+| 301 | evento | Evento di progressione personale a partecipazione individuale (EPPPI) |
+| 302 | evento | Route d'orientamento alla scelta di servizio (ROSS) |
+| 303 | evento | Evento per partenti |
 
 ## Da rivedere
 
@@ -244,5 +240,8 @@ può aggiungere voci del gruppo, senza versione.
   (fine del noviziato) e la Partenza. Promessa (per chi
   arriva dall'esterno), passi di scoperta, competenza e responsabilità e firma
   della Carta di clan restano fuori finché non si decide come registrarli.
+  Tra gli eventi a partecipazione individuale ci sono solo ROSS ed Evento per
+  partenti, più una voce generica EPPPI per tutti gli altri (laboratori,
+  campi di specializzazione, Ora et Labora, Route dello spirito, cantieri).
 - **Date:** da decidere se la data di una tappa, fase o passo è l'inizio
   (quando si consegna il distintivo) o il riconoscimento della conclusione.

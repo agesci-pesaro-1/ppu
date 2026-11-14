@@ -102,3 +102,6 @@ Fase 0 — Fondamenta. Ordine suggerito:
 - `pnpm test`: test dello schema (`node:sqlite`) e del Worker (Vitest nel runtime Workers).
 - `pnpm typecheck`: controllo dei tipi TypeScript.
 - `pnpm seed:demo`: rigenera `seed/demo/demo.sql` da `scripts/genera-seed-demo.ts`.
+- `pnpm e2e`: test E2E Playwright contro `wrangler dev` con D1 locale e seed demo (con `E2E_BASE_URL` contro una preview).
+- `pnpm --filter @ppu/worker db:locale`: ricrea il D1 locale con migrazioni, seed base e demo.
+- Pipeline (GitHub Actions) e configurazione per gruppo: `docs/installazione/pipeline.md`. La configurazione di deploy si genera con `scripts/configura-wrangler.ts`.

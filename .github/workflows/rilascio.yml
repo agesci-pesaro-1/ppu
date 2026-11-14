@@ -1,0 +1,96 @@
+# Rilascio: al merge su main migrazioni sul D1 di produzione e deploy della beta;
+# la produzione si promuove a mano (environment "produzione" con approvazione).
+# Deploy solo da qui, mai da una macchina locale.
+name: Rilascio
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ambiente:
+        description: Ambiente da pubblicare
+        type: choice
+        options: [produzione, beta]
+        default: produzione
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rilascio
+  cancel-in-progress: false
+
+jobs:
+  pubblica:
+    name: Pubblica ${{ github.event_name == 'push' && 'beta' || inputs.ambiente }}
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ github.event_name == 'push' && 'beta' || inputs.ambiente }}
+    env:
+      AMBIENTE: ${{ github.event_name == 'push' && 'beta' || inputs.ambiente }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Verifica i prerequisiti
+        id: prerequisiti
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::Segreti Cloudflare mancanti: rilascio saltato (docs/installazione/pipeline.md)."
+            echo "attiva=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "attiva=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.prerequisiti.outputs.attiva == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - if: steps.prerequisiti.outputs.attiva == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - if: steps.prerequisiti.outputs.attiva == 'true'
+        name: Installa e verifica
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+          pnpm check
+          pnpm typecheck
+          pnpm test
+
+      - if: steps.prerequisiti.outputs.attiva == 'true'
+        name: Genera la configurazione
+        env:
+          PPU_AMBIENTE: ${{ env.AMBIENTE }}
+          PPU_D1_NOME: ${{ vars.PPU_D1_NOME }}
+          PPU_D1_ID: ${{ vars.PPU_D1_ID }}
+          PPU_DOMINIO: ${{ vars.PPU_DOMINIO }}
+          PPU_NOME_GRUPPO: ${{ vars.PPU_NOME_GRUPPO }}
+          PPU_ACCESS_TEAM_DOMAIN: ${{ vars.PPU_ACCESS_TEAM_DOMAIN }}
+          PPU_ACCESS_AUD: ${{ vars.PPU_ACCESS_AUD }}
+          PPU_ROUTE: ${{ vars.PPU_ROUTE }}
+        run: node scripts/configura-wrangler.ts
+
+      # Difesa in profondità, oltre a src/config.ts e al generatore.
+      - if: steps.prerequisiti.outputs.attiva == 'true'
+        name: Blocca la modalità di test fuori dalla preview
+        working-directory: packages/worker
+        run: |
+          if grep -q 'MODALITA_TEST' wrangler.generato.json; then
+            echo "::error::La configurazione di $AMBIENTE contiene MODALITA_TEST: deploy bloccato."
+            exit 1
+          fi
+
+      - if: steps.prerequisiti.outputs.attiva == 'true'
+        name: Migrazioni sul D1 di produzione
+        working-directory: packages/worker
+        env:
+          CI: "1"
+        run: pnpm exec wrangler d1 migrations apply DB --remote -c wrangler.generato.json --env "$AMBIENTE"
+
+      - if: steps.prerequisiti.outputs.attiva == 'true'
+        name: Pubblica il Worker
+        working-directory: packages/worker
+        run: |
+          pnpm exec wrangler deploy -c wrangler.generato.json --env "$AMBIENTE" \
+            --message "${GITHUB_SHA::7} da GitHub Actions"

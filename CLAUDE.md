@@ -53,14 +53,15 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 
 ## Modello dati (sintesi)
 
-- `associati`: id interno (chiave), codice censimento (univoco, facoltativo), anagrafica, unità attuale, residenza (indirizzo, CAP, comune, provincia), contatti, privacy, stato (attivo/archiviato).
+- `associati`: id interno (chiave), codice censimento (univoco, facoltativo), anagrafica, unità attuale, residenza (indirizzo, CAP, comune, provincia), contatti, flag "riceve comunicazioni", privacy, stato (attivo/archiviato).
 - `storico_unita`: associato, unità, anno scout.
-- `tutori`: associato, relazione, anagrafica, CF, contatti, flag "riceve comunicazioni", collegamento facoltativo a un associato (capo che è anche genitore), archiviato.
+- `tutori`: associato, ruolo (madre, padre, tutore, affidatario, altro), anagrafica, CF, contatti, collegamento facoltativo a un associato (capo che è anche genitore), archiviato.
 - `relazioni`: due associati + tipo; l'inversa si crea in automatico.
 - `anni_scout`: nome, data di inizio (data dei passaggi, variabile), attuale. Si crea con l'azione "Crea nuovo anno".
 - `progressione`: voci dal catalogo di branca o voci libere (data, tipo, descrizione).
-- `catalogo_progressione`: voci note per branca.
-- `tag`: nome, tipo, stato (libero/ufficiale/archiviato), anno facoltativo, flag esclusivo, creato da. Qualsiasi capo crea e usa tag; il webmaster li rende ufficiali, li unisce o li archivia.
+- `catalogo_progressione`: voci note per branca, versionate per data di aggiornamento del Regolamento metodologico (`versioni_regolamento`). Leggibile in `docs/catalogo-progressione.md`.
+- `tipi_tag`: li crea solo il webmaster; il tipo `varie` raccoglie le proposte non categorizzate ed è il predefinito.
+- `tag`: nome, tipo, stato (libero/ufficiale/archiviato), anno facoltativo, flag esclusivo, creato da. Qualsiasi capo crea e usa tag, quanti ne vuole dentro ogni tipo; il webmaster li rende ufficiali, li unisce o li archivia.
 - `associati_tag`: associato, tag, anno scout, nota.
 - `riunioni` e `presenze`: per ogni associato presente/assente/giustificato, motivazione facoltativa, registrabile anche prima della riunione.
 - `utenti`: vedi sopra.
@@ -72,7 +73,7 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 - **Lingua:** UI, documentazione utente e ADR in italiano. Tabelle e colonne di dominio in italiano (`associati`, `unita`, `riunioni`), senza accenti. Codice tecnico (funzioni di infrastruttura, utility) in inglese.
 - **Migrazioni:** lo schema esiste solo come migrazioni SQL numerate in `migrations/` (`wrangler d1 migrations`). Mai modifiche a mano sul database. Ogni migrazione deve funzionare sia con la versione corrente sia con la precedente (beta e produzione condividono lo stesso D1): prima si aggiunge, poi si toglie in una migrazione successiva.
 - **Seed:** `seed/base/` con i dati standard AGESCI (branche, unità, cataloghi, tipi di tag); `seed/demo/` con dati finti per preview, test E2E e demo.
-- **Configurazione:** dominio, nome del gruppo, unità attive e branding in configurazione e segreti Cloudflare. Nessun valore specifico del gruppo nel codice.
+- **Configurazione:** dominio, nome del gruppo e branding in configurazione e segreti Cloudflare; le unità sono righe della tabella `unita` (ADR 0009). Nessun valore specifico del gruppo nel codice.
 - **ADR:** `docs/adr/NNNN-titolo.md` (contesto, decisione, alternative, conseguenze, stato). Un ADR accettato non si modifica: se ne scrive uno nuovo che lo supera.
 - **Commit:** firmati con DCO (`git commit -s`). Pull request piccole, una cosa per volta.
 
@@ -94,3 +95,9 @@ Fase 0 — Fondamenta. Ordine suggerito:
 5. Pipeline GitHub Actions (lint, test, build, preview, E2E).
 6. MCP admin.
 7. Import dal foglio esistente con mappatura delle colonne configurabile.
+
+## Comandi
+
+- `pnpm check`: lint e formattazione (Biome).
+- `pnpm test`: test (schema su SQLite in memoria con `node:sqlite`).
+- `pnpm seed:demo`: rigenera `seed/demo/demo.sql` da `scripts/genera-seed-demo.ts`.

@@ -59,8 +59,8 @@ Database D1 (SQLite) con giurisdizione UE: ogni voce sotto è una tabella, i per
 
 | Collezione | Contenuto |
 | --- | --- |
-| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, telefono casa, email); privacy (informativa con data, consensi 2A, 2B, 2C, note privacy); stato (attivo o archiviato) |
-| `associati/{id}` → genitori/tutori | Lista: relazione, anagrafica, CF, cellulare, email, flag "riceve comunicazioni", collegamento facoltativo al profilo se il tutore è anche associato. Archiviati automaticamente ai 18 anni |
+| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, email); flag "riceve comunicazioni"; privacy (informativa con data, consensi 2A, 2B, 2C, note privacy); stato (attivo o archiviato) |
+| `associati/{id}` → genitori/tutori | Lista: ruolo (madre, padre, tutore, affidatario, altro), anagrafica, CF, cellulare, email, collegamento facoltativo al profilo se il tutore è anche associato. Archiviati automaticamente ai 18 anni |
 | `associati/{id}/progressione/{voce}` | Voci dal catalogo di branca (prede, specialità, voli, tappe, brevetti…) o voci libere (data, tipo, descrizione). Le vecchie note generali diventano voci libere |
 | `relazioni/{id}` | Due associati + tipo (genitore/figlio, fratello/sorella, zio/nipote, cugino, coniuge, altro), con l'inversa creata in automatico. Vale anche per i capi |
 | `catalogo/{branca}` | Voci note di progressione per branca, gestite da chi ha accesso completo |
@@ -71,6 +71,7 @@ Database D1 (SQLite) con giurisdizione UE: ogni voce sotto è una tabella, i per
 - **`utenti/{email}`:** unità (una o più), accesso completo, Buona Strada, webmaster, esclusione; gestita dal webmaster tramite MCP admin.
 - **`anni_scout`:** nome (per esempio 2026/27), data di inizio, anno attuale. L'anno cambia alla data dei passaggi, che varia ogni anno: chi ha accesso completo preme "Crea nuovo anno" e da lì partono i passaggi.
 - **`tag/{id}`:** nome, tipo, stato (libero, ufficiale, archiviato), anno scout facoltativo, flag "esclusivo" (una sola voce di quel tipo per persona e anno, per esempio la squadriglia), creato da. Qualsiasi capo li crea e li usa su tutti gli associati; il webmaster vede tutti i tag con il loro utilizzo e decide quali rendere ufficiali, quali unire e quali archiviare.
+- **`tipi_tag`:** li crea, rinomina e riordina solo il webmaster dall'MCP admin; dentro ogni tipo qualsiasi capo crea i tag che vuole. Il seed base inserisce i tipi comuni (squadriglia, sestiglia, consiglio, incarico, evento, esperienza, varie). Il tipo **varie** raccoglie le proposte non categorizzate ed è il predefinito quando un capo non sceglie un tipo: nella revisione il webmaster sposta quei tag nel tipo giusto o crea un tipo nuovo.
 - **`associati_tag`:** associato, tag, anno scout, nota facoltativa, chi e quando. Salvati subito con registro, fuori dal flusso Buona Strada.
 - **Fuori dal sistema:** dati sanitari, che restano offline.
 - **Codici fiscali:** usati solo per Buona Strada, non mostrati nelle viste normali.

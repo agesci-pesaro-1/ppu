@@ -22,3 +22,5 @@ Ogni scelta architetturale di PPU è registrata qui come ADR (Architecture Decis
 | [0006](0006-beta-e-produzione-stesso-database.md) | Beta e produzione sullo stesso database, migrazioni retrocompatibili | Accettata |
 | [0007](0007-un-installazione-per-gruppo.md) | Un'installazione separata per ogni gruppo | Accettata |
 | [0008](0008-buona-strada-fonte-ufficiale.md) | Buona Strada fonte ufficiale, allineamento manuale tracciato nel registro | Accettata |
+| [0009](0009-unita-nel-database.md) | Unità nel database, gestite dall'MCP admin | Proposta |
+| [0010](0010-immagini-dei-distintivi-dal-worker.md) | Immagini dei distintivi scaricate e servite dal Worker | Proposta |

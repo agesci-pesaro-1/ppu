@@ -64,6 +64,7 @@ jobs:
           PPU_AMBIENTE: ${{ env.AMBIENTE }}
           PPU_D1_NOME: ${{ vars.PPU_D1_NOME }}
           PPU_D1_ID: ${{ vars.PPU_D1_ID }}
+          PPU_KV_OAUTH_ID: ${{ vars.PPU_KV_OAUTH_ID }}
           PPU_DOMINIO: ${{ vars.PPU_DOMINIO }}
           PPU_NOME_GRUPPO: ${{ vars.PPU_NOME_GRUPPO }}
           PPU_ACCESS_TEAM_DOMAIN: ${{ vars.PPU_ACCESS_TEAM_DOMAIN }}
@@ -88,9 +89,61 @@ jobs:
           CI: "1"
         run: pnpm exec wrangler d1 migrations apply DB --remote -c wrangler.generato.json --env "$AMBIENTE"
 
+      # Il seed base è idempotente (ON CONFLICT DO NOTHING): riapplicarlo non
+      # tocca unità rinominate o disattivate dal webmaster.
+      - if: steps.prerequisiti.outputs.attiva == 'true'
+        name: Seed base sul D1 di produzione
+        working-directory: packages/worker
+        env:
+          CI: "1"
+        run: |
+          for f in ../../seed/base/*.sql; do
+            pnpm exec wrangler d1 execute DB --remote --file "$f" -c wrangler.generato.json --env "$AMBIENTE"
+          done
+
+      # Primo webmaster: senza almeno un webmaster nessuno può assegnare ruoli
+      # dall'MCP admin. Agisce solo se in utenti non c'è ancora nessun webmaster.
+      - if: steps.prerequisiti.outputs.attiva == 'true' && vars.PPU_WEBMASTER_INIZIALE != ''
+        name: Primo webmaster (solo se assente)
+        working-directory: packages/worker
+        env:
+          CI: "1"
+          EMAIL: ${{ vars.PPU_WEBMASTER_INIZIALE }}
+          DOMINIO: ${{ vars.PPU_DOMINIO }}
+        run: |
+          email="$(printf '%s' "$EMAIL" | tr '[:upper:]' '[:lower:]')"
+          dominio="$(printf '%s' "$DOMINIO" | tr '[:upper:]' '[:lower:]')"
+          if ! printf '%s' "$email" | grep -Eq '^[a-z0-9._+-]+@[a-z0-9.-]+$' || [ "${email##*@}" != "$dominio" ]; then
+            echo "::error::PPU_WEBMASTER_INIZIALE non valida o fuori dal dominio."
+            exit 1
+          fi
+          pnpm exec wrangler d1 execute DB --remote -c wrangler.generato.json --env "$AMBIENTE" --command "
+            INSERT INTO utenti (email, webmaster)
+              SELECT '$email', 1 WHERE NOT EXISTS (SELECT 1 FROM utenti WHERE webmaster = 1)
+              ON CONFLICT (email) DO UPDATE SET webmaster = 1;
+            INSERT INTO modifiche (operazione, autore_email, canale, entita, entita_id, campo, valore_dopo)
+              SELECT 'primo-webmaster', 'sistema', 'sistema', 'utenti', '$email', 'webmaster', '1'
+              WHERE changes() > 0;"
+
       - if: steps.prerequisiti.outputs.attiva == 'true'
         name: Pubblica il Worker
         working-directory: packages/worker
         run: |
           pnpm exec wrangler deploy -c wrangler.generato.json --env "$AMBIENTE" \
             --message "${GITHUB_SHA::7} da GitHub Actions"
+
+      # Segreti del login Google per l'MCP. Dopo il deploy: il Worker deve esistere.
+      - if: steps.prerequisiti.outputs.attiva == 'true'
+        name: Segreti del login Google
+        working-directory: packages/worker
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          if [ -z "$GOOGLE_CLIENT_ID" ] || [ -z "$GOOGLE_CLIENT_SECRET" ]; then
+            echo "::notice::GOOGLE_CLIENT_ID o GOOGLE_CLIENT_SECRET mancanti: login MCP non disponibile."
+            exit 0
+          fi
+          jq -n --arg id "$GOOGLE_CLIENT_ID" --arg s "$GOOGLE_CLIENT_SECRET" \
+            '{GOOGLE_CLIENT_ID: $id, GOOGLE_CLIENT_SECRET: $s}' \
+            | pnpm exec wrangler secret bulk -c wrangler.generato.json --env "$AMBIENTE"

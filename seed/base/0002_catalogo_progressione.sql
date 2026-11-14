@@ -9,7 +9,7 @@ INSERT INTO versioni_regolamento (data, nome) VALUES
 ON CONFLICT (data) DO NOTHING;
 
 -- Immagini delle specialità: collegamenti, i file non sono nel repository.
--- E/G: immagini pubblicate da AGESCI su avventura.agesci.it/specialita;
+-- E/G: immagini pubblicate da AGESCI su avventura.agesci.it/specialita (Geologo dal rivenditore);
 -- L/C: foto dei distintivi su ilcastoroscoutshop.com (rivendita).
 INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, immagine_url) VALUES
   ('2026-07-29', 'lc', 'promessa', 'Promessa', 1, NULL),
@@ -101,7 +101,7 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, imma
   ('2026-07-29', 'eg', 'specialita', 'Fa tutto', 131, 'https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_fatutto.jpg'),
   ('2026-07-29', 'eg', 'specialita', 'Folclorista', 132, 'https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_folclorista.jpg'),
   ('2026-07-29', 'eg', 'specialita', 'Fotografo', 133, 'https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_fotografo-150x150.jpg'),
-  ('2026-07-29', 'eg', 'specialita', 'Geologo', 134, NULL),
+  ('2026-07-29', 'eg', 'specialita', 'Geologo', 134, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/specialita_eg_geologo_web.jpg?v=1611073528'),
   ('2026-07-29', 'eg', 'specialita', 'Giardiniere', 135, 'https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_giardiniere.jpg'),
   ('2026-07-29', 'eg', 'specialita', 'Giocattolaio', 136, 'https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_giocattolaio.jpg'),
   ('2026-07-29', 'eg', 'specialita', 'Grafico', 137, 'https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_grafico-150x150.jpg'),

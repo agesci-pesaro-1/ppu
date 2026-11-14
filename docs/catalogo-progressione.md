@@ -35,8 +35,8 @@ può aggiungere voci del gruppo, senza versione.
 - **Tipo:** il valore della colonna `tipo` (`promessa`, `fase`, `tappa`,
   `passaggio`, `partenza`, `specialita`, `brevetto`, `evento`).
 - **Immagine:** il distintivo della specialità. Per le E/G è l'immagine pubblicata
-  da AGESCI su [avventura.agesci.it/specialita](https://avventura.agesci.it/specialita/);
-  per le L/C la foto del distintivo su
+  da AGESCI su [avventura.agesci.it/specialita](https://avventura.agesci.it/specialita/)
+  (tranne Geologo, che lì manca); per le L/C e per Geologo la foto del distintivo su
   [ilcastoroscoutshop.com](https://ilcastoroscoutshop.com/collections/distintivi-uniforme-agesci/products/copia-del-specialita-eg),
   un rivenditore. Nel database c'è solo il collegamento (`immagine_url`): le
   immagini non sono nostre e non stanno nel repository. Alcuni visualizzatori di
@@ -157,7 +157,7 @@ può aggiungere voci del gruppo, senza versione.
 | 131 | specialita | Fa tutto | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_fatutto.jpg" alt="" width="48"> |
 | 132 | specialita | Folclorista | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_folclorista.jpg" alt="" width="48"> |
 | 133 | specialita | Fotografo | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_fotografo-150x150.jpg" alt="" width="48"> |
-| 134 | specialita | Geologo | — |
+| 134 | specialita | Geologo | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/specialita_eg_geologo_web.jpg?v=1611073528" alt="" width="48"> |
 | 135 | specialita | Giardiniere | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_giardiniere.jpg" alt="" width="48"> |
 | 136 | specialita | Giocattolaio | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_giocattolaio.jpg" alt="" width="48"> |
 | 137 | specialita | Grafico | <img src="https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_grafico-150x150.jpg" alt="" width="48"> |
@@ -246,7 +246,8 @@ può aggiungere voci del gruppo, senza versione.
 - **Immagini L/C:** il negozio non ha «Amico degli anziani». Le foto di un
   rivenditore possono cambiare o sparire: meglio sostituirle con immagini
   ufficiali quando ci sono.
-- **Immagini E/G:** il sito non ha l'immagine di Geologo. Sul sito c'è anche
+- **Immagini E/G:** avventura.agesci.it non ha l'immagine di Geologo: viene dal
+  rivenditore, come le L/C. Sul sito c'è anche
   Naturalista, che nel regolamento in vigore è un brevetto e non una specialità:
   non è abbinato. Il regolamento scrive «Batteliere», il sito «Battelliere».
 - **R/S:** per ora i soli momenti nel catalogo sono la salita in clan/fuoco

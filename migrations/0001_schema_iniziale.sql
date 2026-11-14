@@ -64,7 +64,6 @@ CREATE TABLE associati (
   provincia TEXT,
   -- contatti personali
   cellulare TEXT,
-  telefono_casa TEXT,
   email TEXT,
   -- privacy
   informativa INTEGER NOT NULL DEFAULT 0 CHECK (informativa IN (0, 1)),

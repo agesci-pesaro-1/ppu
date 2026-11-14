@@ -364,7 +364,6 @@ persone.forEach((p, i) => {
     comune: COMUNE,
     provincia: PROVINCIA,
     cellulare: adulto ? `+39 300 000 ${String(n).padStart(4, '0')}` : null,
-    telefono_casa: n % 3 === 0 ? `+39 0000 ${String(n).padStart(6, '0')}` : null,
     email: adulto ? `${slug(p.nome)}.${slug(p.cognome)}@${DOMINIO}` : null,
     informativa: 1,
     informativa_data: '2025-10-05',
@@ -683,15 +682,7 @@ const modifiche: [string, string, string, string, string, string, string | null]
     null,
   ],
   ['demo-op-2', 'capogruppo', 'Dini Sara', 'cellulare', '', '+39 300 000 9999', null],
-  [
-    'demo-op-3',
-    'capo.lupetti',
-    'Cardelli Matteo',
-    'telefono_casa',
-    '',
-    '+39 0000 000003',
-    'capo.rs',
-  ],
+  ['demo-op-3', 'capo.lupetti', 'Cardelli Matteo', 'luogo_nascita', COMUNE, 'Altrove', 'capo.rs'],
 ];
 for (const [operazione, autore, chi, campo, prima, dopo, confermata] of modifiche) {
   insert('modifiche', {

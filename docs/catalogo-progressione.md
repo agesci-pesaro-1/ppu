@@ -38,7 +38,9 @@ può aggiungere voci del gruppo, senza versione.
   da AGESCI su [avventura.agesci.it/specialita](https://avventura.agesci.it/specialita/)
   (tranne Geologo, che lì manca); per le L/C e per Geologo la foto del distintivo su
   [ilcastoroscoutshop.com](https://ilcastoroscoutshop.com/collections/distintivi-uniforme-agesci/products/copia-del-specialita-eg),
-  un rivenditore. Nel database c'è solo il collegamento (`immagine_url`): le
+  un rivenditore (Amico degli anziani da
+  [scoutshopcampania.it](https://www.scoutshopcampania.it/prodotto/specialita-l-c-amico-degli-anziani/)).
+  Nel database c'è solo il collegamento (`immagine_url`): le
   immagini non sono nostre e non stanno nel repository. Alcuni visualizzatori di
   Markdown non mostrano immagini esterne; su GitHub si vedono.
 - I nomi si possono declinare al maschile o al femminile, come dice il regolamento:
@@ -63,7 +65,7 @@ può aggiungere voci del gruppo, senza versione.
 | Ordine | Tipo | Voce | Immagine |
 | --- | --- | --- | --- |
 | 101 | specialita | Amico degli animali | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_a_d_animali.jpg?v=1611333610" alt="" width="48"> |
-| 102 | specialita | Amico degli anziani | — |
+| 102 | specialita | Amico degli anziani | <img src="https://www.scoutshopcampania.it/wp-content/uploads/2025/02/amico_degli_anziani_4.jpg" alt="" width="48"> |
 | 103 | specialita | Amico del mare | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_a_mare.jpg?v=1611333610" alt="" width="48"> |
 | 104 | specialita | Amico della natura | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_amico_natura.jpg?v=1611333610" alt="" width="48"> |
 | 105 | specialita | Amico di Aronne | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_aronne.jpg?v=1611333610" alt="" width="48"> |
@@ -243,9 +245,9 @@ può aggiungere voci del gruppo, senza versione.
 - **E/G:** la conclusione del sentiero (Art. 40) è una cerimonia di reparto, non
   una voce a sé: non è nel catalogo. Le specialità di squadriglia (Allegato 3 E/G)
   per ora non servono e non sono nel catalogo.
-- **Immagini L/C:** il negozio non ha «Amico degli anziani». Le foto di un
-  rivenditore possono cambiare o sparire: meglio sostituirle con immagini
-  ufficiali quando ci sono.
+- **Immagini L/C:** vengono da due rivenditori, e «Amico degli anziani» ha uno
+  stile fotografico diverso dalle altre. Le foto di un rivenditore possono cambiare
+  o sparire: meglio sostituirle con immagini ufficiali quando ci sono.
 - **Immagini E/G:** avventura.agesci.it non ha l'immagine di Geologo: viene dal
   rivenditore, come le L/C. Sul sito c'è anche
   Naturalista, che nel regolamento in vigore è un brevetto e non una specialità:

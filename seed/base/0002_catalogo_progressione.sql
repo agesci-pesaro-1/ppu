@@ -10,7 +10,7 @@ ON CONFLICT (data) DO NOTHING;
 
 -- Immagini delle specialità: collegamenti, i file non sono nel repository.
 -- E/G: immagini pubblicate da AGESCI su avventura.agesci.it/specialita (Geologo dal rivenditore);
--- L/C: foto dei distintivi su ilcastoroscoutshop.com (rivendita).
+-- L/C: foto dei distintivi su ilcastoroscoutshop.com (Amico degli anziani su scoutshopcampania.it).
 INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, immagine_url) VALUES
   ('2026-07-29', 'lc', 'promessa', 'Promessa', 1, NULL),
   ('2026-07-29', 'lc', 'fase', 'Lupo della legge', 2, NULL),
@@ -21,7 +21,7 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, imma
   ('2026-07-29', 'lc', 'fase', 'Coccinella della montagna', 7, NULL),
 
   ('2026-07-29', 'lc', 'specialita', 'Amico degli animali', 101, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_a_d_animali.jpg?v=1611333610'),
-  ('2026-07-29', 'lc', 'specialita', 'Amico degli anziani', 102, NULL),
+  ('2026-07-29', 'lc', 'specialita', 'Amico degli anziani', 102, 'https://www.scoutshopcampania.it/wp-content/uploads/2025/02/amico_degli_anziani_4.jpg'),
   ('2026-07-29', 'lc', 'specialita', 'Amico del mare', 103, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_a_mare.jpg?v=1611333610'),
   ('2026-07-29', 'lc', 'specialita', 'Amico della natura', 104, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_amico_natura.jpg?v=1611333610'),
   ('2026-07-29', 'lc', 'specialita', 'Amico di Aronne', 105, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_aronne.jpg?v=1611333610'),

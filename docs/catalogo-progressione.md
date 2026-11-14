@@ -34,10 +34,13 @@ può aggiungere voci del gruppo, senza versione.
   specialità da 101, i brevetti da 201, gli eventi da 301.
 - **Tipo:** il valore della colonna `tipo` (`promessa`, `fase`, `tappa`,
   `passaggio`, `partenza`, `specialita`, `brevetto`, `evento`).
-- **Immagine:** per le specialità E/G, il distintivo come pubblicato da AGESCI su
-  [avventura.agesci.it/specialita](https://avventura.agesci.it/specialita/). Nel
-  database c'è solo il collegamento (`immagine_url`): le immagini sono di AGESCI e
-  non stanno nel repository.
+- **Immagine:** il distintivo della specialità. Per le E/G è l'immagine pubblicata
+  da AGESCI su [avventura.agesci.it/specialita](https://avventura.agesci.it/specialita/);
+  per le L/C la foto del distintivo su
+  [ilcastoroscoutshop.com](https://ilcastoroscoutshop.com/collections/distintivi-uniforme-agesci/products/copia-del-specialita-eg),
+  un rivenditore. Nel database c'è solo il collegamento (`immagine_url`): le
+  immagini non sono nostre e non stanno nel repository. Alcuni visualizzatori di
+  Markdown non mostrano immagini esterne; su GitHub si vedono.
 - I nomi si possono declinare al maschile o al femminile, come dice il regolamento:
   nel catalogo compaiono come negli allegati.
 
@@ -57,48 +60,48 @@ può aggiungere voci del gruppo, senza versione.
 
 ### Specialità (Allegato 3)
 
-| Ordine | Tipo | Voce |
-| --- | --- | --- |
-| 101 | specialita | Amico degli animali |
-| 102 | specialita | Amico degli anziani |
-| 103 | specialita | Amico del mare |
-| 104 | specialita | Amico della natura |
-| 105 | specialita | Amico di Aronne |
-| 106 | specialita | Amico di Samuele |
-| 107 | specialita | Amico di San Francesco |
-| 108 | specialita | Artigiano |
-| 109 | specialita | Astronomo |
-| 110 | specialita | Atleta |
-| 111 | specialita | Attore |
-| 112 | specialita | Botanico |
-| 113 | specialita | Canterino |
-| 114 | specialita | Cercatore di tracce |
-| 115 | specialita | Cittadino del mondo |
-| 116 | specialita | Collezionista |
-| 117 | specialita | Cuoco |
-| 118 | specialita | Disegnatore |
-| 119 | specialita | Folclorista |
-| 120 | specialita | Fotografo |
-| 121 | specialita | Giardiniere |
-| 122 | specialita | Giocatore di squadra |
-| 123 | specialita | Giocattolaio |
-| 124 | specialita | Giornalista |
-| 125 | specialita | Guida |
-| 126 | specialita | Infermiere |
-| 127 | specialita | Kim |
-| 128 | specialita | Maestro dei giochi |
-| 129 | specialita | Maestro del bosco |
-| 130 | specialita | Maestro della salute |
-| 131 | specialita | Maestro di danze |
-| 132 | specialita | Mani abili |
-| 133 | specialita | Massaio |
-| 134 | specialita | Meteorologo |
-| 135 | specialita | Montanaro |
-| 136 | specialita | Musicista |
-| 137 | specialita | Ripara-Ricicla |
-| 138 | specialita | Sarto |
-| 139 | specialita | Scaccia pericoli |
-| 140 | specialita | Scrittore |
+| Ordine | Tipo | Voce | Immagine |
+| --- | --- | --- | --- |
+| 101 | specialita | Amico degli animali | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_a_d_animali.jpg?v=1611333610" alt="" width="48"> |
+| 102 | specialita | Amico degli anziani | — |
+| 103 | specialita | Amico del mare | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_a_mare.jpg?v=1611333610" alt="" width="48"> |
+| 104 | specialita | Amico della natura | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_amico_natura.jpg?v=1611333610" alt="" width="48"> |
+| 105 | specialita | Amico di Aronne | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_aronne.jpg?v=1611333610" alt="" width="48"> |
+| 106 | specialita | Amico di Samuele | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_samuele.jpg?v=1611333602" alt="" width="48"> |
+| 107 | specialita | Amico di San Francesco | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_a_d_francesco.jpg?v=1611333602" alt="" width="48"> |
+| 108 | specialita | Artigiano | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_artigiano.jpg?v=1611333602" alt="" width="48"> |
+| 109 | specialita | Astronomo | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_astronomo.jpg?v=1611333602" alt="" width="48"> |
+| 110 | specialita | Atleta | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_atleta.jpg?v=1611333602" alt="" width="48"> |
+| 111 | specialita | Attore | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_attore.jpg?v=1611333602" alt="" width="48"> |
+| 112 | specialita | Botanico | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/spec_lc_botanico.jpg?v=1611333602" alt="" width="48"> |
+| 113 | specialita | Canterino | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/spec_lc_canterino.jpg?v=1611333602" alt="" width="48"> |
+| 114 | specialita | Cercatore di tracce | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/spec_lc_cercatore_tracce.jpg?v=1611333602" alt="" width="48"> |
+| 115 | specialita | Cittadino del mondo | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_cittadino_mondo.jpg?v=1611333602" alt="" width="48"> |
+| 116 | specialita | Collezionista | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/spec_lc_collezionista.jpg?v=1611333602" alt="" width="48"> |
+| 117 | specialita | Cuoco | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_cuoco.jpg?v=1611333602" alt="" width="48"> |
+| 118 | specialita | Disegnatore | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_disegnatore.jpg?v=1611333602" alt="" width="48"> |
+| 119 | specialita | Folclorista | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_folclorista.jpg?v=1611333602" alt="" width="48"> |
+| 120 | specialita | Fotografo | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/spec_lc_fotografo.jpg?v=1611333602" alt="" width="48"> |
+| 121 | specialita | Giardiniere | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_giardiniere.jpg?v=1611333602" alt="" width="48"> |
+| 122 | specialita | Giocatore di squadra | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_g_d_squadra.jpg?v=1611333602" alt="" width="48"> |
+| 123 | specialita | Giocattolaio | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_giocattolaio.jpg?v=1611333602" alt="" width="48"> |
+| 124 | specialita | Giornalista | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_giornalista.jpg?v=1611333602" alt="" width="48"> |
+| 125 | specialita | Guida | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_guida.jpg?v=1611333602" alt="" width="48"> |
+| 126 | specialita | Infermiere | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_infermiere.jpg?v=1611333602" alt="" width="48"> |
+| 127 | specialita | Kim | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_kim.jpg?v=1611333602" alt="" width="48"> |
+| 128 | specialita | Maestro dei giochi | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_m_d_giochi.jpg?v=1611333602" alt="" width="48"> |
+| 129 | specialita | Maestro del bosco | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/spec_lc_maestro_bosco.jpg?v=1611333602" alt="" width="48"> |
+| 130 | specialita | Maestro della salute | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_m_d_salute.jpg?v=1611333602" alt="" width="48"> |
+| 131 | specialita | Maestro di danze | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_m_d_danze.jpg?v=1611333602" alt="" width="48"> |
+| 132 | specialita | Mani abili | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/spec_lc_mani_abili.jpg?v=1611333602" alt="" width="48"> |
+| 133 | specialita | Massaio | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_massaio.jpg?v=1611333602" alt="" width="48"> |
+| 134 | specialita | Meteorologo | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/spec_lc_meteorologo.jpg?v=1611333602" alt="" width="48"> |
+| 135 | specialita | Montanaro | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_montanaro.jpg?v=1611333602" alt="" width="48"> |
+| 136 | specialita | Musicista | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_musicista.jpg?v=1611333602" alt="" width="48"> |
+| 137 | specialita | Ripara-Ricicla | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_ripararicicla.jpg?v=1611333602" alt="" width="48"> |
+| 138 | specialita | Sarto | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_sarto.jpg?v=1611333602" alt="" width="48"> |
+| 139 | specialita | Scaccia pericoli | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_scacciapericoli.jpg?v=1611333602" alt="" width="48"> |
+| 140 | specialita | Scrittore | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_scrittore.jpg?v=1611333602" alt="" width="48"> |
 
 ### Eventi a partecipazione individuale
 
@@ -240,6 +243,9 @@ può aggiungere voci del gruppo, senza versione.
 - **E/G:** la conclusione del sentiero (Art. 40) è una cerimonia di reparto, non
   una voce a sé: non è nel catalogo. Le specialità di squadriglia (Allegato 3 E/G)
   per ora non servono e non sono nel catalogo.
+- **Immagini L/C:** il negozio non ha «Amico degli anziani». Le foto di un
+  rivenditore possono cambiare o sparire: meglio sostituirle con immagini
+  ufficiali quando ci sono.
 - **Immagini E/G:** il sito non ha l'immagine di Geologo. Sul sito c'è anche
   Naturalista, che nel regolamento in vigore è un brevetto e non una specialità:
   non è abbinato. Il regolamento scrive «Batteliere», il sito «Battelliere».

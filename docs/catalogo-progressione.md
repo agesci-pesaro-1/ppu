@@ -244,10 +244,11 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
 
 ### Tappe
 
-| Ordine | Tipo | Voce |
-| --- | --- | --- |
-| 1 | tappa | Salita in clan/fuoco |
-| 2 | tappa | Partenza |
+| Ordine | Tipo | Voce | Immagine |
+| --- | --- | --- | --- |
+| 1 | tappa | Promessa | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/PromessaScoutricamata.jpg?v=1605715991" alt="" width="48"> |
+| 2 | tappa | Salita in clan/fuoco | — |
+| 3 | tappa | Partenza | — |
 
 ### Eventi di progressione personale a partecipazione individuale (Allegato 1)
 
@@ -274,10 +275,11 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
   rivenditore, come le L/C. Sul sito c'è anche
   Naturalista, che nel regolamento in vigore è un brevetto e non una specialità:
   non è abbinato. Il regolamento scrive «Batteliere», il sito «Battelliere».
-- **R/S:** per ora i soli momenti nel catalogo sono la salita in clan/fuoco
-  (fine del noviziato) e la Partenza. Promessa (per chi
-  arriva dall'esterno), passi di scoperta, competenza e responsabilità e firma
-  della Carta di clan restano fuori finché non si decide come registrarli.
+- **R/S:** per ora nel catalogo ci sono la Promessa (per chi arriva in Comunità
+  R/S senza averla pronunciata prima, Art. 34), la salita in clan/fuoco (fine del
+  noviziato) e la Partenza. La Promessa ha lo stesso distintivo di quella E/G.
+  Passi di scoperta, competenza e responsabilità e firma della Carta di clan
+  restano fuori finché non si decide come registrarli.
   Tra gli eventi a partecipazione individuale ci sono solo ROSS ed Evento per
   partenti, più una voce generica EPPPI per tutti gli altri (laboratori,
   campi di specializzazione, Ora et Labora, Route dello spirito, cantieri).

@@ -161,8 +161,9 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, imma
   ('2026-07-29', 'eg', 'evento', 'Campo di specialità', 301, NULL),
   ('2026-07-29', 'eg', 'evento', 'Campo di competenza', 302, NULL),
 
-  ('2026-07-29', 'rs', 'tappa', 'Salita in clan/fuoco', 1, NULL),
-  ('2026-07-29', 'rs', 'tappa', 'Partenza', 2, NULL),
+  ('2026-07-29', 'rs', 'tappa', 'Promessa', 1, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/PromessaScoutricamata.jpg?v=1605715991'),
+  ('2026-07-29', 'rs', 'tappa', 'Salita in clan/fuoco', 2, NULL),
+  ('2026-07-29', 'rs', 'tappa', 'Partenza', 3, NULL),
 
   ('2026-07-29', 'rs', 'evento', 'Evento di progressione personale a partecipazione individuale (EPPPI)', 301, NULL),
   ('2026-07-29', 'rs', 'evento', 'Route d''orientamento alla scelta di servizio (ROSS)', 302, NULL),

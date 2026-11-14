@@ -90,7 +90,8 @@ export function leggiCsv(testo: string): TabellaCsv {
   const separatore = rilevaSeparatore(pulito);
   const [intestazione, ...dati] = record(pulito, separatore);
   if (!intestazione) throw new ErroreCsv('Intestazione mancante.');
-  const intestazioni = intestazione.valori.map((h) => h.trim());
+  // Le intestazioni possono contenere a capo o spazi doppi (celle su più righe).
+  const intestazioni = intestazione.valori.map((h) => h.replace(/\s+/g, ' ').trim());
   const viste = new Set<string>();
   for (const h of intestazioni) {
     const chiave = h.toLowerCase();
@@ -106,4 +107,9 @@ export function leggiCsv(testo: string): TabellaCsv {
     }
   }
   return { separatore, intestazioni, righe };
+}
+
+/** Chiave di confronto tra nomi di colonna: spazi normalizzati, senza maiuscole. */
+export function chiaveColonna(nome: string): string {
+  return nome.replace(/\s+/g, ' ').trim().toLowerCase();
 }

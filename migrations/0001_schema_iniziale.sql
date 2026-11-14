@@ -3,6 +3,8 @@
 -- Convenzioni:
 --   * tabelle e colonne di dominio in italiano, senza accenti;
 --   * date come TEXT ISO 8601 ('AAAA-MM-GG'), istanti come TEXT ISO 8601 UTC;
+--     ogni colonna di sola data ha CHECK (col IS date(col)): rifiuta formati
+--     diversi, orari e date inesistenti come '2026-02-30';
 --   * booleani come INTEGER 0/1 con CHECK;
 --   * nessuna cancellazione definitiva: le righe si archiviano;
 --   * i permessi NON sono nel database: li applica il livello di servizi.
@@ -31,7 +33,7 @@ CREATE TABLE unita (
 CREATE TABLE anni_scout (
   id INTEGER PRIMARY KEY,
   nome TEXT NOT NULL UNIQUE,                 -- '2026/27'
-  data_inizio TEXT NOT NULL UNIQUE,          -- data dei passaggi
+  data_inizio TEXT NOT NULL UNIQUE CHECK (data_inizio IS date(data_inizio)), -- data dei passaggi
   attuale INTEGER NOT NULL DEFAULT 0 CHECK (attuale IN (0, 1)),
   creato_da TEXT,
   creato_il TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
@@ -51,7 +53,7 @@ CREATE TABLE associati (
   codice_censimento TEXT UNIQUE,             -- facoltativo
   cognome TEXT NOT NULL,
   nome TEXT NOT NULL,
-  data_nascita TEXT,
+  data_nascita TEXT CHECK (data_nascita IS date(data_nascita)),
   luogo_nascita TEXT,
   codice_fiscale TEXT UNIQUE,                -- solo per Buona Strada, mai nelle viste normali
   unita_id TEXT REFERENCES unita (id),       -- unità attuale
@@ -66,7 +68,7 @@ CREATE TABLE associati (
   email TEXT,
   -- privacy
   informativa INTEGER NOT NULL DEFAULT 0 CHECK (informativa IN (0, 1)),
-  informativa_data TEXT,
+  informativa_data TEXT CHECK (informativa_data IS date(informativa_data)),
   consenso_2a INTEGER NOT NULL DEFAULT 0 CHECK (consenso_2a IN (0, 1)),
   consenso_2b INTEGER NOT NULL DEFAULT 0 CHECK (consenso_2b IN (0, 1)),
   consenso_2c INTEGER NOT NULL DEFAULT 0 CHECK (consenso_2c IN (0, 1)),
@@ -150,7 +152,7 @@ CREATE TABLE progressione (
   catalogo_id INTEGER REFERENCES catalogo_progressione (id),
   tipo TEXT,
   descrizione TEXT,
-  data TEXT,
+  data TEXT CHECK (data IS date(data)),
   anno_scout_id INTEGER REFERENCES anni_scout (id),
   archiviata INTEGER NOT NULL DEFAULT 0 CHECK (archiviata IN (0, 1)),
   creato_da TEXT NOT NULL,
@@ -216,7 +218,7 @@ CREATE TABLE riunioni (
   id INTEGER PRIMARY KEY,
   unita_id TEXT NOT NULL REFERENCES unita (id),
   anno_scout_id INTEGER REFERENCES anni_scout (id),
-  data TEXT NOT NULL,
+  data TEXT NOT NULL CHECK (data IS date(data)),
   tipo TEXT NOT NULL DEFAULT 'riunione',     -- 'riunione', 'uscita', 'campo', ...
   note TEXT,
   archiviata INTEGER NOT NULL DEFAULT 0 CHECK (archiviata IN (0, 1)),

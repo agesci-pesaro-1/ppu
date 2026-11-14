@@ -136,6 +136,58 @@ describe('vincoli di dominio', () => {
       ),
     );
   });
+
+  describe('le colonne di sola data accettano solo date valide AAAA-MM-GG', () => {
+    const colonne: [string, string, string][] = [
+      ['anni_scout', 'data_inizio', "INSERT INTO anni_scout (nome, data_inizio) VALUES ('x', ?)"],
+      [
+        'associati',
+        'data_nascita',
+        "INSERT INTO associati (cognome, nome, data_nascita) VALUES ('P', 'U', ?)",
+      ],
+      [
+        'associati',
+        'informativa_data',
+        "INSERT INTO associati (cognome, nome, informativa_data) VALUES ('P', 'U', ?)",
+      ],
+      [
+        'progressione',
+        'data',
+        "INSERT INTO progressione (associato_id, tipo, descrizione, creato_da, data) VALUES (1, 't', 'd', 'capo@example.org', ?)",
+      ],
+      [
+        'riunioni',
+        'data',
+        "INSERT INTO riunioni (unita_id, creato_da, data) VALUES ('lupetti', 'capo@example.org', ?)",
+      ],
+    ];
+    const valide = ['2026-11-14', '2024-02-29'];
+    const nonValide = [
+      '2026-02-30',
+      '2025-02-29',
+      '2026-13-01',
+      '2026-1-5',
+      '14/11/2026',
+      '2026-11-14 10:00',
+      '2026-11-14T10:00:00Z',
+      '',
+    ];
+
+    for (const [tabella, colonna, sql] of colonne) {
+      it(`${tabella}.${colonna}`, () => {
+        const db = creaDatabase();
+        db.exec("INSERT INTO associati (id, cognome, nome) VALUES (1, 'Prova', 'Uno')");
+        for (const v of valide) {
+          db.exec('SAVEPOINT s');
+          assert.doesNotThrow(() => db.prepare(sql).run(v), v);
+          db.exec('ROLLBACK TO s');
+        }
+        for (const v of nonValide) {
+          assert.throws(() => db.prepare(sql).run(v), /CHECK/, `${v} dovrebbe essere rifiutato`);
+        }
+      });
+    }
+  });
 });
 
 describe('seed demo', () => {

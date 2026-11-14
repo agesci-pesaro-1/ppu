@@ -1,0 +1,18 @@
+{
+  "name": "ppu",
+  "private": true,
+  "description": "PPU — Progressione Personale Unitaria: gestionale degli associati per gruppi scout AGESCI",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "packageManager": "pnpm@12.16.1",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "check": "biome check .",
+    "format": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.3"
+  }
+}

@@ -13,6 +13,7 @@ export interface Config {
   nomeGruppo: string;
   modalitaTest: boolean;
   access: { teamDomain: string; aud: string } | null;
+  google: { clientId: string; clientSecret: string } | null;
 }
 
 export class ErroreConfigurazione extends Error {}
@@ -42,11 +43,17 @@ export function leggiConfig(env: Env): Config {
   if (!access && !modalitaTest && ambiente !== 'demo') {
     throw new ErroreConfigurazione('ACCESS_TEAM_DOMAIN e ACCESS_AUD sono obbligatori');
   }
+  // Login Google per l'MCP: facoltativo (senza, l'endpoint MCP accetta solo la modalità di test).
+  const google =
+    env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+      ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET }
+      : null;
   return {
     ambiente,
     dominio,
     nomeGruppo: env.NOME_GRUPPO ?? 'PPU',
     modalitaTest,
     access,
+    google,
   };
 }

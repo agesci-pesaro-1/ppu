@@ -14,17 +14,18 @@ INSERT INTO versioni_regolamento (data, nome) VALUES
   ('2026-07-29', 'Regolamento metodologico AGESCI, aggiornato al Consiglio generale 2026')
 ON CONFLICT (data) DO NOTHING;
 
--- Immagini delle specialità: collegamenti, i file non sono nel repository.
+-- Immagini dei distintivi: collegamenti, i file non sono nel repository.
 -- E/G: immagini pubblicate da AGESCI su avventura.agesci.it/specialita (Geologo dal rivenditore);
 -- L/C: foto dei distintivi su ilcastoroscoutshop.com (Amico degli anziani su scoutshopcampania.it).
+-- Tappe E/G, fasi L/C e brevetti: foto dei distintivi su ilcastoroscoutshop.com.
 INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, immagine_url) VALUES
   ('2026-07-29', 'lc', 'tappa', 'Promessa', 1, NULL),
-  ('2026-07-29', 'lc', 'tappa', 'Lupo della legge', 2, NULL),
-  ('2026-07-29', 'lc', 'tappa', 'Lupo della rupe', 3, NULL),
-  ('2026-07-29', 'lc', 'tappa', 'Lupo anziano', 4, NULL),
-  ('2026-07-29', 'lc', 'tappa', 'Coccinella del prato', 5, NULL),
-  ('2026-07-29', 'lc', 'tappa', 'Coccinella del bosco', 6, NULL),
-  ('2026-07-29', 'lc', 'tappa', 'Coccinella della montagna', 7, NULL),
+  ('2026-07-29', 'lc', 'tappa', 'Lupo della legge', 2, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_1_momento.jpg?v=1611068606'),
+  ('2026-07-29', 'lc', 'tappa', 'Lupo della rupe', 3, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_2_momento.jpg?v=1611068606'),
+  ('2026-07-29', 'lc', 'tappa', 'Lupo anziano', 4, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_3_momento.jpg?v=1611068606'),
+  ('2026-07-29', 'lc', 'tappa', 'Coccinella del prato', 5, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_1_momento.jpg?v=1611068606'),
+  ('2026-07-29', 'lc', 'tappa', 'Coccinella del bosco', 6, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_2_momento.jpg?v=1611068606'),
+  ('2026-07-29', 'lc', 'tappa', 'Coccinella della montagna', 7, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_3_momento.jpg?v=1611068606'),
 
   ('2026-07-29', 'lc', 'specialita', 'Amico degli animali', 101, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_a_d_animali.jpg?v=1611333610'),
   ('2026-07-29', 'lc', 'specialita', 'Amico degli anziani', 102, 'https://www.scoutshopcampania.it/wp-content/uploads/2025/02/amico_degli_anziani_4.jpg'),
@@ -70,9 +71,9 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, imma
   ('2026-07-29', 'lc', 'evento', 'Campetto Piccole Orme', 301, NULL),
 
   ('2026-07-29', 'eg', 'tappa', 'Promessa', 1, NULL),
-  ('2026-07-29', 'eg', 'tappa', 'Scoperta', 2, NULL),
-  ('2026-07-29', 'eg', 'tappa', 'Competenza', 3, NULL),
-  ('2026-07-29', 'eg', 'tappa', 'Responsabilità', 4, NULL),
+  ('2026-07-29', 'eg', 'tappa', 'Scoperta', 2, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_1_Tappa.jpg?v=1611068124'),
+  ('2026-07-29', 'eg', 'tappa', 'Competenza', 3, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_2_Tappa_ok.jpg?v=1611068124'),
+  ('2026-07-29', 'eg', 'tappa', 'Responsabilità', 4, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_3_Tappa_ok.jpg?v=1611068124'),
 
   ('2026-07-29', 'eg', 'specialita', 'Allevatore', 101, 'https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_Allevatore.jpg'),
   ('2026-07-29', 'eg', 'specialita', 'Alpinista', 102, 'https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/spec_Alpinista.jpg'),
@@ -140,21 +141,21 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, imma
   ('2026-07-29', 'eg', 'specialita', 'Topografo', 164, 'https://avventura.agesci.it/wp-content/uploads/sites/17/2018/05/topografo-e1525515313664.jpg'),
   ('2026-07-29', 'eg', 'specialita', 'Velista', 165, 'https://avventura.agesci.it/wp-content/uploads/sites/17/2015/08/velista.jpg'),
 
-  ('2026-07-29', 'eg', 'brevetto', 'Animatore sportivo', 201, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Artista', 202, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Cittadino del mondo', 203, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Esploratore delle acque', 204, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Giornalista', 205, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Grafico multimediale', 206, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Guida alpina', 207, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Liturgista', 208, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Maestro delle tecnologie', 209, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Mani Abili', 210, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Naturalista', 211, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Pioniere', 212, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Sherpa', 213, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Soccorritore', 214, NULL),
-  ('2026-07-29', 'eg', 'brevetto', 'Trappeur', 215, NULL),
+  ('2026-07-29', 'eg', 'brevetto', 'Animatore sportivo', 201, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_sportiva.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Artista', 202, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_espressiva.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Cittadino del mondo', 203, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_internazionale.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Esploratore delle acque', 204, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/files/esploratore-delle-acque.gif?v=1712736580'),
+  ('2026-07-29', 'eg', 'brevetto', 'Giornalista', 205, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_giornalistica.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Grafico multimediale', 206, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_grafica_e_multimediale.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Guida alpina', 207, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Guida_alpina.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Liturgista', 208, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_religiosa.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Maestro delle tecnologie', 209, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/files/maestro-delle-tecnologie.gif?v=1712736579'),
+  ('2026-07-29', 'eg', 'brevetto', 'Mani Abili', 210, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Mani_abili.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Naturalista', 211, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Amico_della_natura.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Pioniere', 212, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Pioniere.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Sherpa', 213, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Sherpa.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Soccorritore', 214, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Soccorso.jpg?v=1611067883'),
+  ('2026-07-29', 'eg', 'brevetto', 'Trappeur', 215, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Trappeur.jpg?v=1611067883'),
 
   ('2026-07-29', 'eg', 'evento', 'Campo di specialità', 301, NULL),
   ('2026-07-29', 'eg', 'evento', 'Campo di competenza', 302, NULL),

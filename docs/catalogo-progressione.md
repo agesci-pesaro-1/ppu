@@ -34,7 +34,8 @@ può aggiungere voci del gruppo, senza versione.
   specialità da 101, i brevetti da 201, gli eventi da 301.
 - **Tipo:** il valore della colonna `tipo`: `tappa`, `specialita`, `brevetto`,
   `evento`. Vedi sotto, «Perché un solo tipo `tappa`».
-- **Immagine:** il distintivo della specialità. Per le E/G è l'immagine pubblicata
+- **Immagine:** il distintivo. Tappe E/G, fasi L/C e brevetti hanno la foto del
+  distintivo su ilcastoroscoutshop.com. Per le specialità E/G è l'immagine pubblicata
   da AGESCI su [avventura.agesci.it/specialita](https://avventura.agesci.it/specialita/)
   (tranne Geologo, che lì manca); per le L/C e per Geologo la foto del distintivo su
   [ilcastoroscoutshop.com](https://ilcastoroscoutshop.com/collections/distintivi-uniforme-agesci/products/copia-del-specialita-eg),
@@ -69,15 +70,15 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
 
 ### Momenti
 
-| Ordine | Tipo | Voce |
-| --- | --- | --- |
-| 1 | tappa | Promessa |
-| 2 | tappa | Lupo della legge |
-| 3 | tappa | Lupo della rupe |
-| 4 | tappa | Lupo anziano |
-| 5 | tappa | Coccinella del prato |
-| 6 | tappa | Coccinella del bosco |
-| 7 | tappa | Coccinella della montagna |
+| Ordine | Tipo | Voce | Immagine |
+| --- | --- | --- | --- |
+| 1 | tappa | Promessa | — |
+| 2 | tappa | Lupo della legge | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_1_momento.jpg?v=1611068606" alt="" width="48"> |
+| 3 | tappa | Lupo della rupe | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_2_momento.jpg?v=1611068606" alt="" width="48"> |
+| 4 | tappa | Lupo anziano | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_3_momento.jpg?v=1611068606" alt="" width="48"> |
+| 5 | tappa | Coccinella del prato | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_1_momento.jpg?v=1611068606" alt="" width="48"> |
+| 6 | tappa | Coccinella del bosco | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_2_momento.jpg?v=1611068606" alt="" width="48"> |
+| 7 | tappa | Coccinella della montagna | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_3_momento.jpg?v=1611068606" alt="" width="48"> |
 
 ### Specialità (Allegato 3)
 
@@ -134,12 +135,12 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
 
 ### Momenti
 
-| Ordine | Tipo | Voce |
-| --- | --- | --- |
-| 1 | tappa | Promessa |
-| 2 | tappa | Scoperta |
-| 3 | tappa | Competenza |
-| 4 | tappa | Responsabilità |
+| Ordine | Tipo | Voce | Immagine |
+| --- | --- | --- | --- |
+| 1 | tappa | Promessa | — |
+| 2 | tappa | Scoperta | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_1_Tappa.jpg?v=1611068124" alt="" width="48"> |
+| 3 | tappa | Competenza | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_2_Tappa_ok.jpg?v=1611068124" alt="" width="48"> |
+| 4 | tappa | Responsabilità | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_3_Tappa_ok.jpg?v=1611068124" alt="" width="48"> |
 
 ### Specialità individuali (Allegato 2)
 
@@ -213,23 +214,23 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
 
 ### Brevetti di competenza (Allegato 4)
 
-| Ordine | Tipo | Voce |
-| --- | --- | --- |
-| 201 | brevetto | Animatore sportivo |
-| 202 | brevetto | Artista |
-| 203 | brevetto | Cittadino del mondo |
-| 204 | brevetto | Esploratore delle acque |
-| 205 | brevetto | Giornalista |
-| 206 | brevetto | Grafico multimediale |
-| 207 | brevetto | Guida alpina |
-| 208 | brevetto | Liturgista |
-| 209 | brevetto | Maestro delle tecnologie |
-| 210 | brevetto | Mani Abili |
-| 211 | brevetto | Naturalista |
-| 212 | brevetto | Pioniere |
-| 213 | brevetto | Sherpa |
-| 214 | brevetto | Soccorritore |
-| 215 | brevetto | Trappeur |
+| Ordine | Tipo | Voce | Immagine |
+| --- | --- | --- | --- |
+| 201 | brevetto | Animatore sportivo | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_sportiva.jpg?v=1611067883" alt="" width="48"> |
+| 202 | brevetto | Artista | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_espressiva.jpg?v=1611067883" alt="" width="48"> |
+| 203 | brevetto | Cittadino del mondo | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_internazionale.jpg?v=1611067883" alt="" width="48"> |
+| 204 | brevetto | Esploratore delle acque | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/files/esploratore-delle-acque.gif?v=1712736580" alt="" width="48"> |
+| 205 | brevetto | Giornalista | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_giornalistica.jpg?v=1611067883" alt="" width="48"> |
+| 206 | brevetto | Grafico multimediale | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_grafica_e_multimediale.jpg?v=1611067883" alt="" width="48"> |
+| 207 | brevetto | Guida alpina | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Guida_alpina.jpg?v=1611067883" alt="" width="48"> |
+| 208 | brevetto | Liturgista | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Animazione_religiosa.jpg?v=1611067883" alt="" width="48"> |
+| 209 | brevetto | Maestro delle tecnologie | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/files/maestro-delle-tecnologie.gif?v=1712736579" alt="" width="48"> |
+| 210 | brevetto | Mani Abili | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Mani_abili.jpg?v=1611067883" alt="" width="48"> |
+| 211 | brevetto | Naturalista | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Amico_della_natura.jpg?v=1611067883" alt="" width="48"> |
+| 212 | brevetto | Pioniere | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Pioniere.jpg?v=1611067883" alt="" width="48"> |
+| 213 | brevetto | Sherpa | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Sherpa.jpg?v=1611067883" alt="" width="48"> |
+| 214 | brevetto | Soccorritore | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Soccorso.jpg?v=1611067883" alt="" width="48"> |
+| 215 | brevetto | Trappeur | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Trappeur.jpg?v=1611067883" alt="" width="48"> |
 
 ### Eventi di approfondimento della competenza (Allegato 5)
 

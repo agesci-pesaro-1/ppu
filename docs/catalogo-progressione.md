@@ -34,7 +34,7 @@ può aggiungere voci del gruppo, senza versione.
   specialità da 101, i brevetti da 201, gli eventi da 301.
 - **Tipo:** il valore della colonna `tipo`: `tappa`, `specialita`, `brevetto`,
   `evento`. Vedi sotto, «Perché un solo tipo `tappa`».
-- **Immagine:** il distintivo. Tappe E/G, fasi L/C e brevetti hanno la foto del
+- **Immagine:** il distintivo. Promesse, tappe E/G, fasi L/C e brevetti hanno la foto del
   distintivo su ilcastoroscoutshop.com. Per le specialità E/G è l'immagine pubblicata
   da AGESCI su [avventura.agesci.it/specialita](https://avventura.agesci.it/specialita/)
   (tranne Geologo, che lì manca); per le L/C e per Geologo la foto del distintivo su
@@ -72,13 +72,14 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
 
 | Ordine | Tipo | Voce | Immagine |
 | --- | --- | --- | --- |
-| 1 | tappa | Promessa | — |
+| 1 | tappa | Promessa lupetto | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/PromessaLupettoricamata.jpg?v=1605715944" alt="" width="48"> |
 | 2 | tappa | Lupo della legge | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_1_momento.jpg?v=1611068606" alt="" width="48"> |
 | 3 | tappa | Lupo della rupe | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_2_momento.jpg?v=1611068606" alt="" width="48"> |
 | 4 | tappa | Lupo anziano | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_3_momento.jpg?v=1611068606" alt="" width="48"> |
-| 5 | tappa | Coccinella del prato | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_1_momento.jpg?v=1611068606" alt="" width="48"> |
-| 6 | tappa | Coccinella del bosco | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_2_momento.jpg?v=1611068606" alt="" width="48"> |
-| 7 | tappa | Coccinella della montagna | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_3_momento.jpg?v=1611068606" alt="" width="48"> |
+| 5 | tappa | Promessa coccinella | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/PromessaCoccinellaricamata.jpg?v=1605715845" alt="" width="48"> |
+| 6 | tappa | Coccinella del prato | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_1_momento.jpg?v=1611068606" alt="" width="48"> |
+| 7 | tappa | Coccinella del bosco | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_2_momento.jpg?v=1611068606" alt="" width="48"> |
+| 8 | tappa | Coccinella della montagna | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_3_momento.jpg?v=1611068606" alt="" width="48"> |
 
 ### Specialità (Allegato 3)
 
@@ -137,7 +138,7 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
 
 | Ordine | Tipo | Voce | Immagine |
 | --- | --- | --- | --- |
-| 1 | tappa | Promessa | — |
+| 1 | tappa | Promessa | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/PromessaScoutricamata.jpg?v=1605715991" alt="" width="48"> |
 | 2 | tappa | Scoperta | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_1_Tappa.jpg?v=1611068124" alt="" width="48"> |
 | 3 | tappa | Competenza | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_2_Tappa_ok.jpg?v=1611068124" alt="" width="48"> |
 | 4 | tappa | Responsabilità | <img src="https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_3_Tappa_ok.jpg?v=1611068124" alt="" width="48"> |
@@ -258,8 +259,9 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
 
 ## Da rivedere
 
-- **L/C:** le fasi del lupetto (pista) e della coccinella (sentiero) stanno nella
-  stessa branca; il capo sceglie quelle giuste. Non sono incluse le altre
+- **L/C:** Promessa e fasi del lupetto (pista) e della coccinella (sentiero) stanno
+  nella stessa branca, con distintivi diversi (Allegati 1 e 2); il capo sceglie
+  quelle giuste. Non sono incluse le altre
   occasioni a partecipazione individuale (voli, cacce, campetti) perché il
   regolamento non le elenca per nome.
 - **E/G:** la conclusione del sentiero (Art. 40) è una cerimonia di reparto, non

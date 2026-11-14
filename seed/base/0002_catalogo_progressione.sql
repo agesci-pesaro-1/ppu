@@ -17,15 +17,16 @@ ON CONFLICT (data) DO NOTHING;
 -- Immagini dei distintivi: collegamenti, i file non sono nel repository.
 -- E/G: immagini pubblicate da AGESCI su avventura.agesci.it/specialita (Geologo dal rivenditore);
 -- L/C: foto dei distintivi su ilcastoroscoutshop.com (Amico degli anziani su scoutshopcampania.it).
--- Tappe E/G, fasi L/C e brevetti: foto dei distintivi su ilcastoroscoutshop.com.
+-- Promesse, tappe E/G, fasi L/C e brevetti: foto dei distintivi su ilcastoroscoutshop.com.
 INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, immagine_url) VALUES
-  ('2026-07-29', 'lc', 'tappa', 'Promessa', 1, NULL),
+  ('2026-07-29', 'lc', 'tappa', 'Promessa lupetto', 1, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/PromessaLupettoricamata.jpg?v=1605715944'),
   ('2026-07-29', 'lc', 'tappa', 'Lupo della legge', 2, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_1_momento.jpg?v=1611068606'),
   ('2026-07-29', 'lc', 'tappa', 'Lupo della rupe', 3, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_2_momento.jpg?v=1611068606'),
   ('2026-07-29', 'lc', 'tappa', 'Lupo anziano', 4, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_3_momento.jpg?v=1611068606'),
-  ('2026-07-29', 'lc', 'tappa', 'Coccinella del prato', 5, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_1_momento.jpg?v=1611068606'),
-  ('2026-07-29', 'lc', 'tappa', 'Coccinella del bosco', 6, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_2_momento.jpg?v=1611068606'),
-  ('2026-07-29', 'lc', 'tappa', 'Coccinella della montagna', 7, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_3_momento.jpg?v=1611068606'),
+  ('2026-07-29', 'lc', 'tappa', 'Promessa coccinella', 5, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/PromessaCoccinellaricamata.jpg?v=1605715845'),
+  ('2026-07-29', 'lc', 'tappa', 'Coccinella del prato', 6, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_1_momento.jpg?v=1611068606'),
+  ('2026-07-29', 'lc', 'tappa', 'Coccinella del bosco', 7, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_2_momento.jpg?v=1611068606'),
+  ('2026-07-29', 'lc', 'tappa', 'Coccinella della montagna', 8, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Cerchio_3_momento.jpg?v=1611068606'),
 
   ('2026-07-29', 'lc', 'specialita', 'Amico degli animali', 101, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/sp_lc_a_d_animali.jpg?v=1611333610'),
   ('2026-07-29', 'lc', 'specialita', 'Amico degli anziani', 102, 'https://www.scoutshopcampania.it/wp-content/uploads/2025/02/amico_degli_anziani_4.jpg'),
@@ -70,7 +71,7 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, imma
 
   ('2026-07-29', 'lc', 'evento', 'Campetto Piccole Orme', 301, NULL),
 
-  ('2026-07-29', 'eg', 'tappa', 'Promessa', 1, NULL),
+  ('2026-07-29', 'eg', 'tappa', 'Promessa', 1, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/PromessaScoutricamata.jpg?v=1605715991'),
   ('2026-07-29', 'eg', 'tappa', 'Scoperta', 2, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_1_Tappa.jpg?v=1611068124'),
   ('2026-07-29', 'eg', 'tappa', 'Competenza', 3, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_2_Tappa_ok.jpg?v=1611068124'),
   ('2026-07-29', 'eg', 'tappa', 'Responsabilità', 4, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_E_G-_3_Tappa_ok.jpg?v=1611068124'),

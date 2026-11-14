@@ -604,7 +604,7 @@ voceCatalogo('Pacini Marco', 'eg', 'tappa', 'Promessa', '2024-04-21');
 voceCatalogo('Pacini Marco', 'eg', 'tappa', 'Competenza', '2026-05-10');
 voceCatalogo('Tarducci Giulia', 'eg', 'tappa', 'Promessa', '2024-03-17');
 voceCatalogo('Zanetti Alice', 'eg', 'tappa', 'Responsabilità', '2026-10-25');
-voceCatalogo('Fabbrini Davide', 'lc', 'tappa', 'Promessa', '2024-12-08');
+voceCatalogo('Fabbrini Davide', 'lc', 'tappa', 'Promessa lupetto', '2024-12-08');
 voceCatalogo('Morandi Camilla', 'rs', 'tappa', 'Salita in clan/fuoco', '2025-10-05');
 voceCatalogo('Rinaldi Giacomo', 'eg', 'specialita', 'Topografo', '2026-03-01');
 voceCatalogo('Fabbrini Davide', 'lc', 'tappa', 'Lupo della legge', '2025-05-18');

@@ -136,8 +136,9 @@ Ogni scelta architetturale si registra come ADR in `docs/adr/NNNN-titolo.md` nel
 5. PWA in Svelte, non Next.js né AppSheet
 6. Beta e produzione sullo stesso database, migrazioni retrocompatibili
 7. Un'installazione separata per ogni gruppo
+8. Buona Strada fonte ufficiale, allineamento manuale tracciato nel registro
 
-Regole di dominio (allineamento Buona Strada, tag), strumenti di sviluppo e licenza non sono scelte architetturali: stanno in questo piano, in `CONTRIBUTING.md` e in `LICENSE`.
+Regole di dominio (chi conferma l'allineamento con Buona Strada, tag), strumenti di sviluppo e licenza non sono scelte architetturali: stanno in questo piano, in `CONTRIBUTING.md` e in `LICENSE`.
 
 **Open source e replicabilità**
 

@@ -21,3 +21,4 @@ Ogni scelta architetturale di PPU è registrata qui come ADR (Architecture Decis
 | [0005](0005-pwa-in-svelte.md) | PWA in Svelte, non Next.js né AppSheet | Accettata |
 | [0006](0006-beta-e-produzione-stesso-database.md) | Beta e produzione sullo stesso database, migrazioni retrocompatibili | Accettata |
 | [0007](0007-un-installazione-per-gruppo.md) | Un'installazione separata per ogni gruppo | Accettata |
+| [0008](0008-buona-strada-fonte-ufficiale.md) | Buona Strada fonte ufficiale, allineamento manuale tracciato nel registro | Accettata |

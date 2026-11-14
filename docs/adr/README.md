@@ -19,13 +19,8 @@ Ogni scelta architetturale di PPU è registrata qui come ADR (Architecture Decis
 | [0003](0003-workspace-solo-identita.md) | Workspace solo per identità, ruoli nel database | Accettata |
 | [0004](0004-un-backend-mcp-e-rest.md) | Un solo backend con endpoint MCP e API REST | Accettata |
 | [0005](0005-pwa-in-svelte.md) | PWA in Svelte, non Next.js né AppSheet | Accettata |
-| [0006](0006-allineamento-buona-strada.md) | Allineamento manuale con Buona Strada, con conferma di una seconda persona | Accettata |
-| [0007](0007-tag-liberi-con-revisione.md) | Tag liberi con revisione del webmaster | Accettata |
-| [0008](0008-beta-e-produzione-stesso-database.md) | Beta e produzione sullo stesso database, migrazioni retrocompatibili | Accettata |
-| [0009](0009-notifiche-google-chat.md) | Notifiche tramite webhook Google Chat | Accettata |
-| [0010](0010-open-source-un-installazione-per-gruppo.md) | Progetto open source, un'installazione separata per ogni gruppo | Accettata |
-| [0011](0011-licenza-agpl.md) | Licenza AGPL-3.0 per il codice | Accettata |
-| [0012](0012-strumenti-di-sviluppo.md) | Strumenti di sviluppo: Node 26, pnpm, Biome | Proposta |
-| [0013](0013-unita-nel-database.md) | Unità nel database, gestite dall'MCP admin | Proposta |
-| [0014](0014-tipi-di-tag-del-webmaster.md) | Tipi di tag gestiti dal webmaster, con il tipo "varie" | Proposta |
-| [0015](0015-immagini-dei-distintivi-dal-worker.md) | Immagini dei distintivi scaricate e servite dal Worker | Proposta |
+| [0006](0006-beta-e-produzione-stesso-database.md) | Beta e produzione sullo stesso database, migrazioni retrocompatibili | Accettata |
+| [0007](0007-un-installazione-per-gruppo.md) | Un'installazione separata per ogni gruppo | Accettata |
+| [0008](0008-buona-strada-fonte-ufficiale.md) | Buona Strada fonte ufficiale, allineamento manuale tracciato nel registro | Accettata |
+| [0009](0009-unita-nel-database.md) | Unità nel database, gestite dall'MCP admin | Proposta |
+| [0010](0010-immagini-dei-distintivi-dal-worker.md) | Immagini dei distintivi scaricate e servite dal Worker | Proposta |

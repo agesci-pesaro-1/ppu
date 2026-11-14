@@ -1,4 +1,4 @@
-# 0015. Immagini dei distintivi scaricate e servite dal Worker
+# 0010. Immagini dei distintivi scaricate e servite dal Worker
 
 - **Stato:** Proposta
 - **Data:** 2026-11-14

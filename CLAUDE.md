@@ -60,7 +60,8 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 - `anni_scout`: nome, data di inizio (data dei passaggi, variabile), attuale. Si crea con l'azione "Crea nuovo anno".
 - `progressione`: voci dal catalogo di branca o voci libere (data, tipo, descrizione).
 - `catalogo_progressione`: voci note per branca, versionate per data di aggiornamento del Regolamento metodologico (`versioni_regolamento`). Leggibile in `docs/catalogo-progressione.md`.
-- `tag`: nome, tipo, stato (libero/ufficiale/archiviato), anno facoltativo, flag esclusivo, creato da. Qualsiasi capo crea e usa tag; il webmaster li rende ufficiali, li unisce o li archivia.
+- `tipi_tag`: li crea solo il webmaster; il tipo `varie` raccoglie le proposte non categorizzate ed è il predefinito.
+- `tag`: nome, tipo, stato (libero/ufficiale/archiviato), anno facoltativo, flag esclusivo, creato da. Qualsiasi capo crea e usa tag, quanti ne vuole dentro ogni tipo; il webmaster li rende ufficiali, li unisce o li archivia.
 - `associati_tag`: associato, tag, anno scout, nota.
 - `riunioni` e `presenze`: per ogni associato presente/assente/giustificato, motivazione facoltativa, registrabile anche prima della riunione.
 - `utenti`: vedi sopra.
@@ -72,7 +73,7 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 - **Lingua:** UI, documentazione utente e ADR in italiano. Tabelle e colonne di dominio in italiano (`associati`, `unita`, `riunioni`), senza accenti. Codice tecnico (funzioni di infrastruttura, utility) in inglese.
 - **Migrazioni:** lo schema esiste solo come migrazioni SQL numerate in `migrations/` (`wrangler d1 migrations`). Mai modifiche a mano sul database. Ogni migrazione deve funzionare sia con la versione corrente sia con la precedente (beta e produzione condividono lo stesso D1): prima si aggiunge, poi si toglie in una migrazione successiva.
 - **Seed:** `seed/base/` con i dati standard AGESCI (branche, unità, cataloghi, tipi di tag); `seed/demo/` con dati finti per preview, test E2E e demo.
-- **Configurazione:** dominio, nome del gruppo e branding in configurazione e segreti Cloudflare; le unità sono righe della tabella `unita` (ADR 0013). Nessun valore specifico del gruppo nel codice.
+- **Configurazione:** dominio, nome del gruppo e branding in configurazione e segreti Cloudflare; le unità sono righe della tabella `unita` (ADR 0009). Nessun valore specifico del gruppo nel codice.
 - **ADR:** `docs/adr/NNNN-titolo.md` (contesto, decisione, alternative, conseguenze, stato). Un ADR accettato non si modifica: se ne scrive uno nuovo che lo supera.
 - **Commit:** firmati con DCO (`git commit -s`). Pull request piccole, una cosa per volta.
 
@@ -88,7 +89,7 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 
 Fase 0 — Fondamenta. Ordine suggerito:
 1. Struttura del repository, README, LICENSE (AGPL-3.0), CONTRIBUTING con DCO.
-2. ADR 0001–0011 dalle decisioni del piano.
+2. ADR 0001–0008 dalle decisioni architetturali del piano.
 3. Prima migrazione dello schema + seed base + seed demo.
 4. Worker con login Google, lettura della tabella `utenti`, registro modifiche e accessi.
 5. Pipeline GitHub Actions (lint, test, build, preview, E2E).

@@ -71,6 +71,7 @@ Database D1 (SQLite) con giurisdizione UE: ogni voce sotto è una tabella, i per
 - **`utenti/{email}`:** unità (una o più), accesso completo, Buona Strada, webmaster, esclusione; gestita dal webmaster tramite MCP admin.
 - **`anni_scout`:** nome (per esempio 2026/27), data di inizio, anno attuale. L'anno cambia alla data dei passaggi, che varia ogni anno: chi ha accesso completo preme "Crea nuovo anno" e da lì partono i passaggi.
 - **`tag/{id}`:** nome, tipo, stato (libero, ufficiale, archiviato), anno scout facoltativo, flag "esclusivo" (una sola voce di quel tipo per persona e anno, per esempio la squadriglia), creato da. Qualsiasi capo li crea e li usa su tutti gli associati; il webmaster vede tutti i tag con il loro utilizzo e decide quali rendere ufficiali, quali unire e quali archiviare.
+- **`tipi_tag`:** li crea, rinomina e riordina solo il webmaster dall'MCP admin; dentro ogni tipo qualsiasi capo crea i tag che vuole. Il seed base inserisce i tipi comuni (squadriglia, sestiglia, consiglio, incarico, evento, esperienza, varie). Il tipo **varie** raccoglie le proposte non categorizzate ed è il predefinito quando un capo non sceglie un tipo: nella revisione il webmaster sposta quei tag nel tipo giusto o crea un tipo nuovo.
 - **`associati_tag`:** associato, tag, anno scout, nota facoltativa, chi e quando. Salvati subito con registro, fuori dal flusso Buona Strada.
 - **Fuori dal sistema:** dati sanitari, che restano offline.
 - **Codici fiscali:** usati solo per Buona Strada, non mostrati nelle viste normali.
@@ -134,12 +135,11 @@ Ogni scelta architetturale si registra come ADR in `docs/adr/NNNN-titolo.md` nel
 3. Workspace solo per identità, ruoli nel database
 4. Un solo backend con endpoint MCP e API REST
 5. PWA in Svelte, non Next.js né AppSheet
-6. Allineamento manuale con Buona Strada, con conferma di una seconda persona
-7. Tag liberi con revisione del webmaster
-8. Beta e produzione sullo stesso database, migrazioni retrocompatibili
-9. Notifiche tramite webhook Google Chat
-10. Progetto open source, un'installazione separata per ogni gruppo
-11. Licenza AGPL-3.0 per il codice, per ora: permette l'uso commerciale ma obbliga chi offre il servizio a pubblicare le modifiche
+6. Beta e produzione sullo stesso database, migrazioni retrocompatibili
+7. Un'installazione separata per ogni gruppo
+8. Buona Strada fonte ufficiale, allineamento manuale tracciato nel registro
+
+Regole di dominio (chi conferma l'allineamento con Buona Strada, tag), strumenti di sviluppo e licenza non sono scelte architetturali: stanno in questo piano, in `CONTRIBUTING.md` e in `LICENSE`.
 
 **Open source e replicabilità**
 

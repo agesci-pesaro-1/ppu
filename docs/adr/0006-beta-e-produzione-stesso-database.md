@@ -1,4 +1,4 @@
-# 0008. Beta e produzione sullo stesso database, migrazioni retrocompatibili
+# 0006. Beta e produzione sullo stesso database, migrazioni retrocompatibili
 
 - **Stato:** Accettata
 - **Data:** 2026-11-12

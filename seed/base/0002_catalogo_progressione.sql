@@ -1,4 +1,5 @@
 -- Catalogo di progressione: punto di partenza minimo.
+-- Versione leggibile: docs/catalogo-progressione.md (deve coincidere, lo verifica un test).
 -- Contiene solo le voci comuni e stabili; specialità, brevetti, prede e voli
 -- vanno completati da chi ha accesso completo secondo il regolamento in vigore.
 

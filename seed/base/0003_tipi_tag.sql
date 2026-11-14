@@ -7,5 +7,5 @@ INSERT INTO tipi_tag (id, nome, esclusivo_predefinito, ordine) VALUES
   ('incarico', 'Incarico', 0, 4),
   ('evento', 'Evento', 0, 5),
   ('esperienza', 'Esperienza', 0, 6),
-  ('altro', 'Altro', 0, 7)
+  ('varie', 'Varie', 0, 7)
 ON CONFLICT (id) DO NOTHING;

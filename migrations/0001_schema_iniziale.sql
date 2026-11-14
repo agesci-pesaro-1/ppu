@@ -65,6 +65,8 @@ CREATE TABLE associati (
   -- contatti personali
   cellulare TEXT,
   email TEXT,
+  -- comunicazioni del gruppo: a chi vanno (associato o tutori) lo decide il livello di servizi
+  riceve_comunicazioni INTEGER NOT NULL DEFAULT 1 CHECK (riceve_comunicazioni IN (0, 1)),
   -- privacy
   informativa INTEGER NOT NULL DEFAULT 0 CHECK (informativa IN (0, 1)),
   informativa_data TEXT CHECK (informativa_data IS date(informativa_data)),
@@ -97,13 +99,13 @@ CREATE INDEX storico_unita_anno ON storico_unita (anno_scout_id, unita_id);
 CREATE TABLE tutori (
   id INTEGER PRIMARY KEY,
   associato_id INTEGER NOT NULL REFERENCES associati (id),
-  relazione TEXT NOT NULL,                   -- 'madre', 'padre', 'tutore', ...
+  -- ruolo verso l'associato; i legami tra due associati stanno in `relazioni`
+  ruolo TEXT NOT NULL CHECK (ruolo IN ('madre', 'padre', 'tutore', 'affidatario', 'altro')),
   cognome TEXT NOT NULL,
   nome TEXT NOT NULL,
   codice_fiscale TEXT,                       -- solo per Buona Strada
   cellulare TEXT,
   email TEXT,
-  riceve_comunicazioni INTEGER NOT NULL DEFAULT 1 CHECK (riceve_comunicazioni IN (0, 1)),
   associato_collegato_id INTEGER REFERENCES associati (id),  -- tutore che è anche associato
   archiviato INTEGER NOT NULL DEFAULT 0 CHECK (archiviato IN (0, 1)),
   archiviato_il TEXT,
@@ -165,6 +167,8 @@ CREATE INDEX progressione_associato ON progressione (associato_id, archiviata);
 -- Tag
 -- ---------------------------------------------------------------------------
 
+-- I tipi li crea solo il webmaster (MCP admin); dentro ogni tipo qualsiasi capo
+-- crea i tag che vuole. 'varie' raccoglie le proposte non ancora categorizzate.
 CREATE TABLE tipi_tag (
   id TEXT PRIMARY KEY,                       -- 'squadriglia', 'evento', ...
   nome TEXT NOT NULL,
@@ -175,7 +179,7 @@ CREATE TABLE tipi_tag (
 CREATE TABLE tag (
   id INTEGER PRIMARY KEY,
   nome TEXT NOT NULL,
-  tipo_id TEXT NOT NULL REFERENCES tipi_tag (id),
+  tipo_id TEXT NOT NULL DEFAULT 'varie' REFERENCES tipi_tag (id),
   stato TEXT NOT NULL DEFAULT 'libero' CHECK (stato IN ('libero', 'ufficiale', 'archiviato')),
   anno_scout_id INTEGER REFERENCES anni_scout (id),
   esclusivo INTEGER NOT NULL DEFAULT 0 CHECK (esclusivo IN (0, 1)),  -- una sola voce di quel tipo per persona e anno
@@ -292,6 +296,31 @@ CREATE INDEX modifiche_entita ON modifiche (entita, entita_id, data);
 CREATE INDEX modifiche_operazione ON modifiche (operazione);
 CREATE INDEX modifiche_da_riportare ON modifiche (data) WHERE stato_buona_strada = 'da_riportare';
 
+-- Il registro si scrive solo in aggiunta. L'unico aggiornamento ammesso è la
+-- conferma Buona Strada: da 'da_riportare' a 'riportata', con chi e quando,
+-- senza toccare le altre colonne.
+CREATE TRIGGER modifiche_no_cancellazione BEFORE DELETE ON modifiche
+BEGIN
+  SELECT RAISE(ABORT, 'il registro modifiche non si cancella');
+END;
+
+CREATE TRIGGER modifiche_solo_conferma BEFORE UPDATE ON modifiche
+WHEN OLD.stato_buona_strada IS NOT 'da_riportare'
+  OR NEW.stato_buona_strada IS NOT 'riportata'
+  OR NEW.id IS NOT OLD.id
+  OR NEW.operazione IS NOT OLD.operazione
+  OR NEW.autore_email IS NOT OLD.autore_email
+  OR NEW.data IS NOT OLD.data
+  OR NEW.canale IS NOT OLD.canale
+  OR NEW.entita IS NOT OLD.entita
+  OR NEW.entita_id IS NOT OLD.entita_id
+  OR NEW.campo IS NOT OLD.campo
+  OR NEW.valore_prima IS NOT OLD.valore_prima
+  OR NEW.valore_dopo IS NOT OLD.valore_dopo
+BEGIN
+  SELECT RAISE(ABORT, 'il registro modifiche ammette solo la conferma Buona Strada');
+END;
+
 -- Letture di dati sensibili (codici fiscali, campi solo Buona Strada, esportazioni).
 CREATE TABLE accessi (
   id INTEGER PRIMARY KEY,
@@ -306,3 +335,14 @@ CREATE TABLE accessi (
 
 CREATE INDEX accessi_email_data ON accessi (email, data);
 CREATE INDEX accessi_entita ON accessi (entita, entita_id);
+
+-- Anche il registro degli accessi si scrive solo in aggiunta.
+CREATE TRIGGER accessi_no_cancellazione BEFORE DELETE ON accessi
+BEGIN
+  SELECT RAISE(ABORT, 'il registro accessi non si cancella');
+END;
+
+CREATE TRIGGER accessi_no_modifica BEFORE UPDATE ON accessi
+BEGIN
+  SELECT RAISE(ABORT, 'il registro accessi non si modifica');
+END;

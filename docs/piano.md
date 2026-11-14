@@ -59,8 +59,8 @@ Database D1 (SQLite) con giurisdizione UE: ogni voce sotto è una tabella, i per
 
 | Collezione | Contenuto |
 | --- | --- |
-| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, email); privacy (informativa con data, consensi 2A, 2B, 2C, note privacy); stato (attivo o archiviato) |
-| `associati/{id}` → genitori/tutori | Lista: relazione, anagrafica, CF, cellulare, email, flag "riceve comunicazioni", collegamento facoltativo al profilo se il tutore è anche associato. Archiviati automaticamente ai 18 anni |
+| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, email); flag "riceve comunicazioni"; privacy (informativa con data, consensi 2A, 2B, 2C, note privacy); stato (attivo o archiviato) |
+| `associati/{id}` → genitori/tutori | Lista: ruolo (madre, padre, tutore, affidatario, altro), anagrafica, CF, cellulare, email, collegamento facoltativo al profilo se il tutore è anche associato. Archiviati automaticamente ai 18 anni |
 | `associati/{id}/progressione/{voce}` | Voci dal catalogo di branca (prede, specialità, voli, tappe, brevetti…) o voci libere (data, tipo, descrizione). Le vecchie note generali diventano voci libere |
 | `relazioni/{id}` | Due associati + tipo (genitore/figlio, fratello/sorella, zio/nipote, cugino, coniuge, altro), con l'inversa creata in automatico. Vale anche per i capi |
 | `catalogo/{branca}` | Voci note di progressione per branca, gestite da chi ha accesso completo |

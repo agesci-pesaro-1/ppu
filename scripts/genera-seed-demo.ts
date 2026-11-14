@@ -365,6 +365,7 @@ persone.forEach((p, i) => {
     provincia: PROVINCIA,
     cellulare: adulto ? `+39 300 000 ${String(n).padStart(4, '0')}` : null,
     email: adulto ? `${slug(p.nome)}.${slug(p.cognome)}@${DOMINIO}` : null,
+    riceve_comunicazioni: n % 11 === 0 ? 0 : 1,
     informativa: 1,
     informativa_data: '2025-10-05',
     consenso_2a: c2a,
@@ -428,21 +429,20 @@ persone.forEach((p) => {
   ];
   // Una famiglia con un solo tutore registrato.
   const elenco = n % 7 === 0 ? genitori.slice(0, 1) : genitori;
-  for (const [relazione, nome] of elenco) {
+  for (const [ruolo, nome] of elenco) {
     tutore += 1;
     // Il padre degli Arcangeli è anche capo (Stefano Arcangeli).
     const collegato =
-      p.cognome === 'Arcangeli' && relazione === 'padre' ? idDi('Arcangeli Stefano') : null;
+      p.cognome === 'Arcangeli' && ruolo === 'padre' ? idDi('Arcangeli Stefano') : null;
     insert('tutori', {
       id: tutore,
       associato_id: n,
-      relazione,
+      ruolo,
       cognome: collegato ? 'Arcangeli' : p.cognome,
       nome: collegato ? 'Stefano' : nome,
       codice_fiscale: `DEMOT${String(tutore).padStart(11, '0')}`,
       cellulare: `+39 301 000 ${String(tutore).padStart(4, '0')}`,
       email: `${slug(nome)}.${slug(p.cognome)}.${tutore}@${DOMINIO}`,
-      riceve_comunicazioni: relazione === 'madre' || elenco.length === 1 ? 1 : 0,
       associato_collegato_id: collegato,
       archiviato: maggiorenne ? 1 : 0,
       archiviato_il,

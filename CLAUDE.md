@@ -53,9 +53,9 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 
 ## Modello dati (sintesi)
 
-- `associati`: id interno (chiave), codice censimento (univoco, facoltativo), anagrafica, unità attuale, residenza (indirizzo, CAP, comune, provincia), contatti, privacy, stato (attivo/archiviato).
+- `associati`: id interno (chiave), codice censimento (univoco, facoltativo), anagrafica, unità attuale, residenza (indirizzo, CAP, comune, provincia), contatti, flag "riceve comunicazioni", privacy, stato (attivo/archiviato).
 - `storico_unita`: associato, unità, anno scout.
-- `tutori`: associato, relazione, anagrafica, CF, contatti, flag "riceve comunicazioni", collegamento facoltativo a un associato (capo che è anche genitore), archiviato.
+- `tutori`: associato, ruolo (madre, padre, tutore, affidatario, altro), anagrafica, CF, contatti, collegamento facoltativo a un associato (capo che è anche genitore), archiviato.
 - `relazioni`: due associati + tipo; l'inversa si crea in automatico.
 - `anni_scout`: nome, data di inizio (data dei passaggi, variabile), attuale. Si crea con l'azione "Crea nuovo anno".
 - `progressione`: voci dal catalogo di branca o voci libere (data, tipo, descrizione).

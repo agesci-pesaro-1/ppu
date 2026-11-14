@@ -30,7 +30,7 @@ può aggiungere voci del gruppo, senza versione.
 
 ### Colonne
 
-- **Ordine:** posizione nell'elenco dentro la branca. I momenti partono da 1, le
+- **Ordine:** posizione nell'elenco dentro la branca. Le tappe partono da 1, le
   specialità da 101, i brevetti da 201, gli eventi da 301.
 - **Tipo:** il valore della colonna `tipo`: `tappa`, `specialita`, `brevetto`,
   `evento`. Vedi sotto, «Perché un solo tipo `tappa`».
@@ -68,7 +68,7 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
 
 ## L/C — Lupetti e Coccinelle (`lc`)
 
-### Momenti
+### Tappe
 
 | Ordine | Tipo | Voce | Immagine |
 | --- | --- | --- | --- |
@@ -133,7 +133,7 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
 
 ## E/G — Esploratori e Guide (`eg`)
 
-### Momenti
+### Tappe
 
 | Ordine | Tipo | Voce | Immagine |
 | --- | --- | --- | --- |
@@ -241,7 +241,7 @@ mostrare per ogni branca (fase, tappa, passo…) si deciderà con l'interfaccia.
 
 ## R/S — Rover e Scolte (`rs`)
 
-### Momenti
+### Tappe
 
 | Ordine | Tipo | Voce |
 | --- | --- | --- |

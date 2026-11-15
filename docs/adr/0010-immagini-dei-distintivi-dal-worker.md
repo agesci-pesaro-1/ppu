@@ -1,6 +1,6 @@
 # 0010. Immagini dei distintivi scaricate e servite dal Worker
 
-- **Stato:** Proposta
+- **Stato:** Accettata
 - **Data:** 2026-11-14
 
 ## Contesto

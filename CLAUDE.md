@@ -10,6 +10,7 @@ Il piano completo è in `docs/piano.md`. Le decisioni architetturali sono in `do
   - endpoint MCP remoto (Streamable HTTP) per gli assistenti AI, con OAuth Google tramite `workers-oauth-provider`, limitato al dominio configurato;
   - API REST per la PWA.
 - **Database:** Cloudflare D1 (SQLite), creato con `--jurisdiction eu`. La giurisdizione si imposta solo alla creazione.
+- **File:** Cloudflare R2 con giurisdizione UE, per le immagini dei distintivi: il Worker le scarica dalla fonte e le serve alla PWA, che non chiama mai siti esterni (ADR 0010).
 - **PWA:** Svelte + Vite + `vite-plugin-pwa`, build statica su Cloudflare Pages, protetta da Cloudflare Access (Google Workspace come provider, regola sul dominio). Il Worker verifica il JWT di Access su ogni chiamata della PWA.
 - **MCP admin:** strumenti riservati al webmaster (utenti, ruoli, unità, revisione dei tag).
 - **Notifiche:** webhook in ingresso di Google Chat.

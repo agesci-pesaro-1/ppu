@@ -1,0 +1,24 @@
+// Configurazione del Worker PPU.
+// Nessun valore specifico del gruppo qui: dominio, nome e Access si impostano
+// come variabili o segreti dell'installazione (vedi README del pacchetto).
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "ppu",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // In locale la modalità di test si attiva da .dev.vars (vedi .dev.vars.example),
+  // mai qui: questa sezione è la base anche degli ambienti pubblicati.
+  "vars": {
+    "AMBIENTE": "locale"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ppu-locale",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../migrations"
+    }
+  ]
+}

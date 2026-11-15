@@ -18,7 +18,10 @@ ON CONFLICT (data) DO NOTHING;
 -- E/G: immagini pubblicate da AGESCI su avventura.agesci.it/specialita (Geologo dal rivenditore);
 -- L/C: foto dei distintivi su ilcastoroscoutshop.com (Amico degli anziani su scoutshopcampania.it).
 -- Promesse, tappe E/G, fasi L/C e brevetti: foto dei distintivi su ilcastoroscoutshop.com.
-INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, immagine_url) VALUES
+-- Si inseriscono solo le voci delle branche presenti (configurazione del gruppo,
+-- scripts/seed-gruppo.ts, da applicare prima di questo file).
+INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, immagine_url)
+SELECT column1, column2, column3, column4, column5, column6 FROM (VALUES
   ('2026-07-29', 'lc', 'tappa', 'Promessa lupetto', 1, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/PromessaLupettoricamata.jpg?v=1605715944'),
   ('2026-07-29', 'lc', 'tappa', 'Lupo della legge', 2, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_1_momento.jpg?v=1611068606'),
   ('2026-07-29', 'lc', 'tappa', 'Lupo della rupe', 3, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/Progressione_Personale_Branco_2_momento.jpg?v=1611068606'),
@@ -168,4 +171,6 @@ INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, imma
   ('2026-07-29', 'rs', 'evento', 'Evento di progressione personale a partecipazione individuale (EPPPI)', 301, NULL),
   ('2026-07-29', 'rs', 'evento', 'Route d''orientamento alla scelta di servizio (ROSS)', 302, NULL),
   ('2026-07-29', 'rs', 'evento', 'Evento per partenti', 303, NULL)
+)
+WHERE column2 IN (SELECT id FROM branche)
 ON CONFLICT (versione, branca_id, tipo, nome) DO NOTHING;

@@ -1,32 +1,70 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
+import { leggiConfigurazione, sqlConfigurazione } from '../../scripts/seed-gruppo.ts';
 import { creaDatabase, fileSql } from './applica.ts';
 
 const conta = (db: ReturnType<typeof creaDatabase>, sql: string): number =>
   Number((db.prepare(sql).get() as { n: number }).n);
 
-describe('migrazioni e seed base', () => {
-  it('si applicano su un database vuoto', () => {
+describe('migrazioni e dati iniziali', () => {
+  it("si applicano su un database vuoto con la configurazione d'esempio", () => {
     const db = creaDatabase();
     assert.equal(conta(db, 'SELECT count(*) n FROM unita'), 7);
     assert.equal(conta(db, 'SELECT count(*) n FROM branche'), 4);
+    assert.equal(conta(db, 'SELECT count(*) n FROM tipi_tag'), 7);
   });
 
-  it('il seed base è idempotente', () => {
+  it('configurazione e seed base si possono riapplicare', () => {
     const db = creaDatabase();
     const prima = conta(db, 'SELECT count(*) n FROM catalogo_progressione');
+    db.exec(sqlConfigurazione(leggiConfigurazione()));
     for (const s of fileSql('seed/base')) db.exec(s);
     assert.equal(conta(db, 'SELECT count(*) n FROM unita'), 7);
     assert.equal(conta(db, 'SELECT count(*) n FROM catalogo_progressione'), prima);
   });
 
-  it('Noviziato fa parte della branca R/S', () => {
+  it('una voce aggiunta alla configurazione entra senza toccare le altre', () => {
+    const config = leggiConfigurazione();
+    const db = creaDatabase({ config });
+    db.exec("UPDATE unita SET nome = 'Branco Seeonee' WHERE id = 'lupetti'");
+    config.unita.push({ id: 'branco_misto', nome: 'Branco misto', branca: 'lc' });
+    db.exec(sqlConfigurazione(config));
+    assert.equal(conta(db, 'SELECT count(*) n FROM unita'), 8);
+    const r = db.prepare("SELECT nome FROM unita WHERE id = 'lupetti'").get() as { nome: string };
+    assert.equal(r.nome, 'Branco Seeonee');
+  });
+
+  it('il catalogo entra solo per le branche configurate', () => {
+    const config = leggiConfigurazione();
+    config.branche = config.branche.filter((b) => b.id === 'eg');
+    config.unita = config.unita.filter((u) => u.branca === 'eg');
+    const db = creaDatabase({ config });
+    assert.equal(
+      conta(db, "SELECT count(*) n FROM catalogo_progressione WHERE branca_id <> 'eg'"),
+      0,
+    );
+    assert.ok(conta(db, "SELECT count(*) n FROM catalogo_progressione WHERE branca_id = 'eg'") > 0);
+  });
+
+  it('una configurazione sbagliata viene rifiutata con un messaggio chiaro', () => {
+    const config = leggiConfigurazione();
+    config.unita.push({ id: 'reparto', nome: 'Reparto', branca: 'inesistente' });
+    config.tipi_tag = config.tipi_tag.filter((t) => t.id !== 'varie');
+    assert.throws(
+      () => sqlConfigurazione(config),
+      /branca inesistente[\s\S]*manca il tipo "varie"/,
+    );
+  });
+
+  it('Noviziato fa parte della branca R/S e il clan si chiama Clan/Fuoco', () => {
     const db = creaDatabase();
     const r = db.prepare("SELECT branca_id FROM unita WHERE id = 'noviziato'").get() as {
       branca_id: string;
     };
     assert.equal(r.branca_id, 'rs');
+    const c = db.prepare("SELECT nome FROM unita WHERE id = 'clan'").get() as { nome: string };
+    assert.equal(c.nome, 'Clan/Fuoco');
   });
 });
 
@@ -292,7 +330,7 @@ describe('tutori e tag', () => {
 describe('seed demo', () => {
   const db = creaDatabase({ demo: true });
 
-  it('si applica dopo il seed base', () => {
+  it('si applica dopo configurazione e seed base', () => {
     assert.ok(conta(db, 'SELECT count(*) n FROM associati') >= 40);
   });
 

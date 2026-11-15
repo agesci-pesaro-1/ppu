@@ -1,12 +1,11 @@
-// Genera seed/demo/demo.sql con dati INVENTATI per preview, test E2E e demo.
-// Uso: node scripts/genera-seed-demo.ts
+// Dati INVENTATI per preview, test E2E e demo. Nessun file SQL nel repository:
+// i test importano `seedDemo`, la pipeline genera l'SQL al momento.
+// Uso: node scripts/genera-seed-demo.ts > demo.sql
 //
-// Tutto è deterministico: lo stesso script produce sempre lo stesso file.
+// Presuppone le unità di config/gruppo.esempio.json.
+// Tutto è deterministico: lo script produce sempre lo stesso SQL.
 // Nessun dato reale: email su example.org, codici fiscali con prefisso DEMO,
 // comune e provincia inesistenti.
-
-import { writeFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 
 type Valore = string | number | null;
 
@@ -705,9 +704,9 @@ for (const [operazione, autore, chi, campo, prima, dopo, confermata] of modifich
 // ---------------------------------------------------------------------------
 
 const intestazione = `-- Dati INVENTATI per preview, test E2E e demo. Mai in produzione.
--- Generato da scripts/genera-seed-demo.ts: non modificare a mano.
--- Richiede le migrazioni e seed/base già applicati.
+-- Generato da scripts/genera-seed-demo.ts.
+-- Richiede le migrazioni, la configurazione d'esempio e seed/base già applicati.
 `;
-const destinazione = fileURLToPath(new URL('../seed/demo/demo.sql', import.meta.url));
-writeFileSync(destinazione, `${intestazione}\n${righe.join('\n')}\n`);
-console.log(`Scritte ${righe.length} istruzioni in ${destinazione}`);
+export const seedDemo = `${intestazione}\n${righe.join('\n')}\n`;
+
+if (import.meta.main) process.stdout.write(seedDemo);

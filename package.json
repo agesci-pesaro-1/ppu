@@ -12,6 +12,7 @@
     "check": "biome check .",
     "format": "biome check --write .",
     "test": "node --test 'tests/**/*.test.ts'",
+    "seed:gruppo": "node scripts/seed-gruppo.ts",
     "seed:demo": "node scripts/genera-seed-demo.ts"
   },
   "devDependencies": {

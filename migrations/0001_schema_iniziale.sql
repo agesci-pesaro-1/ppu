@@ -1,18 +1,18 @@
--- PPU — schema iniziale.
+-- PPU — initial schema.
 --
--- Convenzioni:
---   * tabelle e colonne di dominio in italiano, senza accenti;
---   * date come TEXT ISO 8601 ('AAAA-MM-GG'), istanti come TEXT ISO 8601 UTC;
---     ogni colonna di sola data ha CHECK (col IS date(col)): rifiuta formati
---     diversi, orari e date inesistenti come '2026-02-30';
---   * booleani come INTEGER 0/1 con CHECK;
---   * nessuna cancellazione definitiva: le righe si archiviano;
---   * i permessi NON sono nel database: li applica il livello di servizi.
+-- Conventions:
+--   * domain tables and columns in Italian, without accents;
+--   * dates as ISO 8601 TEXT ('YYYY-MM-DD'), instants as ISO 8601 UTC TEXT;
+--     every date-only column has CHECK (col IS date(col)): it rejects other
+--     formats, times and non-existent dates such as '2026-02-30';
+--   * booleans as INTEGER 0/1 with CHECK;
+--   * no hard deletes: rows are archived;
+--   * permissions are NOT in the database: the service layer enforces them.
 --
--- D1 applica sempre le chiavi esterne.
+-- D1 always enforces foreign keys.
 
 -- ---------------------------------------------------------------------------
--- Struttura del gruppo
+-- Group structure
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE branche (
@@ -21,7 +21,7 @@ CREATE TABLE branche (
   ordine INTEGER NOT NULL DEFAULT 0
 ) STRICT;
 
--- Le unità sono configurabili per gruppo (attive, nome, unità miste).
+-- Units come from the group configuration (active, name, mixed units).
 CREATE TABLE unita (
   id TEXT PRIMARY KEY,                       -- slug: 'lupetti', 'esploratori', ...
   nome TEXT NOT NULL,
@@ -33,39 +33,39 @@ CREATE TABLE unita (
 CREATE TABLE anni_scout (
   id INTEGER PRIMARY KEY,
   nome TEXT NOT NULL UNIQUE,                 -- '2026/27'
-  data_inizio TEXT NOT NULL UNIQUE CHECK (data_inizio IS date(data_inizio)), -- data dei passaggi
+  data_inizio TEXT NOT NULL UNIQUE CHECK (data_inizio IS date(data_inizio)), -- date of the yearly unit transitions (passaggi)
   attuale INTEGER NOT NULL DEFAULT 0 CHECK (attuale IN (0, 1)),
   creato_da TEXT,
   creato_il TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 ) STRICT;
 
--- Un solo anno attuale alla volta.
+-- Only one current year at a time.
 CREATE UNIQUE INDEX anni_scout_un_solo_attuale ON anni_scout (attuale) WHERE attuale = 1;
 
 -- ---------------------------------------------------------------------------
--- Associati
+-- Members (associati)
 -- ---------------------------------------------------------------------------
 
--- I campi anagrafici marcati "Buona Strada" sono elencati nel codice
--- (livello di servizi), non qui.
+-- Personal data fields marked "Buona Strada" are listed in the code
+-- (service layer), not here.
 CREATE TABLE associati (
   id INTEGER PRIMARY KEY,
-  codice_censimento TEXT UNIQUE,             -- facoltativo
+  codice_censimento TEXT UNIQUE,             -- optional
   cognome TEXT NOT NULL,
   nome TEXT NOT NULL,
   data_nascita TEXT CHECK (data_nascita IS date(data_nascita)),
   luogo_nascita TEXT,
-  codice_fiscale TEXT UNIQUE,                -- solo per Buona Strada, mai nelle viste normali
-  unita_id TEXT REFERENCES unita (id),       -- unità attuale
-  -- residenza
+  codice_fiscale TEXT UNIQUE,                -- Buona Strada only, never in normal views
+  unita_id TEXT REFERENCES unita (id),       -- current unit
+  -- residence
   indirizzo TEXT,
   cap TEXT,
   comune TEXT,
   provincia TEXT,
-  -- contatti personali
+  -- personal contacts
   cellulare TEXT,
   email TEXT,
-  -- comunicazioni del gruppo: a chi vanno (associato o tutori) lo decide il livello di servizi
+  -- group communications: the service layer decides who gets them (member or guardians)
   riceve_comunicazioni INTEGER NOT NULL DEFAULT 1 CHECK (riceve_comunicazioni IN (0, 1)),
   -- privacy
   informativa INTEGER NOT NULL DEFAULT 0 CHECK (informativa IN (0, 1)),
@@ -74,7 +74,7 @@ CREATE TABLE associati (
   consenso_2b INTEGER NOT NULL DEFAULT 0 CHECK (consenso_2b IN (0, 1)),
   consenso_2c INTEGER NOT NULL DEFAULT 0 CHECK (consenso_2c IN (0, 1)),
   note_privacy TEXT,
-  -- stato
+  -- status
   stato TEXT NOT NULL DEFAULT 'attivo' CHECK (stato IN ('attivo', 'archiviato')),
   archiviato_il TEXT,
   creato_il TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -85,7 +85,7 @@ CREATE TABLE associati (
 CREATE INDEX associati_unita ON associati (unita_id, stato);
 CREATE INDEX associati_nome ON associati (cognome COLLATE NOCASE, nome COLLATE NOCASE);
 
--- Un associato può stare in più unità nello stesso anno (per esempio un capo).
+-- A member can be in more than one unit in the same year (e.g. a leader).
 CREATE TABLE storico_unita (
   associato_id INTEGER NOT NULL REFERENCES associati (id),
   unita_id TEXT NOT NULL REFERENCES unita (id),
@@ -95,18 +95,18 @@ CREATE TABLE storico_unita (
 
 CREATE INDEX storico_unita_anno ON storico_unita (anno_scout_id, unita_id);
 
--- Genitori e tutori. Archiviati automaticamente quando l'associato compie 18 anni.
+-- Parents and guardians. Archived automatically when the member turns 18.
 CREATE TABLE tutori (
   id INTEGER PRIMARY KEY,
   associato_id INTEGER NOT NULL REFERENCES associati (id),
-  -- ruolo verso l'associato; i legami tra due associati stanno in `relazioni`
+  -- role towards the member; links between two members are in `relazioni`
   ruolo TEXT NOT NULL CHECK (ruolo IN ('madre', 'padre', 'tutore', 'affidatario', 'altro')),
   cognome TEXT NOT NULL,
   nome TEXT NOT NULL,
-  codice_fiscale TEXT,                       -- solo per Buona Strada
+  codice_fiscale TEXT,                       -- Buona Strada only
   cellulare TEXT,
   email TEXT,
-  associato_collegato_id INTEGER REFERENCES associati (id),  -- tutore che è anche associato
+  associato_collegato_id INTEGER REFERENCES associati (id),  -- guardian who is also a member
   archiviato INTEGER NOT NULL DEFAULT 0 CHECK (archiviato IN (0, 1)),
   archiviato_il TEXT,
   creato_il TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -117,8 +117,8 @@ CREATE TABLE tutori (
 
 CREATE INDEX tutori_associato ON tutori (associato_id, archiviato);
 
--- Relazioni tra associati. L'inversa la crea il livello di servizi nella stessa
--- transazione (genitore <-> figlio, zio <-> nipote, le altre simmetriche).
+-- Relationships between members. The service layer creates the inverse in the
+-- same transaction (genitore <-> figlio, zio <-> nipote, the others symmetric).
 CREATE TABLE relazioni (
   id INTEGER PRIMARY KEY,
   associato_id INTEGER NOT NULL REFERENCES associati (id),
@@ -133,35 +133,35 @@ CREATE TABLE relazioni (
 ) STRICT;
 
 -- ---------------------------------------------------------------------------
--- Progressione personale
+-- Personal progression
 -- ---------------------------------------------------------------------------
 
--- Versioni del Regolamento metodologico da cui viene il catalogo, identificate
--- dalla data di aggiornamento del documento. La più recente è quella in vigore.
+-- Versions of the Regolamento metodologico the catalogue comes from, keyed by
+-- the document's update date. The most recent one is in force.
 CREATE TABLE versioni_regolamento (
   data TEXT PRIMARY KEY CHECK (data IS date(data)),
   nome TEXT NOT NULL,
   note TEXT
 ) STRICT;
 
--- Una nuova versione del regolamento aggiunge nuove righe: le voci precedenti
--- restano, così la progressione registrata punta alla voce in vigore allora.
+-- A new Regolamento version adds new rows: earlier entries stay, so recorded
+-- progression keeps pointing to the entry in force at the time.
 CREATE TABLE catalogo_progressione (
   id INTEGER PRIMARY KEY,
-  versione TEXT REFERENCES versioni_regolamento (data),  -- NULL: voce aggiunta dal gruppo
+  versione TEXT REFERENCES versioni_regolamento (data),  -- NULL: entry added by the group
   branca_id TEXT NOT NULL REFERENCES branche (id),
-  -- 'tappa' (tutti i traguardi del cammino, vedi seed/base/0001_catalogo_progressione.sql),
+  -- 'tappa' (every milestone of the journey, see seed/base/0001_catalogo_progressione.sql),
   -- 'specialita', 'brevetto', 'evento'
   tipo TEXT NOT NULL,
   nome TEXT NOT NULL,
   ordine INTEGER NOT NULL DEFAULT 0,
   attivo INTEGER NOT NULL DEFAULT 1 CHECK (attivo IN (0, 1)),
-  -- distintivo: fonte da cui il Worker scarica l'immagine (ADR 0009); i file non stanno qui
+  -- badge: source the Worker downloads the image from (ADR 0009); no files here
   immagine_url TEXT CHECK (immagine_url IS NULL OR immagine_url LIKE 'https://%'),
   UNIQUE (versione, branca_id, tipo, nome)
 ) STRICT;
 
--- Una voce viene dal catalogo oppure è libera (tipo + descrizione).
+-- An entry comes from the catalogue or is free text (type + description).
 CREATE TABLE progressione (
   id INTEGER PRIMARY KEY,
   associato_id INTEGER NOT NULL REFERENCES associati (id),
@@ -182,10 +182,10 @@ CREATE INDEX progressione_associato ON progressione (associato_id, archiviata);
 -- Tag
 -- ---------------------------------------------------------------------------
 
--- I tipi li crea solo il webmaster (MCP admin); dentro ogni tipo qualsiasi capo
--- crea i tag che vuole. 'varie' raccoglie le proposte non ancora categorizzate.
+-- Types come from the group configuration, decided by the webmaster; within each
+-- type any leader creates the tags they want. 'varie' collects uncategorised proposals.
 CREATE TABLE tipi_tag (
-  id TEXT PRIMARY KEY,                       -- 'squadriglia', 'evento', ...
+  id TEXT PRIMARY KEY,                       -- 'squadriglia', 'sestiglia', 'varie', ...
   nome TEXT NOT NULL,
   esclusivo_predefinito INTEGER NOT NULL DEFAULT 0 CHECK (esclusivo_predefinito IN (0, 1)),
   ordine INTEGER NOT NULL DEFAULT 0
@@ -197,8 +197,8 @@ CREATE TABLE tag (
   tipo_id TEXT NOT NULL DEFAULT 'varie' REFERENCES tipi_tag (id),
   stato TEXT NOT NULL DEFAULT 'libero' CHECK (stato IN ('libero', 'ufficiale', 'archiviato')),
   anno_scout_id INTEGER REFERENCES anni_scout (id),
-  esclusivo INTEGER NOT NULL DEFAULT 0 CHECK (esclusivo IN (0, 1)),  -- una sola voce di quel tipo per persona e anno
-  unito_in_id INTEGER REFERENCES tag (id),   -- valorizzato quando il webmaster unisce due tag
+  esclusivo INTEGER NOT NULL DEFAULT 0 CHECK (esclusivo IN (0, 1)),  -- at most one tag of that type per person and year
+  unito_in_id INTEGER REFERENCES tag (id),   -- set when the webmaster merges two tags
   creato_da TEXT NOT NULL,
   creato_il TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   CHECK (unito_in_id IS NULL OR unito_in_id <> id),
@@ -209,7 +209,7 @@ CREATE UNIQUE INDEX tag_nome_univoco
   ON tag (lower(nome), tipo_id, coalesce(anno_scout_id, 0))
   WHERE stato <> 'archiviato';
 
--- Le assegnazioni non si cancellano: si chiudono con rimosso_il.
+-- Assignments are never deleted: they are closed with rimosso_il.
 CREATE TABLE associati_tag (
   id INTEGER PRIMARY KEY,
   associato_id INTEGER NOT NULL REFERENCES associati (id),
@@ -229,7 +229,7 @@ CREATE UNIQUE INDEX associati_tag_attivo
 CREATE INDEX associati_tag_tag ON associati_tag (tag_id) WHERE rimosso_il IS NULL;
 
 -- ---------------------------------------------------------------------------
--- Riunioni e presenze
+-- Meetings and attendance
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE riunioni (
@@ -246,7 +246,7 @@ CREATE TABLE riunioni (
 
 CREATE INDEX riunioni_unita_data ON riunioni (unita_id, data);
 
--- Registrabile anche prima della riunione (assenze comunicate in anticipo).
+-- Can be recorded before the meeting too (absences reported in advance).
 CREATE TABLE presenze (
   riunione_id INTEGER NOT NULL REFERENCES riunioni (id),
   associato_id INTEGER NOT NULL REFERENCES associati (id),
@@ -258,13 +258,13 @@ CREATE TABLE presenze (
 ) STRICT;
 
 -- ---------------------------------------------------------------------------
--- Utenti (capi) e ruoli. Scritta solo dall'MCP admin.
+-- Users (leaders) and roles. Written only by the MCP admin.
 -- ---------------------------------------------------------------------------
 
--- Un account del dominio senza riga qui è un capo in sola lettura.
+-- A domain account without a row here is a read-only leader.
 CREATE TABLE utenti (
   email TEXT PRIMARY KEY CHECK (email = lower(email) AND email LIKE '%_@_%'),
-  associato_id INTEGER UNIQUE REFERENCES associati (id),  -- scheda del capo, per "i propri dati"
+  associato_id INTEGER UNIQUE REFERENCES associati (id),  -- the leader's member record, for "own data"
   accesso_completo INTEGER NOT NULL DEFAULT 0 CHECK (accesso_completo IN (0, 1)),
   buona_strada INTEGER NOT NULL DEFAULT 0 CHECK (buona_strada IN (0, 1)),
   webmaster INTEGER NOT NULL DEFAULT 0 CHECK (webmaster IN (0, 1)),
@@ -274,7 +274,7 @@ CREATE TABLE utenti (
   aggiornato_il TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 ) STRICT;
 
--- Unità in cui il capo può modificare (una o più).
+-- Units where the leader can edit (one or more).
 CREATE TABLE utenti_unita (
   email TEXT NOT NULL REFERENCES utenti (email),
   unita_id TEXT NOT NULL REFERENCES unita (id),
@@ -282,20 +282,20 @@ CREATE TABLE utenti_unita (
 ) STRICT;
 
 -- ---------------------------------------------------------------------------
--- Registri
+-- Logs
 -- ---------------------------------------------------------------------------
 
--- Ogni modifica confermata, una riga per campo. Le righe non si modificano
--- tranne che per la conferma Buona Strada.
+-- Every confirmed change, one row per field. Rows are never modified
+-- except for the Buona Strada confirmation.
 CREATE TABLE modifiche (
   id INTEGER PRIMARY KEY,
-  operazione TEXT NOT NULL,                  -- identificativo comune alle righe di una stessa conferma
+  operazione TEXT NOT NULL,                  -- id shared by the rows of the same confirmation
   autore_email TEXT NOT NULL,
   data TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   canale TEXT NOT NULL CHECK (canale IN ('mcp', 'pwa', 'admin', 'import', 'sistema')),
   entita TEXT NOT NULL,                      -- 'associati', 'tutori', 'presenze', ...
   entita_id TEXT NOT NULL,
-  campo TEXT,                                -- NULL per creazione o archiviazione dell'intera riga
+  campo TEXT,                                -- NULL when the whole row is created or archived
   valore_prima TEXT,                         -- JSON
   valore_dopo TEXT,                          -- JSON
   stato_buona_strada TEXT CHECK (stato_buona_strada IN ('da_riportare', 'riportata')),
@@ -303,7 +303,7 @@ CREATE TABLE modifiche (
   confermata_il TEXT,
   CHECK ((stato_buona_strada = 'riportata') = (confermata_da IS NOT NULL)),
   CHECK ((confermata_da IS NULL) = (confermata_il IS NULL)),
-  -- chi conferma su Buona Strada non può essere l'autore, nemmeno con accesso completo
+  -- whoever confirms on Buona Strada cannot be the author, not even with full access
   CHECK (confermata_da IS NULL OR confermata_da <> autore_email)
 ) STRICT;
 
@@ -311,12 +311,12 @@ CREATE INDEX modifiche_entita ON modifiche (entita, entita_id, data);
 CREATE INDEX modifiche_operazione ON modifiche (operazione);
 CREATE INDEX modifiche_da_riportare ON modifiche (data) WHERE stato_buona_strada = 'da_riportare';
 
--- Il registro si scrive solo in aggiunta. L'unico aggiornamento ammesso è la
--- conferma Buona Strada: da 'da_riportare' a 'riportata', con chi e quando,
--- senza toccare le altre colonne.
+-- The log is append-only. The only allowed update is the Buona Strada
+-- confirmation: from 'da_riportare' to 'riportata', with who and when,
+-- without touching the other columns.
 CREATE TRIGGER modifiche_no_cancellazione BEFORE DELETE ON modifiche
 BEGIN
-  SELECT RAISE(ABORT, 'il registro modifiche non si cancella');
+  SELECT RAISE(ABORT, 'modifiche rows cannot be deleted');
 END;
 
 CREATE TRIGGER modifiche_solo_conferma BEFORE UPDATE ON modifiche
@@ -333,10 +333,10 @@ WHEN OLD.stato_buona_strada IS NOT 'da_riportare'
   OR NEW.valore_prima IS NOT OLD.valore_prima
   OR NEW.valore_dopo IS NOT OLD.valore_dopo
 BEGIN
-  SELECT RAISE(ABORT, 'il registro modifiche ammette solo la conferma Buona Strada');
+  SELECT RAISE(ABORT, 'modifiche rows allow only the Buona Strada confirmation');
 END;
 
--- Letture di dati sensibili (codici fiscali, campi solo Buona Strada, esportazioni).
+-- Reads of sensitive data (tax codes, Buona Strada-only fields, exports).
 CREATE TABLE accessi (
   id INTEGER PRIMARY KEY,
   email TEXT NOT NULL,
@@ -344,20 +344,20 @@ CREATE TABLE accessi (
   canale TEXT NOT NULL CHECK (canale IN ('mcp', 'pwa', 'admin', 'sistema')),
   entita TEXT NOT NULL,
   entita_id TEXT,
-  campi TEXT,                                -- JSON: elenco dei campi letti
+  campi TEXT,                                -- JSON: list of fields read
   motivo TEXT
 ) STRICT;
 
 CREATE INDEX accessi_email_data ON accessi (email, data);
 CREATE INDEX accessi_entita ON accessi (entita, entita_id);
 
--- Anche il registro degli accessi si scrive solo in aggiunta.
+-- The access log is append-only too.
 CREATE TRIGGER accessi_no_cancellazione BEFORE DELETE ON accessi
 BEGIN
-  SELECT RAISE(ABORT, 'il registro accessi non si cancella');
+  SELECT RAISE(ABORT, 'accessi rows cannot be deleted');
 END;
 
 CREATE TRIGGER accessi_no_modifica BEFORE UPDATE ON accessi
 BEGIN
-  SELECT RAISE(ABORT, 'il registro accessi non si modifica');
+  SELECT RAISE(ABORT, 'accessi rows cannot be updated');
 END;

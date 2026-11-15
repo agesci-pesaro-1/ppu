@@ -71,9 +71,12 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 
 ## Convenzioni
 
-- **Lingua:** UI, documentazione utente e ADR in italiano. Tabelle e colonne di dominio in italiano (`associati`, `unita`, `riunioni`), senza accenti. Codice tecnico (funzioni di infrastruttura, utility) in inglese.
+- **Lingua:**
+  - UI, documentazione e ADR in italiano.
+  - Schema del database in italiano: tabelle, colonne e valori di dominio (`associati`, `unita`, `riunioni`, `'da_riportare'`), senza accenti. Anche le chiavi del file di configurazione del gruppo seguono lo schema.
+  - Tutto il codice in inglese: nomi di file, funzioni, variabili e tipi, commenti (anche nell'SQL), messaggi di errore e descrizioni dei test.
 - **Migrazioni:** lo schema esiste solo come migrazioni SQL numerate in `migrations/` (`wrangler d1 migrations`). Mai modifiche a mano sul database. Ogni migrazione deve funzionare sia con la versione corrente sia con la precedente (beta e produzione condividono lo stesso D1): prima si aggiunge, poi si toglie in una migrazione successiva.
-- **Dati iniziali** (dettagli in `seed/README.md`): branche, unità e tipi di tag dal file di configurazione del gruppo (esempio in `config/gruppo.esempio.json`, tradotto in SQL da `scripts/seed-gruppo.ts`); `seed/base/` con il catalogo di progressione; dati finti per preview, test E2E e demo generati da `scripts/genera-seed-demo.ts`, senza file SQL nel repository.
+- **Dati iniziali** (dettagli in `seed/README.md`): branche, unità e tipi di tag dal file di configurazione del gruppo (esempio in `config/gruppo.esempio.json`, tradotto in SQL da `scripts/group-seed.ts`); `seed/base/` con il catalogo di progressione; dati finti per preview, test E2E e demo generati da `scripts/demo-seed.ts`, senza file SQL nel repository.
 - **Configurazione:** dominio, nome del gruppo e branding in configurazione e segreti Cloudflare; branche, unità e tipi di tag nel file di configurazione del gruppo, che ognuno compila con ciò che gli serve e che si può riapplicare per aggiungere voci. Nessun valore specifico del gruppo nel codice.
 - **ADR:** `docs/adr/NNNN-titolo.md` (contesto, decisione, alternative, conseguenze, stato). Un ADR accettato non si modifica: se ne scrive uno nuovo che lo supera.
 - **Commit:** firmati con DCO (`git commit -s`). Pull request piccole, una cosa per volta.
@@ -101,5 +104,5 @@ Fase 0 — Fondamenta. Ordine suggerito:
 
 - `pnpm check`: lint e formattazione (Biome).
 - `pnpm test`: test (schema su SQLite in memoria con `node:sqlite`).
-- `pnpm -s seed:gruppo [file] > gruppo.sql`: SQL dei dati del gruppo dal file di configurazione (default: l'esempio).
-- `pnpm -s seed:demo > demo.sql`: SQL dei dati finti da `scripts/genera-seed-demo.ts`.
+- `pnpm -s seed:group [file] > gruppo.sql`: SQL dei dati del gruppo dal file di configurazione (default: l'esempio).
+- `pnpm -s seed:demo > demo.sql`: SQL dei dati finti da `scripts/demo-seed.ts`.

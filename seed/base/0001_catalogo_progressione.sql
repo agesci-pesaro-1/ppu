@@ -1,24 +1,26 @@
--- Catalogo di progressione dal Regolamento metodologico AGESCI.
--- Ogni voce appartiene alla versione del regolamento da cui è presa, identificata
--- dalla data di aggiornamento del documento. Una nuova versione si aggiunge con
--- nuove righe: le voci delle versioni precedenti restano per lo storico.
+-- Progression catalogue from the AGESCI Regolamento metodologico.
+-- Every entry belongs to the Regolamento version it comes from, keyed by the
+-- document's update date. A new version is added as new rows: entries of
+-- earlier versions stay for history.
 
--- Tipo 'tappa': tutti i traguardi del cammino (Promessa, fasi L/C, tappe E/G,
--- salita in clan/fuoco, Partenza). Il regolamento usa termini diversi: «fasi»
--- scoperta/competenza/responsabilità nella parte comune (Art. 30), «momenti» e
--- «fasi» in L/C, «tappe» in E/G, «passi» in R/S; la Promessa sta nei fondamenti
--- (Art. 9). Qui si usa un solo tipo; i nomi per branca si rivedranno con la UI.
+-- Type 'tappa': every milestone of the journey (Promessa, L/C fasi, E/G tappe,
+-- salita in clan/fuoco, Partenza). The Regolamento uses different terms: «fasi»
+-- scoperta/competenza/responsabilità in the common part (Art. 30), «momenti» and
+-- «fasi» in L/C, «tappe» in E/G, «passi» in R/S; the Promessa is among the
+-- foundations (Art. 9). A single type is used here; per-branch labels will be
+-- reviewed with the UI.
 
 INSERT INTO versioni_regolamento (data, nome) VALUES
   ('2026-07-29', 'Regolamento metodologico AGESCI, aggiornato al Consiglio generale 2026')
 ON CONFLICT (data) DO NOTHING;
 
--- Immagini dei distintivi: collegamenti, i file non sono nel repository.
--- E/G: immagini pubblicate da AGESCI su avventura.agesci.it/specialita (Geologo dal rivenditore);
--- L/C: foto dei distintivi su ilcastoroscoutshop.com (Amico degli anziani su scoutshopcampania.it).
--- Promesse, tappe E/G, fasi L/C e brevetti: foto dei distintivi su ilcastoroscoutshop.com.
--- Si inseriscono solo le voci delle branche presenti (configurazione del gruppo,
--- scripts/seed-gruppo.ts, da applicare prima di questo file).
+-- Badge images: links only, the files are not in the repository (ADR 0009).
+-- E/G specialità: images published by AGESCI on avventura.agesci.it/specialita
+-- (Geologo from a retailer); L/C specialità: badge photos on ilcastoroscoutshop.com
+-- (Amico degli anziani on scoutshopcampania.it); Promesse, E/G tappe, L/C fasi and
+-- brevetti: badge photos on ilcastoroscoutshop.com.
+-- Only entries of configured branches are inserted (group configuration,
+-- scripts/group-seed.ts, to be applied before this file).
 INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome, ordine, immagine_url)
 SELECT column1, column2, column3, column4, column5, column6 FROM (VALUES
   ('2026-07-29', 'lc', 'tappa', 'Promessa lupetto', 1, 'https://cdn.shopify.com/s/files/1/0511/9098/8955/products/PromessaLupettoricamata.jpg?v=1605715944'),

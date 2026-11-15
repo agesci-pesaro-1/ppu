@@ -2,7 +2,7 @@
 
 Le voci standard che i capi trovano già pronte quando registrano la progressione
 personale di un associato. È la versione leggibile di
-`seed/base/0002_catalogo_progressione.sql`: le due devono coincidere, e un test
+`seed/base/0001_catalogo_progressione.sql`: le due devono coincidere, e un test
 (`pnpm test`) lo verifica.
 
 **Versione:** `2026-07-29`, Regolamento metodologico AGESCI, aggiornato al Consiglio generale 2026.
@@ -45,7 +45,7 @@ può aggiungere voci del gruppo, senza versione.
   immagini non sono nostre e non stanno nel repository. Alcuni visualizzatori di
   Markdown non mostrano immagini esterne; su GitHub si vedono.
   Nell'app le immagini le scarica e le serve il Worker
-  ([ADR 0010](adr/0010-immagini-dei-distintivi-dal-worker.md)).
+  ([ADR 0009](adr/0009-immagini-dei-distintivi-dal-worker.md)).
 - I nomi si possono declinare al maschile o al femminile, come dice il regolamento:
   nel catalogo compaiono come negli allegati.
 

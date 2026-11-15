@@ -129,6 +129,15 @@ describe('vincoli di dominio', () => {
     );
   });
 
+  it("un'anteprima chiusa non si riapre né si chiude due volte", () => {
+    const db = creaDatabase();
+    db.exec(`INSERT INTO anteprime (id, autore_email, canale, tipo, payload, anteprima, scade_il)
+      VALUES ('a1', 'x@example.org', 'admin', 'prova', '{}', '[]', '2099-01-01')`);
+    db.exec("UPDATE anteprime SET stato = 'confermata' WHERE id = 'a1'");
+    assert.throws(() => db.exec("UPDATE anteprime SET stato = 'confermata' WHERE id = 'a1'"));
+    assert.throws(() => db.exec("UPDATE anteprime SET stato = 'in_attesa' WHERE id = 'a1'"));
+  });
+
   it('le chiavi esterne sono applicate', () => {
     const db = creaDatabase();
     assert.throws(() =>

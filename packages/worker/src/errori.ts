@@ -6,6 +6,8 @@ export type CodiceErrore =
   | 'permesso_negato'
   | 'non_trovato'
   | 'richiesta_non_valida'
+  | 'conflitto'
+  | 'anteprima_non_valida'
   | 'configurazione';
 
 const STATO_HTTP: Record<CodiceErrore, number> = {
@@ -16,6 +18,8 @@ const STATO_HTTP: Record<CodiceErrore, number> = {
   permesso_negato: 403,
   non_trovato: 404,
   richiesta_non_valida: 400,
+  conflitto: 409,
+  anteprima_non_valida: 409,
   configurazione: 500,
 };
 

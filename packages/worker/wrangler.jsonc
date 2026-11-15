@@ -19,6 +19,8 @@
   "vars": {
     "AMBIENTE": "locale"
   },
+  // KV del provider OAuth dell'MCP (token e client cifrati o sotto hash).
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "00000000000000000000000000000000" }],
   "d1_databases": [
     {
       "binding": "DB",

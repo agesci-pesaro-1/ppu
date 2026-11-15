@@ -2,3 +2,6 @@
 DOMINIO=example.org
 NOME_GRUPPO=Gruppo Demo
 MODALITA_TEST=attiva
+# Facoltativi: login Google per l'MCP (client OAuth di prova, mai quello di produzione).
+# GOOGLE_CLIENT_ID=
+# GOOGLE_CLIENT_SECRET=

@@ -1,5 +1,4 @@
 -- Catalogo di progressione dal Regolamento metodologico AGESCI.
--- Versione leggibile: docs/catalogo-progressione.md (deve coincidere, lo verifica un test).
 -- Ogni voce appartiene alla versione del regolamento da cui è presa, identificata
 -- dalla data di aggiornamento del documento. Una nuova versione si aggiunge con
 -- nuove righe: le voci delle versioni precedenti restano per lo storico.

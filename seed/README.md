@@ -10,7 +10,7 @@ Dopo le migrazioni, un'installazione riceve i dati in quest'ordine:
 
    Il tipo di tag `varie` è obbligatorio: è il predefinito per i tag senza categoria. Il file si può riapplicare quando si aggiunge qualcosa: le voci nuove entrano, quelle già presenti non cambiano.
 
-2. **`base/`**: il catalogo di progressione dal Regolamento metodologico (versione leggibile in [`docs/catalogo-progressione.md`](../docs/catalogo-progressione.md)). Entrano solo le voci delle branche presenti nella configurazione. Idempotente.
+2. **`base/`**: il catalogo di progressione dal Regolamento metodologico. Entrano solo le voci delle branche presenti nella configurazione. Idempotente.
 
 3. **Solo per preview, test E2E e demo pubblica**: dati **inventati**, generati da `scripts/genera-seed-demo.ts`. Nel repository non c'è nessun file SQL dei dati demo: i test importano lo script, la pipeline genera l'SQL al momento. Presuppongono la configurazione d'esempio. Mai in produzione.
 

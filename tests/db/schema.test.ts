@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 import { leggiConfigurazione, sqlConfigurazione } from '../../scripts/seed-gruppo.ts';
 import { creaDatabase, fileSql } from './applica.ts';
@@ -454,34 +453,5 @@ describe('catalogo di progressione', () => {
         "INSERT INTO catalogo_progressione (versione, branca_id, tipo, nome) VALUES ('2028-06-01', 'eg', 'tappa', 'Scoperta')",
       ),
     );
-  });
-});
-
-describe('documentazione', () => {
-  it('docs/catalogo-progressione.md coincide con il seed del catalogo', () => {
-    const testo = readFileSync(
-      new URL('../../docs/catalogo-progressione.md', import.meta.url),
-      'utf8',
-    );
-    const versione = testo.match(/^\*\*Versione:\*\* `([\d-]+)`/m)?.[1];
-    const dalDocumento: string[] = [];
-    let branca = '';
-    for (const riga of testo.split('\n')) {
-      const titolo = riga.match(/^## .*\(`(\w+)`\)$/);
-      if (titolo) branca = titolo[1] ?? '';
-      const voce = riga.match(/^\| (\d+) \| (\S+) \| ([^|]+?)(?: \| (.+))? \|$/);
-      const immagine = voce?.[4]?.match(/src="([^"]+)"/)?.[1] ?? '';
-      if (branca && voce)
-        dalDocumento.push(`${versione}|${branca}|${voce[2]}|${voce[3]}|${voce[1]}|${immagine}`);
-    }
-    const db = creaDatabase();
-    const dalSeed = (
-      db
-        .prepare(
-          "SELECT versione || '|' || branca_id || '|' || tipo || '|' || nome || '|' || ordine || '|' || coalesce(immagine_url, '') v FROM catalogo_progressione",
-        )
-        .all() as { v: string }[]
-    ).map((r) => r.v);
-    assert.deepEqual(dalDocumento.sort(), dalSeed.sort());
   });
 });

@@ -89,6 +89,17 @@ describe('domain constraints', () => {
       VALUES ('op', 'a@example.org', 'pwa', 'associati', '1', 'cap', 'riportata', 'b@example.org', '2026-01-01')`);
   });
 
+  it('the change log accepts only tracked tables', () => {
+    const db = createDatabase();
+    const insert = db.prepare(
+      "INSERT INTO modifiche (operazione, autore_email, canale, entita, entita_id) VALUES ('op', 'a@example.org', 'pwa', ?, '1')",
+    );
+    insert.run('associati');
+    insert.run('presenze');
+    assert.throws(() => insert.run('asociati'), /CHECK/);
+    assert.throws(() => insert.run('modifiche'), /CHECK/);
+  });
+
   it('a change marked as copied must record who confirmed it', () => {
     const db = createDatabase();
     assert.throws(() =>

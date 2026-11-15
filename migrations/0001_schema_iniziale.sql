@@ -293,7 +293,13 @@ CREATE TABLE modifiche (
   autore_email TEXT NOT NULL,
   data TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   canale TEXT NOT NULL CHECK (canale IN ('mcp', 'pwa', 'admin', 'import', 'sistema')),
-  entita TEXT NOT NULL,                      -- 'associati', 'tutori', 'presenze', ...
+  -- tables changed through the service layer; tracking a new table needs a migration.
+  -- branche, tipi_tag and the catalogue seed come from configuration/seed SQL instead.
+  entita TEXT NOT NULL CHECK (entita IN (
+    'associati', 'storico_unita', 'tutori', 'relazioni', 'anni_scout',
+    'progressione', 'catalogo_progressione', 'tag', 'associati_tag',
+    'riunioni', 'presenze', 'utenti', 'utenti_unita', 'unita'
+  )),
   entita_id TEXT NOT NULL,
   campo TEXT,                                -- NULL when the whole row is created or archived
   valore_prima TEXT,                         -- JSON

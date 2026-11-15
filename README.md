@@ -28,7 +28,13 @@ Il piano completo è in [`docs/piano.md`](docs/piano.md); le decisioni architett
 
 PPU è pensato per essere installato da ogni gruppo sulla propria infrastruttura: stesso codice, Worker, D1 e Access separati, nessun dato condiviso tra gruppi. Dominio, nome del gruppo, unità attive e branding stanno in configurazione, non nel codice.
 
-La guida di installazione arriverà nelle prossime fasi.
+Guida di installazione: [docs/installazione/cloudflare-e-google.md](docs/installazione/cloudflare-e-google.md). In breve:
+
+1. **Google Cloud**: progetto `PPU` con consenso *Interno*, due client OAuth (`PPU MCP` per il Worker, `PPU Access` per Cloudflare Access).
+2. **Cloudflare**: il dominio del gruppo deve essere una zona **dello stesso account** di Zero Trust; database D1 `ppu` con giurisdizione **UE** (si sceglie solo alla creazione); KV `ppu-oauth`; team Zero Trust (`<team>.cloudflareaccess.com`).
+3. **Zero Trust → Integrazioni → Provider di identità**: provider **Google** (non Google Workspace) con il client `PPU Access`.
+4. **Applicazioni Access** self-hosted solo sul percorso `/api`: `PPU API` (email del dominio) e `PPU API beta` (elenco dei tester), solo Google, reindirizzamento diretto a Google, sessione di 12 ore.
+5. **GitHub**: segreti, variabili (`PPU_D1_ID`, `PPU_KV_OAUTH_ID`, ...) ed environment `beta`/`produzione` con l'AUD di ciascuna applicazione.
 
 ## Sviluppo
 

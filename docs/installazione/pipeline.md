@@ -9,7 +9,7 @@ PPU si pubblica solo da GitHub Actions, mai da una macchina locale (ADR 0008). Q
 | `ci.yml` | ogni pull request e ogni push su `main` | `pnpm check`, `pnpm typecheck`, `pnpm test`; controllo della firma DCO su ogni commit della pull request |
 | `preview.yml` | apertura e aggiornamento di una pull request | crea il D1 `ppu-preview-pr-<n>` (giurisdizione UE), applica migrazioni, seed base e seed demo, pubblica il Worker `ppu-preview-pr-<n>` su `workers.dev` con identità simulata, commenta l'indirizzo sulla pull request, esegue i test E2E |
 | `preview-chiusura.yml` | chiusura o merge della pull request | elimina Worker e D1 della preview |
-| `rilascio.yml` | push su `main` | test, migrazioni sul D1 di produzione, deploy della **beta** |
+| `rilascio.yml` | push su `main` | test, migrazioni e seed base sul D1 di produzione, primo webmaster se assente, deploy della **beta**, segreti del login Google |
 | `rilascio.yml` | avvio manuale (*Run workflow*) | deploy della **produzione** (dopo l'approvazione dell'environment) o di nuovo della beta |
 
 Senza i segreti di Cloudflare, preview e rilascio si saltano con un avviso: la CI funziona comunque. Le pull request da fork non ricevono segreti, quindi non hanno preview.
@@ -20,8 +20,10 @@ Senza i segreti di Cloudflare, preview e rilascio si saltano con un avviso: la C
 
 | Nome | Valore |
 | --- | --- |
-| `CLOUDFLARE_API_TOKEN` | Token API di Cloudflare con i permessi *Workers Scripts: Edit* e *D1: Edit* sull'account del gruppo (più *Zone: Workers Routes: Edit* e *DNS: Edit* sulla zona se si usano domini personalizzati) |
+| `CLOUDFLARE_API_TOKEN` | Token API di Cloudflare con i permessi *Workers Scripts: Edit*, *D1: Edit* e *Workers KV Storage: Edit* sull'account del gruppo (più *Zone: Workers Routes: Edit* e *DNS: Edit* sulla zona se si usano domini personalizzati) |
 | `CLOUDFLARE_ACCOUNT_ID` | ID dell'account Cloudflare del gruppo |
+| `GOOGLE_CLIENT_ID` | ID del client OAuth Google per il login MCP ([cloudflare-e-google.md](cloudflare-e-google.md)) |
+| `GOOGLE_CLIENT_SECRET` | Segreto dello stesso client; il rilascio lo carica nel Worker con `wrangler secret bulk` |
 
 ## Variabili del repository
 
@@ -34,6 +36,8 @@ Senza i segreti di Cloudflare, preview e rilascio si saltano con un avviso: la C
 | `PPU_ACCESS_TEAM_DOMAIN` | `esempio.cloudflareaccess.com` | Team di Cloudflare Access |
 | `PPU_D1_NOME` | `ppu` | Nome del D1 di produzione, condiviso da beta e produzione |
 | `PPU_D1_ID` | `xxxxxxxx-xxxx-...` | ID del D1 di produzione |
+| `PPU_KV_OAUTH_ID` | `0123abcd...` | ID del KV namespace `OAUTH_KV` del provider OAuth dell'MCP |
+| `PPU_WEBMASTER_INIZIALE` | `webmaster@example.org` | Primo webmaster: registrato solo se in `utenti` non c'è ancora nessun webmaster |
 
 ## Environments
 
@@ -52,13 +56,14 @@ Una sola volta, da chi amministra l'account Cloudflare del gruppo:
 
 1. Creare il D1 di produzione **con giurisdizione UE**. La giurisdizione si sceglie solo alla creazione: dalla dashboard (*Storage & Databases → D1 → Create*, *Jurisdiction: EU*) oppure con `wrangler d1 create ppu --jurisdiction eu`. Annotare nome e ID in `PPU_D1_NOME` e `PPU_D1_ID`.
 2. Creare in Cloudflare Access un'applicazione per ciascun indirizzo pubblico (beta e produzione), con Google Workspace come provider e la regola sul dominio; per la beta, la regola ammette solo i tester. Copiare l'*Application Audience (AUD) Tag* in `PPU_ACCESS_AUD` dell'environment corrispondente.
-3. Il primo rilascio applica le migrazioni. Il seed base va applicato una volta sul D1 di produzione (verrà automatizzato dallo script di installazione).
+3. Creare il KV namespace per l'OAuth dell'MCP e annotarne l'ID in `PPU_KV_OAUTH_ID`.
+4. Il rilascio applica migrazioni e seed base (idempotente) e registra il primo webmaster. La guida completa passo passo è in [cloudflare-e-google.md](cloudflare-e-google.md).
 
 Il Worker di beta e produzione **non** è pubblicato su `workers.dev`: è raggiungibile solo dalla rotta configurata, protetta da Access. Senza il JWT di Access ogni chiamata risponde 401.
 
 ## Preview
 
-- D1 e Worker per pull request, eliminati alla chiusura.
+- D1 e Worker per pull request, eliminati alla chiusura. Un solo KV namespace `ppu-preview-oauth`, condiviso da tutte le preview, creato al primo uso.
 - Solo dati del seed demo, dominio `example.org`, identità simulata con l'header `X-Ppu-Utente-Test`. La preview è pubblica su `workers.dev` ma non contiene dati reali.
 - Il seed demo si applica solo a un D1 vuoto; i push successivi applicano soltanto le migrazioni nuove.
 

@@ -13,6 +13,8 @@ export type CampoAssociatoImportabile = Exclude<CampoAssociato, 'unita_id'>;
 export const CAMPI_TUTORE_IMPORTABILI = [
   'cognome',
   'nome',
+  'data_nascita',
+  'luogo_nascita',
   'codice_fiscale',
   'cellulare',
   'email',
@@ -234,6 +236,15 @@ export function codiceFiscale(testo: string): Esito<string> {
   return { ok: true, valore: t };
 }
 
+/** Codice censimento AGESCI: solo cifre; un valore molto corto è probabilmente un segnaposto. */
+export function codiceCensimento(testo: string): Esito<string> {
+  const t = testo.trim();
+  if (!/^\d+$/.test(t)) return { ok: false, errore: 'codice censimento non numerico' };
+  if (t.length < 5)
+    return { ok: true, valore: t, avviso: 'codice censimento sospetto (troppo corto)' };
+  return { ok: true, valore: t };
+}
+
 export function cap(testo: string): Esito<string> {
   const t = testo.trim();
   // Un foglio di calcolo può aver tolto lo zero iniziale.
@@ -251,10 +262,11 @@ export type TipoCampo =
   | 'email'
   | 'codice_fiscale'
   | 'cap'
+  | 'censimento'
   | 'maiuscolo';
 
 export const TIPO_CAMPO_ASSOCIATO: Record<CampoAssociatoImportabile, TipoCampo> = {
-  codice_censimento: 'testo',
+  codice_censimento: 'censimento',
   cognome: 'testo',
   nome: 'testo',
   data_nascita: 'data',
@@ -278,6 +290,8 @@ export const TIPO_CAMPO_ASSOCIATO: Record<CampoAssociatoImportabile, TipoCampo> 
 export const TIPO_CAMPO_TUTORE: Record<CampoTutoreImportabile, TipoCampo> = {
   cognome: 'testo',
   nome: 'testo',
+  data_nascita: 'data',
+  luogo_nascita: 'testo',
   codice_fiscale: 'codice_fiscale',
   cellulare: 'telefono',
   email: 'email',
@@ -290,7 +304,8 @@ export function trasforma(
   tipo: TipoCampo,
   m: Pick<Mappatura, 'formatoData' | 'valoriSi' | 'valoriNo'>,
 ): Esito<string | number | null> {
-  const t = testo.trim();
+  // Un apostrofo iniziale è il marcatore "testo" dei fogli di calcolo, non un dato.
+  const t = testo.trim().replace(/^'/, '').trim();
   if (tipo === 'si_no') return siNo(t, m.valoriSi, m.valoriNo);
   if (t === '') return { ok: true, valore: null };
   switch (tipo) {
@@ -304,6 +319,8 @@ export function trasforma(
       return codiceFiscale(t);
     case 'cap':
       return cap(t);
+    case 'censimento':
+      return codiceCensimento(t);
     case 'maiuscolo':
       return { ok: true, valore: t.toUpperCase() };
     default:

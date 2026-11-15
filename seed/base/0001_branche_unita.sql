@@ -16,5 +16,7 @@ INSERT INTO unita (id, nome, branca_id, attiva, ordine) VALUES
   ('guide', 'Guide', 'eg', 1, 4),
   ('noviziato', 'Noviziato', 'rs', 1, 5),
   ('clan', 'Clan', 'rs', 1, 6),
-  ('coca', 'Co.Ca.', 'coca', 1, 7)
+  ('coca', 'Co.Ca.', 'coca', 1, 7),
+  -- Fuoco: unità R/S separata usata da alcuni gruppi; disattiva finché il webmaster non la attiva.
+  ('fuoco', 'Fuoco', 'rs', 0, 8)
 ON CONFLICT (id) DO NOTHING;

@@ -38,6 +38,8 @@ export const CAMPI_TUTORI = {
   relazione: bs(),
   cognome: bs(),
   nome: bs(),
+  data_nascita: bs(),
+  luogo_nascita: bs(),
   codice_fiscale: bs(true),
   cellulare: bs(),
   email: bs(),

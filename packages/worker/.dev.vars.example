@@ -1,0 +1,4 @@
+# Copia in .dev.vars per lo sviluppo locale (wrangler dev). Mai dati reali.
+DOMINIO=example.org
+NOME_GRUPPO=Gruppo Demo
+MODALITA_TEST=attiva

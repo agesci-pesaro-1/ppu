@@ -12,7 +12,7 @@ describe('migrazioni e dati iniziali', () => {
     const db = creaDatabase();
     assert.equal(conta(db, 'SELECT count(*) n FROM unita'), 7);
     assert.equal(conta(db, 'SELECT count(*) n FROM branche'), 4);
-    assert.equal(conta(db, 'SELECT count(*) n FROM tipi_tag'), 7);
+    assert.equal(conta(db, 'SELECT count(*) n FROM tipi_tag'), 3);
   });
 
   it('configurazione e seed base si possono riapplicare', () => {

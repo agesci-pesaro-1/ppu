@@ -17,10 +17,6 @@
   "tipi_tag": [
     { "id": "squadriglia", "nome": "Squadriglia", "esclusivo": true },
     { "id": "sestiglia", "nome": "Sestiglia", "esclusivo": true },
-    { "id": "consiglio", "nome": "Consiglio" },
-    { "id": "incarico", "nome": "Incarico" },
-    { "id": "evento", "nome": "Evento" },
-    { "id": "esperienza", "nome": "Esperienza" },
     { "id": "varie", "nome": "Varie" }
   ]
 }

@@ -532,11 +532,11 @@ const tag: [number, string, string, string, number | null, number][] = [
   [4, 'Gazzelle', 'squadriglia', 'ufficiale', ANNO_ATTUALE, 1],
   [5, 'Sestiglia dei Grigi', 'sestiglia', 'ufficiale', ANNO_ATTUALE, 1],
   [6, 'Sestiglia dei Neri', 'sestiglia', 'ufficiale', ANNO_ATTUALE, 1],
-  [7, 'Consiglio degli Anziani', 'consiglio', 'ufficiale', ANNO_ATTUALE, 0],
-  [8, 'Campo invernale 2026', 'evento', 'libero', ANNO_ATTUALE, 0],
-  [9, 'campo invernale', 'evento', 'libero', ANNO_ATTUALE, 0], // doppione da unire (demo revisione webmaster)
-  [10, 'Capo squadriglia', 'incarico', 'ufficiale', ANNO_ATTUALE, 0],
-  [11, 'Servizio mensa', 'esperienza', 'libero', null, 0],
+  [7, 'Consiglio degli Anziani', 'varie', 'ufficiale', ANNO_ATTUALE, 0],
+  [8, 'Campo invernale 2026', 'varie', 'libero', ANNO_ATTUALE, 0],
+  [9, 'campo invernale', 'varie', 'libero', ANNO_ATTUALE, 0], // doppione da unire (demo revisione webmaster)
+  [10, 'Capo squadriglia', 'varie', 'ufficiale', ANNO_ATTUALE, 0],
+  [11, 'Servizio mensa', 'varie', 'libero', null, 0],
 ];
 for (const [tid, nome, tipo, stato, anno, esclusivo] of tag) {
   insert('tag', {

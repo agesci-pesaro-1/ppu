@@ -110,6 +110,20 @@ describe('domain constraints', () => {
     );
   });
 
+  it('relationship types are the allowed ones (no coniuge)', () => {
+    const db = createDatabase();
+    db.exec(
+      "INSERT INTO associati (id, cognome, nome) VALUES (1, 'Prova', 'Uno'), (2, 'Prova', 'Due')",
+    );
+    const insert = db.prepare(
+      'INSERT INTO relazioni (associato_id, altro_associato_id, tipo) VALUES (1, 2, ?)',
+    );
+    for (const t of ['genitore', 'figlio', 'fratello', 'zio', 'nipote', 'cugino', 'altro']) {
+      insert.run(t);
+    }
+    assert.throws(() => insert.run('coniuge'), /CHECK/);
+  });
+
   it('a relationship cannot link a member to themselves', () => {
     const db = createDatabase();
     db.exec("INSERT INTO associati (id, cognome, nome) VALUES (1, 'Prova', 'Uno')");

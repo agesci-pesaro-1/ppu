@@ -124,7 +124,7 @@ CREATE TABLE relazioni (
   associato_id INTEGER NOT NULL REFERENCES associati (id),
   altro_associato_id INTEGER NOT NULL REFERENCES associati (id),
   tipo TEXT NOT NULL CHECK (
-    tipo IN ('genitore', 'figlio', 'fratello', 'zio', 'nipote', 'cugino', 'coniuge', 'altro')
+    tipo IN ('genitore', 'figlio', 'fratello', 'zio', 'nipote', 'cugino', 'altro')
   ),
   archiviata INTEGER NOT NULL DEFAULT 0 CHECK (archiviata IN (0, 1)),
   creato_il TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),

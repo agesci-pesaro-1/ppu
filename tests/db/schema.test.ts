@@ -306,6 +306,16 @@ describe('append-only logs', () => {
     );
   });
 
+  it('the access log accepts only tables with sensitive data', () => {
+    const db = createDatabase();
+    const insert = db.prepare(
+      "INSERT INTO accessi (email, canale, entita) VALUES ('a@example.org', 'pwa', ?)",
+    );
+    insert.run('associati');
+    insert.run('tutori');
+    assert.throws(() => insert.run('presenze'), /CHECK/);
+  });
+
   it('an access record cannot be updated or deleted', () => {
     const db = createDatabase();
     const id = db

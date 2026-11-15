@@ -348,7 +348,8 @@ CREATE TABLE accessi (
   email TEXT NOT NULL,
   data TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   canale TEXT NOT NULL CHECK (canale IN ('mcp', 'pwa', 'admin', 'sistema')),
-  entita TEXT NOT NULL,
+  -- tables holding sensitive data; logging reads of a new table needs a migration
+  entita TEXT NOT NULL CHECK (entita IN ('associati', 'tutori')),
   entita_id TEXT,
   campi TEXT,                                -- JSON: list of fields read
   motivo TEXT

@@ -68,7 +68,7 @@ export function createAdminServer(ctx: Context): McpServer {
   server.registerTool(
     'set_user',
     {
-      description: `Creates a user or changes their units, roles or member record. Omitted fields stay unchanged; "units" replaces the list. ${CONFIRMATION_NOTE}`,
+      description: `Creates a user (only users in this table can access PPU) or changes their units, roles or member record. Omitted fields stay unchanged; "units" replaces the list. ${CONFIRMATION_NOTE}`,
       inputSchema: {
         email: z.string().describe("Leader's Workspace email"),
         units: z.array(z.string()).optional().describe('Ids of the units where they can edit'),
@@ -76,7 +76,7 @@ export function createAdminServer(ctx: Context): McpServer {
         buonaStrada: z.boolean().optional(),
         webmaster: z.boolean().optional(),
         betaTester: z.boolean().optional(),
-        excluded: z.boolean().optional().describe('Excludes a domain account that is not a leader'),
+        excluded: z.boolean().optional().describe('Revokes access to PPU (rows are never deleted)'),
         memberId: z.number().int().nullable().optional().describe("Leader's member record"),
       },
     },

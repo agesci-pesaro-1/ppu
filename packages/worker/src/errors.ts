@@ -1,6 +1,7 @@
 export type ErrorCode =
   | 'unauthenticated'
   | 'domain_not_allowed'
+  | 'not_registered'
   | 'excluded'
   | 'not_beta_tester'
   | 'forbidden'
@@ -13,6 +14,7 @@ export type ErrorCode =
 const HTTP_STATUS: Record<ErrorCode, number> = {
   unauthenticated: 401,
   domain_not_allowed: 403,
+  not_registered: 403,
   excluded: 403,
   not_beta_tester: 403,
   forbidden: 403,

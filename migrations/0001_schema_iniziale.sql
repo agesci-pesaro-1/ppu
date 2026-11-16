@@ -261,7 +261,8 @@ CREATE TABLE presenze (
 -- Users (leaders) and roles. Written only by the MCP admin.
 -- ---------------------------------------------------------------------------
 
--- A domain account without a row here is a read-only leader.
+-- Only accounts with a row here (not excluded) can access PPU (ADR 0011);
+-- a row without units or roles is a read-only leader.
 CREATE TABLE utenti (
   email TEXT PRIMARY KEY CHECK (email = lower(email) AND email LIKE '%_@_%'),
   associato_id INTEGER UNIQUE REFERENCES associati (id),  -- the leader's member record, for "own data"

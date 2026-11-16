@@ -12,7 +12,7 @@ export interface MemberForPermissions {
   isLeader: boolean;
 }
 
-/** Every leader of the domain (not excluded) reads everything. */
+/** Every enabled leader (row in `utenti`, not excluded) reads everything. */
 export function canRead(_user: User): boolean {
   return true;
 }

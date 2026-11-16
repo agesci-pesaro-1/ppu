@@ -54,7 +54,7 @@ Prima di usarlo con dati reali, disattiva nelle impostazioni di Claude l'uso del
 | `list_users` | Capi registrati con unità e ruoli |
 | `set_user` | Propone la creazione o modifica di un utente (unità, ruoli, esclusione, scheda associato) |
 | `list_units` | Unità con stato, associati attivi e numero di capi |
-| `set_unit` | Propone l'aggiunta, la rinomina o l'attivazione/disattivazione di un'unità |
+| `set_unit` | Propone l'aggiunta, la rinomina o l'attivazione/disattivazione di un'unità. Dopo l'installazione le unità si gestiscono da qui, non dal file di configurazione (`seed/README.md`) |
 | `list_tags` | Tag con tipo, stato e utilizzi |
 | `set_tag_status` | Propone di rendere un tag ufficiale, archiviarlo o riportarlo a libero |
 | `merge_tags` | Propone l'unione di due tag |

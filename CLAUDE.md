@@ -34,7 +34,7 @@ Il piano completo è in `docs/piano.md`. Le decisioni architetturali sono in `do
 - **I permessi si controllano sempre nel livello di servizi**, mai solo nella UI o nel prompt del modello. MCP e REST chiamano le stesse funzioni.
 
 ### Unità
-Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca. Le unità attive sono configurabili per gruppo.
+Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca. Le unità attive sono configurabili per gruppo: il file di configurazione crea quelle iniziali, poi si gestiscono dall'MCP admin (aggiunta, rinomina, disattivazione), con anteprima, conferma e registro.
 
 ### Flusso delle modifiche
 - Ogni modifica passa da **anteprima prima/dopo → conferma esplicita** di chi la fa.
@@ -79,7 +79,7 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
   - I testi che l'utente legge sono UI e restano in italiano, anche quando li produce il codice (per esempio il `message` degli errori delle API).
 - **Migrazioni:** lo schema esiste solo come migrazioni SQL numerate in `migrations/` (`wrangler d1 migrations`). Mai modifiche a mano sul database. Ogni migrazione deve funzionare sia con la versione corrente sia con la precedente (beta e produzione condividono lo stesso D1): prima si aggiunge, poi si toglie in una migrazione successiva. Se cambiano tabelle o colonne, nella stessa pull request si aggiorna anche lo schema Drizzle: un test confronta i due.
 - **Dati iniziali** (dettagli in `seed/README.md`): branche, unità e tipi di tag dal file di configurazione del gruppo (esempio in `config/gruppo.esempio.json`, tradotto in SQL da `scripts/group-seed.ts`); `seed/base/` con il catalogo di progressione; dati finti per preview, test E2E e demo generati da `scripts/demo-seed.ts`, senza file SQL nel repository.
-- **Configurazione:** dominio, nome del gruppo e branding in configurazione e segreti Cloudflare; branche, unità e tipi di tag nel file di configurazione del gruppo, che ognuno compila con ciò che gli serve e che si può riapplicare per aggiungere voci. Nessun valore specifico del gruppo nel codice.
+- **Configurazione:** dominio, nome del gruppo e branding in configurazione e segreti Cloudflare; branche, unità e tipi di tag nel file di configurazione del gruppo, che ognuno compila con ciò che gli serve e che si può riapplicare per aggiungere voci. Branche e tipi di tag cambiano solo dal file; per le unità il file vale per l'installazione, poi la fonte è il database, modificato dall'MCP admin (il file non sovrascrive le unità esistenti). Nessun valore specifico del gruppo nel codice.
 - **ADR:** `docs/adr/NNNN-titolo.md` (contesto, decisione, alternative, conseguenze, stato). Un ADR accettato non si modifica: se ne scrive uno nuovo che lo supera.
 - **Commit:** firmati con DCO (`git commit -s`). Pull request piccole, una cosa per volta.
 

@@ -7,7 +7,7 @@ PPU si pubblica solo da GitHub Actions, mai da una macchina locale (ADR 0008). Q
 | Workflow | Quando | Cosa fa |
 | --- | --- | --- |
 | `ci.yml` | ogni pull request e ogni push su `main` | `pnpm check`, `pnpm typecheck`, `pnpm test`; controllo della firma DCO su ogni commit della pull request |
-| `preview.yml` | apertura e aggiornamento di una pull request | crea il D1 `ppu-preview-pr-<n>` (giurisdizione UE), applica migrazioni, seed base e seed demo, pubblica il Worker `ppu-preview-pr-<n>` su `workers.dev` con identità simulata, commenta l'indirizzo sulla pull request, esegue i test E2E |
+| `preview.yml` | apertura e aggiornamento di una pull request | crea il D1 `ppu-preview-pr-<n>` (giurisdizione UE), applica migrazioni, configurazione d'esempio del gruppo, seed base e dati demo, pubblica il Worker `ppu-preview-pr-<n>` su `workers.dev` con identità simulata, commenta l'indirizzo sulla pull request, esegue i test E2E |
 | `preview-chiusura.yml` | chiusura o merge della pull request | elimina Worker e D1 della preview |
 | `rilascio.yml` | push su `main` | test, migrazioni sul D1 di produzione, deploy della **beta** |
 | `rilascio.yml` | avvio manuale (*Run workflow*) | deploy della **produzione** (dopo l'approvazione dell'environment) o di nuovo della beta |
@@ -52,15 +52,15 @@ Una sola volta, da chi amministra l'account Cloudflare del gruppo:
 
 1. Creare il D1 di produzione **con giurisdizione UE**. La giurisdizione si sceglie solo alla creazione: dalla dashboard (*Storage & Databases → D1 → Create*, *Jurisdiction: EU*) oppure con `wrangler d1 create ppu --jurisdiction eu`. Annotare nome e ID in `PPU_D1_NOME` e `PPU_D1_ID`.
 2. Creare in Cloudflare Access un'applicazione per ciascun indirizzo pubblico (beta e produzione), con Google Workspace come provider e la regola sul dominio; per la beta, la regola ammette solo i tester. Copiare l'*Application Audience (AUD) Tag* in `PPU_ACCESS_AUD` dell'environment corrispondente.
-3. Il primo rilascio applica le migrazioni. Il seed base va applicato una volta sul D1 di produzione (verrà automatizzato dallo script di installazione).
+3. Il primo rilascio applica le migrazioni. I dati del gruppo (`pnpm -s seed:group config/gruppo.json`) e il seed base vanno applicati una volta sul D1 di produzione, in quest'ordine (`seed/README.md`; verrà automatizzato dallo script di installazione).
 
 Il Worker di beta e produzione **non** è pubblicato su `workers.dev`: è raggiungibile solo dalla rotta configurata, protetta da Access. Senza il JWT di Access ogni chiamata risponde 401.
 
 ## Preview
 
 - D1 e Worker per pull request, eliminati alla chiusura.
-- Solo dati del seed demo, dominio `example.org`, identità simulata con l'header `X-Ppu-Utente-Test`. La preview è pubblica su `workers.dev` ma non contiene dati reali.
-- Il seed demo si applica solo a un D1 vuoto; i push successivi applicano soltanto le migrazioni nuove.
+- Solo dati demo (generati da `scripts/demo-seed.ts`), dominio `example.org`, identità simulata con l'header `X-Ppu-Test-User`. La preview è pubblica su `workers.dev` ma non contiene dati reali.
+- I dati demo si applicano solo a un D1 vuoto; i push successivi applicano soltanto le migrazioni nuove.
 
 ## Protezioni sulla modalità di test
 
@@ -68,7 +68,7 @@ L'identità simulata non può arrivare in beta o produzione per tre motivi indip
 
 1. `wrangler.jsonc` la attiva solo nella sezione `preview`;
 2. `scripts/configura-wrangler.ts` rifiuta di generare una configurazione di beta o produzione che la contenga, e `rilascio.yml` blocca il deploy se il file generato la nomina;
-3. il Worker stesso (`src/config.ts`) rifiuta di avviarsi con `MODALITA_TEST` fuori da `locale` e `preview`.
+3. il Worker stesso (`src/config.ts`) rifiuta di avviarsi con `TEST_MODE` fuori da `local` e `preview`.
 
 ## Rollback
 
@@ -86,7 +86,7 @@ Per la beta il Worker si chiama `ppu-beta`. Il rollback riguarda solo il codice:
 pnpm e2e
 ```
 
-Playwright prepara un D1 locale da zero (migrazioni, seed base e demo in `packages/worker/.wrangler/e2e`), avvia `wrangler dev` con l'identità simulata ed esegue i test. Per provarli contro una preview già pubblicata:
+Playwright prepara un D1 locale da zero (migrazioni, configurazione d'esempio, seed base e dati demo in `packages/worker/.wrangler/e2e`), avvia `wrangler dev` con l'identità simulata ed esegue i test. Per provarli contro una preview già pubblicata:
 
 ```bash
 E2E_BASE_URL=https://ppu-preview-pr-12.esempio.workers.dev pnpm e2e

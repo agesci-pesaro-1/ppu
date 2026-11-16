@@ -76,8 +76,8 @@ jobs:
         name: Blocca la modalità di test fuori dalla preview
         working-directory: packages/worker
         run: |
-          if grep -q 'MODALITA_TEST' wrangler.generato.json; then
-            echo "::error::La configurazione di $AMBIENTE contiene MODALITA_TEST: deploy bloccato."
+          if grep -q 'TEST_MODE' wrangler.generato.json; then
+            echo "::error::La configurazione di $AMBIENTE contiene TEST_MODE: deploy bloccato."
             exit 1
           fi
 

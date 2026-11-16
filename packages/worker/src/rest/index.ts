@@ -1,41 +1,45 @@
 import { Hono } from 'hono';
-import { type Config, leggiConfig } from '../config.ts';
+import { type Config, readConfig } from '../config.ts';
+import { createDb, type Db } from '../db/index.ts';
 import type { Env } from '../env.ts';
-import { ErrorePpu } from '../errori.ts';
-import { caricaUtente, emailDallaRichiesta, type Utente } from '../identita/index.ts';
+import { AppError } from '../errors.ts';
+import { emailFromRequest, loadUser, type User } from '../identity/index.ts';
 
-export interface Variabili {
+export interface Variables {
   config: Config;
-  utente: Utente;
+  db: Db;
+  user: User;
 }
 
-export const api = new Hono<{ Bindings: Env; Variables: Variabili }>();
+export const api = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Identità su ogni chiamata della PWA: JWT di Access (o identità di test in preview).
+// Identity on every PWA call: Access JWT (or the test identity in preview).
 api.use('*', async (c, next) => {
-  const config = leggiConfig(c.env);
-  const email = await emailDallaRichiesta(c.req.raw, config);
+  const config = readConfig(c.env);
+  const email = await emailFromRequest(c.req.raw, config);
+  const db = createDb(c.env.DB);
   c.set('config', config);
-  c.set('utente', await caricaUtente(c.env.DB, email, config));
+  c.set('db', db);
+  c.set('user', await loadUser(db, email, config));
   await next();
 });
 
-/** Profilo dell'utente corrente: email, unità e ruoli. */
-api.get('/io', (c) => {
-  const u = c.get('utente');
+/** Current user's profile: email, units and roles. */
+api.get('/me', (c) => {
+  const u = c.get('user');
   return c.json({
     email: u.email,
-    unita: u.unita,
-    ruoli: {
-      accessoCompleto: u.accessoCompleto,
+    units: u.units,
+    roles: {
+      fullAccess: u.fullAccess,
       buonaStrada: u.buonaStrada,
       webmaster: u.webmaster,
       betaTester: u.betaTester,
     },
-    associatoId: u.associatoId,
+    memberId: u.memberId,
   });
 });
 
 api.notFound(() => {
-  throw new ErrorePpu('non_trovato', 'Risorsa non trovata.');
+  throw new AppError('not_found', 'Risorsa non trovata.');
 });

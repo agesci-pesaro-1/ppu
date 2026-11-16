@@ -21,7 +21,7 @@ export default defineConfig({
     : {
         webServer: {
           command: `pnpm --filter @ppu/worker dev:e2e --port ${PORTA}`,
-          url: `http://localhost:${PORTA}/salute`,
+          url: `http://localhost:${PORTA}/health`,
           reuseExistingServer: !process.env.CI,
           timeout: 180_000,
         },

@@ -32,9 +32,9 @@ const sezione = (c: Record<string, unknown>, a: string): Sezione =>
 
 describe('configura-wrangler', () => {
   it('wrangler.jsonc non attiva la modalità di test nella base, in beta e in produzione', () => {
-    assert.equal('MODALITA_TEST' in (base.vars as Record<string, string>), false);
+    assert.equal('TEST_MODE' in (base.vars as Record<string, string>), false);
     for (const a of ['beta', 'produzione']) {
-      assert.equal('MODALITA_TEST' in sezione(base, a).vars, false);
+      assert.equal('TEST_MODE' in sezione(base, a).vars, false);
     }
   });
 
@@ -45,12 +45,17 @@ describe('configura-wrangler', () => {
       route: 'ppu-beta.example.org',
     });
     const s = sezione(c, 'beta');
-    assert.equal(s.vars.DOMINIO, 'example.org');
+    assert.equal(s.vars.DOMAIN, 'example.org');
     assert.equal(s.vars.ACCESS_AUD, 'aud-123');
     assert.equal(s.d1_databases[0]?.database_id, pubblicato.d1Id);
     assert.deepEqual(s.routes, [{ pattern: 'ppu-beta.example.org', custom_domain: true }]);
     assert.deepEqual(Object.keys(c.env as object), ['beta']);
     verificaSenzaModalitaTest(c, 'beta');
+  });
+
+  it('produzione: il Worker vede ENVIRONMENT=production', () => {
+    const c = generaConfig(base, { ambiente: 'produzione', ...pubblicato });
+    assert.equal(sezione(c, 'produzione').vars.ENVIRONMENT, 'production');
   });
 
   it('produzione: rifiuta valori mancanti', () => {
@@ -60,17 +65,16 @@ describe('configura-wrangler', () => {
     assert.throws(() => generaConfig(base, { ...p, d1Id: '' }), /PPU_D1_ID/);
   });
 
-  it('rifiuta MODALITA_TEST in beta e produzione', () => {
+  it('rifiuta TEST_MODE in beta e produzione', () => {
     const manomesso = structuredClone(base);
-    sezione(manomesso, 'produzione').vars.MODALITA_TEST = 'attiva';
+    sezione(manomesso, 'produzione').vars.TEST_MODE = 'on';
     assert.throws(
       () => generaConfig(manomesso, { ambiente: 'produzione', ...pubblicato }),
-      /MODALITA_TEST/,
+      /TEST_MODE/,
     );
     assert.throws(
-      () =>
-        verificaSenzaModalitaTest({ env: { beta: { vars: { MODALITA_TEST: 'attiva' } } } }, 'beta'),
-      /MODALITA_TEST/,
+      () => verificaSenzaModalitaTest({ env: { beta: { vars: { TEST_MODE: 'on' } } } }, 'beta'),
+      /TEST_MODE/,
     );
   });
 
@@ -83,7 +87,8 @@ describe('configura-wrangler', () => {
     });
     const s = sezione(c, 'preview');
     assert.equal(s.name, 'ppu-preview-pr-7');
-    assert.equal(s.vars.DOMINIO, 'example.org');
-    assert.equal(s.vars.MODALITA_TEST, 'attiva');
+    assert.equal(s.vars.DOMAIN, 'example.org');
+    assert.equal(s.vars.TEST_MODE, 'on');
+    assert.equal(s.vars.ENVIRONMENT, 'preview');
   });
 });

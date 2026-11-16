@@ -5,24 +5,25 @@ Backend unico di PPU (ADR 0004): API REST per la PWA, e in seguito endpoint MCP.
 ## Struttura
 
 - `src/config.ts`: legge e valida la configurazione dell'installazione.
-- `src/identita/`: identità dal JWT di Cloudflare Access (o dall'header di test in locale e preview) e caricamento di unità e ruoli da `utenti`.
-- `src/servizi/permessi.ts`: le regole di permesso, in un solo posto.
-- `src/servizi/registro.ts`: registro delle modifiche (nello stesso batch del dato) e delle letture sensibili.
-- `src/dominio/campi.ts`: quali campi sono anagrafica Buona Strada e quali sensibili.
+- `src/db/`: client Drizzle e `schema.ts`, che rispecchia le migrazioni (ADR 0010). Se una migrazione cambia tabelle o colonne, va aggiornato anche questo file: `test/schema.test.ts` confronta i due.
+- `src/identity/`: identità dal JWT di Cloudflare Access (o dall'header di test in locale e preview) e caricamento di unità e ruoli da `utenti`.
+- `src/services/permissions.ts`: le regole di permesso, in un solo posto.
+- `src/services/audit-log.ts`: registro delle modifiche (`modifiche`, nello stesso batch del dato) e delle letture sensibili (`accessi`).
+- `src/domain/fields.ts`: quali campi sono anagrafica Buona Strada e quali sensibili.
 - `src/rest/`: API REST per la PWA.
 
 ## Configurazione
 
 | Variabile | Obbligatoria | Descrizione |
 | --- | --- | --- |
-| `AMBIENTE` | sì | `locale`, `preview`, `beta`, `produzione`, `demo` |
-| `DOMINIO` | sì | Dominio Google Workspace del gruppo |
-| `NOME_GRUPPO` | no | Nome mostrato nell'interfaccia |
+| `ENVIRONMENT` | sì | `local`, `preview`, `beta`, `production`, `demo` |
+| `DOMAIN` | sì | Dominio Google Workspace del gruppo |
+| `GROUP_NAME` | no | Nome mostrato nell'interfaccia |
 | `ACCESS_TEAM_DOMAIN` | sì, tranne con la modalità di test | `<team>.cloudflareaccess.com` |
 | `ACCESS_AUD` | sì, tranne con la modalità di test | Audience dell'applicazione Access |
-| `MODALITA_TEST` | no | `attiva` per l'identità simulata: rifiutata fuori da `locale` e `preview` |
+| `TEST_MODE` | no | `on` per l'identità simulata: rifiutata fuori da `local` e `preview` |
 
-In modalità di test l'identità si passa con l'header `X-Ppu-Utente-Test: <email>`, usando gli utenti finti del seed demo (`capo.lupetti@example.org`, `capogruppo@example.org`, `webmaster@example.org`, ...).
+In modalità di test l'identità si passa con l'header `X-Ppu-Test-User: <email>`, usando gli utenti finti del seed demo (`capo.lupetti@example.org`, `capogruppo@example.org`, `webmaster@example.org`, ...).
 
 ## Sviluppo locale
 
@@ -40,4 +41,4 @@ pnpm dev
 
 ## Test
 
-`pnpm test` esegue i test dentro il runtime Workers (Miniflare), con le migrazioni reali e i seed base e demo applicati a un D1 locale.
+`pnpm test` esegue i test dentro il runtime Workers (Miniflare), con le migrazioni reali, la configurazione d'esempio, il seed base e i dati demo (generati da `scripts/`) applicati a un D1 locale.

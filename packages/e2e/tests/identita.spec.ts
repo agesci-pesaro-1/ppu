@@ -2,82 +2,82 @@ import { expect, test } from '@playwright/test';
 
 // Test a livello di API contro la preview (o wrangler dev in locale).
 // Gli utenti sono quelli finti del seed demo, tutti su example.org.
-const HEADER = 'X-Ppu-Utente-Test';
+const HEADER = 'X-Ppu-Test-User';
 const come = (email: string) => ({ headers: { [HEADER]: email } });
 
-test('/salute risponde senza autenticazione', async ({ request }) => {
-  const r = await request.get('/salute');
+test('/health risponde senza autenticazione', async ({ request }) => {
+  const r = await request.get('/health');
   expect(r.status()).toBe(200);
   const corpo = await r.json();
-  expect(corpo.stato).toBe('ok');
-  expect(['locale', 'preview']).toContain(corpo.ambiente);
+  expect(corpo.status).toBe('ok');
+  expect(['local', 'preview']).toContain(corpo.environment);
 });
 
 test('senza identità: 401', async ({ request }) => {
-  const r = await request.get('/api/io');
+  const r = await request.get('/api/me');
   expect(r.status()).toBe(401);
-  expect(await r.json()).toMatchObject({ errore: { codice: 'non_autenticato' } });
+  expect(await r.json()).toMatchObject({ error: { code: 'unauthenticated' } });
 });
 
 test('account di un altro dominio: 403', async ({ request }) => {
-  const r = await request.get('/api/io', come('qualcuno@altrodominio.org'));
+  const r = await request.get('/api/me', come('qualcuno@altrodominio.org'));
   expect(r.status()).toBe(403);
-  expect(await r.json()).toMatchObject({ errore: { codice: 'dominio_non_ammesso' } });
+  expect(await r.json()).toMatchObject({ error: { code: 'domain_not_allowed' } });
 });
 
 test('account escluso: 403', async ({ request }) => {
-  const r = await request.get('/api/io', come('segreteria@example.org'));
+  const r = await request.get('/api/me', come('segreteria@example.org'));
   expect(r.status()).toBe(403);
-  expect(await r.json()).toMatchObject({ errore: { codice: 'escluso' } });
+  expect(await r.json()).toMatchObject({ error: { code: 'excluded' } });
 });
 
 const ruoli = [
   {
     email: 'capo.lupetti@example.org',
-    unita: ['lupetti'],
-    ruoli: { accessoCompleto: false, buonaStrada: false, webmaster: false, betaTester: false },
+    units: ['lupetti'],
+    roles: { fullAccess: false, buonaStrada: false, webmaster: false, betaTester: false },
   },
   {
     email: 'capo.coccinelle@example.org',
-    unita: ['coccinelle'],
-    ruoli: { accessoCompleto: false, buonaStrada: false, webmaster: false, betaTester: false },
+    units: ['coccinelle'],
+    roles: { fullAccess: false, buonaStrada: false, webmaster: false, betaTester: false },
   },
   {
     email: 'capo.eg@example.org',
-    unita: ['esploratori', 'guide'],
-    ruoli: { accessoCompleto: false, buonaStrada: false, webmaster: false, betaTester: true },
+    units: ['esploratori', 'guide'],
+    roles: { fullAccess: false, buonaStrada: false, webmaster: false, betaTester: true },
   },
   {
     email: 'capo.rs@example.org',
-    unita: ['clan', 'noviziato'],
-    ruoli: { accessoCompleto: false, buonaStrada: true, webmaster: false, betaTester: false },
+    units: ['clan', 'noviziato'],
+    roles: { fullAccess: false, buonaStrada: true, webmaster: false, betaTester: false },
   },
   {
     email: 'capogruppo@example.org',
-    unita: [],
-    ruoli: { accessoCompleto: true, buonaStrada: true, webmaster: false, betaTester: false },
+    units: [],
+    roles: { fullAccess: true, buonaStrada: true, webmaster: false, betaTester: false },
   },
   {
     email: 'genitore.capo@example.org',
-    unita: ['esploratori'],
-    ruoli: { accessoCompleto: false, buonaStrada: false, webmaster: false, betaTester: false },
+    units: ['esploratori'],
+    roles: { fullAccess: false, buonaStrada: false, webmaster: false, betaTester: false },
   },
   {
     email: 'webmaster@example.org',
-    unita: [],
-    ruoli: { accessoCompleto: false, buonaStrada: false, webmaster: true, betaTester: true },
+    units: [],
+    roles: { fullAccess: false, buonaStrada: false, webmaster: true, betaTester: true },
   },
   {
     // Account del dominio senza riga in `utenti`: capo in sola lettura.
     email: 'nuovo.capo@example.org',
-    unita: [],
-    ruoli: { accessoCompleto: false, buonaStrada: false, webmaster: false, betaTester: false },
+    units: [],
+    roles: { fullAccess: false, buonaStrada: false, webmaster: false, betaTester: false },
   },
 ];
 
 for (const atteso of ruoli) {
-  test(`/api/io per ${atteso.email}`, async ({ request }) => {
-    const r = await request.get('/api/io', come(atteso.email));
+  test(`/api/me per ${atteso.email}`, async ({ request }) => {
+    const r = await request.get('/api/me', come(atteso.email));
     expect(r.status()).toBe(200);
     expect(await r.json()).toMatchObject(atteso);
   });

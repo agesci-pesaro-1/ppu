@@ -82,11 +82,15 @@ jobs:
         run: |
           w() { pnpm exec wrangler "$@" -c wrangler.generato.json --env preview; }
           w d1 migrations apply DB --remote
+          # Configurazione d'esempio e seed base: si possono riapplicare (seed/README.md).
+          node ../../scripts/group-seed.ts > "$RUNNER_TEMP/gruppo.sql"
+          w d1 execute DB --remote --file "$RUNNER_TEMP/gruppo.sql"
           for f in ../../seed/base/*.sql; do w d1 execute DB --remote --file "$f"; done
-          # Il seed demo usa id fissi: si applica solo a un database vuoto.
+          # I dati demo usano id fissi: si applicano solo a un database vuoto.
           n="$(w d1 execute DB --remote --json --command 'SELECT count(*) AS n FROM associati' | jq -r '.[0].results[0].n')"
           if [ "$n" = "0" ]; then
-            for f in ../../seed/demo/*.sql; do w d1 execute DB --remote --file "$f"; done
+            node ../../scripts/demo-seed.ts > "$RUNNER_TEMP/demo.sql"
+            w d1 execute DB --remote --file "$RUNNER_TEMP/demo.sql"
           else
             echo "Seed demo già presente ($n associati)."
           fi
@@ -109,7 +113,7 @@ jobs:
         with:
           script: |
             const segno = '<!-- ppu-preview -->';
-            const corpo = `${segno}\n**Preview:** ${process.env.URL}\n\nSolo dati inventati. Identità simulata con l'header \`X-Ppu-Utente-Test\` (utenti del seed demo su example.org).\n\nCommit: ${context.payload.pull_request.head.sha}`;
+            const corpo = `${segno}\n**Preview:** ${process.env.URL}\n\nSolo dati inventati. Identità simulata con l'header \`X-Ppu-Test-User\` (utenti del seed demo su example.org).\n\nCommit: ${context.payload.pull_request.head.sha}`;
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;
             const commenti = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });

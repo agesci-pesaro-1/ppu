@@ -1,14 +1,14 @@
 export interface Env {
   DB: D1Database;
-  /** 'locale' | 'preview' | 'beta' | 'produzione' | 'demo' */
-  AMBIENTE: string;
-  /** Dominio Google Workspace del gruppo, per esempio "example.org". */
-  DOMINIO: string;
-  NOME_GRUPPO?: string;
-  /** Team di Cloudflare Access: "<team>.cloudflareaccess.com". */
+  /** 'local' | 'preview' | 'beta' | 'production' | 'demo' */
+  ENVIRONMENT: string;
+  /** The group's Google Workspace domain, e.g. "example.org". */
+  DOMAIN: string;
+  GROUP_NAME?: string;
+  /** Cloudflare Access team: "<team>.cloudflareaccess.com". */
   ACCESS_TEAM_DOMAIN?: string;
-  /** Audience (AUD tag) dell'applicazione Access della PWA. */
+  /** Audience (AUD tag) of the PWA's Access application. */
   ACCESS_AUD?: string;
-  /** "attiva" solo in locale e preview: identità simulata. */
-  MODALITA_TEST?: string;
+  /** "on" only in local and preview: simulated identity. */
+  TEST_MODE?: string;
 }

@@ -33,6 +33,13 @@ export interface Opzioni {
 
 type Json = Record<string, unknown>;
 
+/** Valore di ENVIRONMENT (src/config.ts) per ogni ambiente della pipeline. */
+const ENVIRONMENT: Record<AmbientePubblicato, string> = {
+  preview: 'preview',
+  beta: 'beta',
+  produzione: 'production',
+};
+
 /** Toglie i commenti su righe intere, l'unico tipo ammesso in wrangler.jsonc. */
 export function togliCommenti(jsonc: string): string {
   return jsonc
@@ -52,21 +59,21 @@ export function generaConfig(base: Json, o: Opzioni): Json {
   if (!sezione) throw new Error(`Ambiente "${o.ambiente}" assente in wrangler.jsonc`);
 
   const vars = { ...(sezione.vars as Record<string, string>) };
-  if (vars.AMBIENTE !== o.ambiente) {
-    throw new Error(`vars.AMBIENTE di "${o.ambiente}" non corrisponde`);
+  if (vars.ENVIRONMENT !== ENVIRONMENT[o.ambiente]) {
+    throw new Error(`vars.ENVIRONMENT di "${o.ambiente}" non corrisponde`);
   }
 
   if (o.ambiente === 'preview') {
-    // La preview usa solo il seed demo: dominio example.org e identità simulata.
-    if (vars.MODALITA_TEST !== 'attiva') throw new Error('La preview richiede MODALITA_TEST');
+    // La preview usa solo i dati demo: dominio example.org e identità simulata.
+    if (vars.TEST_MODE !== 'on') throw new Error('La preview richiede TEST_MODE');
   } else {
-    if ('MODALITA_TEST' in vars) {
-      throw new Error(`MODALITA_TEST non consentita in "${o.ambiente}"`);
+    if ('TEST_MODE' in vars) {
+      throw new Error(`TEST_MODE non consentita in "${o.ambiente}"`);
     }
-    vars.DOMINIO = richiesto(o.dominio, 'PPU_DOMINIO').toLowerCase();
+    vars.DOMAIN = richiesto(o.dominio, 'PPU_DOMINIO').toLowerCase();
     vars.ACCESS_TEAM_DOMAIN = richiesto(o.accessTeamDomain, 'PPU_ACCESS_TEAM_DOMAIN');
     vars.ACCESS_AUD = richiesto(o.accessAud, 'PPU_ACCESS_AUD');
-    if (o.nomeGruppo?.trim()) vars.NOME_GRUPPO = o.nomeGruppo.trim();
+    if (o.nomeGruppo?.trim()) vars.GROUP_NAME = o.nomeGruppo.trim();
   }
 
   const [d1] = sezione.d1_databases as Json[];
@@ -93,8 +100,8 @@ export function generaConfig(base: Json, o: Opzioni): Json {
 /** Controllo finale indipendente: nessuna identità simulata fuori dalla preview. */
 export function verificaSenzaModalitaTest(config: Json, ambiente: AmbientePubblicato): void {
   if (ambiente === 'preview') return;
-  if (JSON.stringify(config).includes('MODALITA_TEST')) {
-    throw new Error(`La configurazione di "${ambiente}" contiene MODALITA_TEST`);
+  if (JSON.stringify(config).includes('TEST_MODE')) {
+    throw new Error(`La configurazione di "${ambiente}" contiene TEST_MODE`);
   }
 }
 

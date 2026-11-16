@@ -24,8 +24,8 @@ export const CAMPI_ASSOCIATI = {
   comune: bs(),
   provincia: bs(),
   cellulare: bs(),
-  telefono_casa: bs(),
   email: bs(),
+  riceve_comunicazioni: libero,
   informativa: bs(),
   informativa_data: bs(),
   consenso_2a: bs(),
@@ -35,13 +35,12 @@ export const CAMPI_ASSOCIATI = {
 } as const satisfies Record<string, MetaCampo>;
 
 export const CAMPI_TUTORI = {
-  relazione: bs(),
+  ruolo: bs(),
   cognome: bs(),
   nome: bs(),
   codice_fiscale: bs(true),
   cellulare: bs(),
   email: bs(),
-  riceve_comunicazioni: libero,
   associato_collegato_id: libero,
 } as const satisfies Record<string, MetaCampo>;
 

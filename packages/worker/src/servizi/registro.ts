@@ -6,8 +6,28 @@
 
 export type Canale = 'mcp' | 'pwa' | 'admin' | 'import' | 'sistema';
 
+/** Tabelle tracciate in `modifiche` (CHECK nella migrazione: aggiungerne una richiede una migrazione). */
+export type EntitaModifica =
+  | 'associati'
+  | 'storico_unita'
+  | 'tutori'
+  | 'relazioni'
+  | 'anni_scout'
+  | 'progressione'
+  | 'catalogo_progressione'
+  | 'tag'
+  | 'associati_tag'
+  | 'riunioni'
+  | 'presenze'
+  | 'utenti'
+  | 'utenti_unita'
+  | 'unita';
+
+/** Tabelle con dati sensibili le cui letture si registrano in `accessi`. */
+export type EntitaAccesso = 'associati' | 'tutori';
+
 export interface RigaModifica {
-  entita: string;
+  entita: EntitaModifica;
   entitaId: string | number;
   /** null per creazione o archiviazione dell'intera riga. */
   campo: string | null;
@@ -57,7 +77,7 @@ export function istruzioniModifiche(
 export interface LetturaSensibile {
   email: string;
   canale: Exclude<Canale, 'import'>;
-  entita: string;
+  entita: EntitaAccesso;
   entitaId?: string | number;
   campi: readonly string[];
   motivo?: string;

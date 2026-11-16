@@ -29,10 +29,12 @@ In modalità di test l'identità si passa con l'header `X-Ppu-Utente-Test: <emai
 ```bash
 cp .dev.vars.example .dev.vars
 pnpm exec wrangler d1 migrations apply DB --local
-pnpm exec wrangler d1 execute DB --local --file ../../seed/base/0001_branche_unita.sql
+pnpm -s --dir ../.. seed:group > /tmp/gruppo.sql
+pnpm exec wrangler d1 execute DB --local --file /tmp/gruppo.sql
+pnpm exec wrangler d1 execute DB --local --file ../../seed/base/0001_catalogo_progressione.sql
 pnpm dev
 ```
 
 ## Test
 
-`pnpm test` esegue i test dentro il runtime Workers (Miniflare), con le migrazioni reali e i seed base e demo applicati a un D1 locale.
+`pnpm test` esegue i test dentro il runtime Workers (Miniflare), con le migrazioni reali, la configurazione d'esempio, il seed base e i dati demo (generati da `scripts/`) applicati a un D1 locale.

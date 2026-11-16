@@ -14,14 +14,14 @@ test-results/
 playwright-report/
 blob-report/
 
-# Ambiente locale
+# Local environment
 .env
 .env.*
 !.env.example
 *.log
 .DS_Store
 
-# Mai dati reali nel repository
+# Never real data in the repository
 *.xlsx
 *.ods
 *.csv

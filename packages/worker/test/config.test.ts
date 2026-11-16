@@ -1,43 +1,43 @@
 import { describe, expect, it } from 'vitest';
-import { leggiConfig } from '../src/config.ts';
+import { readConfig } from '../src/config.ts';
 import type { Env } from '../src/env.ts';
 
-const base = { DB: {} as D1Database, DOMINIO: 'example.org' } satisfies Partial<Env>;
+const base = { DB: {} as D1Database, DOMAIN: 'example.org' } satisfies Partial<Env>;
 const access = { ACCESS_TEAM_DOMAIN: 'demo.cloudflareaccess.com', ACCESS_AUD: 'aud' };
 
-describe('leggiConfig', () => {
-  it('rifiuta la modalità di test in produzione e in beta', () => {
-    for (const AMBIENTE of ['produzione', 'beta', 'demo']) {
-      expect(() => leggiConfig({ ...base, ...access, AMBIENTE, MODALITA_TEST: 'attiva' })).toThrow(
-        /MODALITA_TEST/,
+describe('readConfig', () => {
+  it('rejects test mode in production, beta and demo', () => {
+    for (const ENVIRONMENT of ['production', 'beta', 'demo']) {
+      expect(() => readConfig({ ...base, ...access, ENVIRONMENT, TEST_MODE: 'on' })).toThrow(
+        /TEST_MODE/,
       );
     }
   });
 
-  it('ammette la modalità di test in preview e in locale', () => {
-    for (const AMBIENTE of ['preview', 'locale']) {
-      expect(leggiConfig({ ...base, AMBIENTE, MODALITA_TEST: 'attiva' }).modalitaTest).toBe(true);
+  it('allows test mode in preview and local', () => {
+    for (const ENVIRONMENT of ['preview', 'local']) {
+      expect(readConfig({ ...base, ENVIRONMENT, TEST_MODE: 'on' }).testMode).toBe(true);
     }
   });
 
-  it('richiede Access fuori dalla modalità di test', () => {
-    expect(() => leggiConfig({ ...base, AMBIENTE: 'produzione' })).toThrow(/ACCESS/);
-    expect(leggiConfig({ ...base, ...access, AMBIENTE: 'produzione' }).access).toEqual({
+  it('requires Access outside test mode', () => {
+    expect(() => readConfig({ ...base, ENVIRONMENT: 'production' })).toThrow(/ACCESS/);
+    expect(readConfig({ ...base, ...access, ENVIRONMENT: 'production' }).access).toEqual({
       teamDomain: 'demo.cloudflareaccess.com',
       aud: 'aud',
     });
   });
 
-  it('rifiuta ambiente e dominio non validi', () => {
-    expect(() => leggiConfig({ ...base, ...access, AMBIENTE: 'prod' })).toThrow(/AMBIENTE/);
-    expect(() => leggiConfig({ ...base, ...access, AMBIENTE: 'beta', DOMINIO: '' })).toThrow(
-      /DOMINIO/,
+  it('rejects an invalid environment or domain', () => {
+    expect(() => readConfig({ ...base, ...access, ENVIRONMENT: 'prod' })).toThrow(/ENVIRONMENT/);
+    expect(() => readConfig({ ...base, ...access, ENVIRONMENT: 'beta', DOMAIN: '' })).toThrow(
+      /DOMAIN/,
     );
   });
 
-  it('normalizza il dominio in minuscolo', () => {
+  it('lowercases the domain', () => {
     expect(
-      leggiConfig({ ...base, ...access, AMBIENTE: 'beta', DOMINIO: 'Example.ORG' }).dominio,
+      readConfig({ ...base, ...access, ENVIRONMENT: 'beta', DOMAIN: 'Example.ORG' }).domain,
     ).toBe('example.org');
   });
 });

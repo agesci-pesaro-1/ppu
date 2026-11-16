@@ -1,35 +1,35 @@
 import { Hono } from 'hono';
-import { ErroreConfigurazione, leggiConfig } from './config.ts';
+import { ConfigError, readConfig } from './config.ts';
 import type { Env } from './env.ts';
-import { ErrorePpu } from './errori.ts';
+import { AppError } from './errors.ts';
 import { api } from './rest/index.ts';
 
 const app = new Hono<{ Bindings: Env }>();
 
-/** Controllo di salute, senza autenticazione e senza dati. */
-app.get('/salute', (c) => {
-  const config = leggiConfig(c.env);
-  return c.json({ stato: 'ok', ambiente: config.ambiente });
+/** Health check: no authentication, no data. */
+app.get('/health', (c) => {
+  const config = readConfig(c.env);
+  return c.json({ status: 'ok', environment: config.environment });
 });
 
 app.route('/api', api);
 
 app.onError((err, c) => {
-  if (err instanceof ErrorePpu) {
-    return c.json({ errore: { codice: err.codice, messaggio: err.message } }, err.statoHttp as 400);
+  if (err instanceof AppError) {
+    return c.json({ error: { code: err.code, message: err.message } }, err.httpStatus as 400);
   }
-  if (err instanceof ErroreConfigurazione) {
-    console.error('Configurazione non valida:', err.message);
+  if (err instanceof ConfigError) {
+    console.error('Invalid configuration:', err.message);
     return c.json(
-      { errore: { codice: 'configurazione', messaggio: 'Configurazione del server non valida.' } },
+      { error: { code: 'configuration', message: 'Configurazione del server non valida.' } },
       500,
     );
   }
-  // Mai dati nei log: solo il tipo di errore.
-  console.error('Errore inatteso:', err instanceof Error ? err.name : typeof err);
-  return c.json({ errore: { codice: 'interno', messaggio: 'Errore interno.' } }, 500);
+  // Never data in the logs: only the error type.
+  console.error('Unexpected error:', err instanceof Error ? err.name : typeof err);
+  return c.json({ error: { code: 'internal', message: 'Errore interno.' } }, 500);
 });
 
-app.notFound((c) => c.json({ errore: { codice: 'non_trovato', messaggio: 'Non trovato.' } }, 404));
+app.notFound((c) => c.json({ error: { code: 'not_found', message: 'Non trovato.' } }, 404));
 
 export default app satisfies ExportedHandler<Env>;

@@ -1,52 +1,52 @@
 import type { Env } from './env.ts';
 
-export type Ambiente = 'locale' | 'preview' | 'beta' | 'produzione' | 'demo';
+export type Environment = 'local' | 'preview' | 'beta' | 'production' | 'demo';
 
-const AMBIENTI: readonly Ambiente[] = ['locale', 'preview', 'beta', 'produzione', 'demo'];
+const ENVIRONMENTS: readonly Environment[] = ['local', 'preview', 'beta', 'production', 'demo'];
 
-/** Ambienti in cui l'identità simulata può essere attivata. */
-const AMBIENTI_CON_MODALITA_TEST: readonly Ambiente[] = ['locale', 'preview'];
+/** Environments where the simulated identity can be turned on. */
+const TEST_MODE_ENVIRONMENTS: readonly Environment[] = ['local', 'preview'];
 
 export interface Config {
-  ambiente: Ambiente;
-  dominio: string;
-  nomeGruppo: string;
-  modalitaTest: boolean;
+  environment: Environment;
+  domain: string;
+  groupName: string;
+  testMode: boolean;
   access: { teamDomain: string; aud: string } | null;
 }
 
-export class ErroreConfigurazione extends Error {}
+export class ConfigError extends Error {}
 
 /**
- * Legge e valida la configurazione. Fallisce in modo esplicito se la modalità
- * di test è attiva fuori da locale e preview: è la protezione principale
- * contro un'identità simulata in beta o produzione.
+ * Reads and validates the configuration. Fails explicitly if test mode is on
+ * outside local and preview: this is the main safeguard against a simulated
+ * identity in beta or production.
  */
-export function leggiConfig(env: Env): Config {
-  const ambiente = env.AMBIENTE as Ambiente;
-  if (!AMBIENTI.includes(ambiente)) {
-    throw new ErroreConfigurazione(`AMBIENTE non valido: "${env.AMBIENTE}"`);
+export function readConfig(env: Env): Config {
+  const environment = env.ENVIRONMENT as Environment;
+  if (!ENVIRONMENTS.includes(environment)) {
+    throw new ConfigError(`invalid ENVIRONMENT: "${env.ENVIRONMENT}"`);
   }
-  const dominio = (env.DOMINIO ?? '').trim().toLowerCase();
-  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(dominio)) {
-    throw new ErroreConfigurazione('DOMINIO mancante o non valido');
+  const domain = (env.DOMAIN ?? '').trim().toLowerCase();
+  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain)) {
+    throw new ConfigError('DOMAIN missing or invalid');
   }
-  const modalitaTest = env.MODALITA_TEST === 'attiva';
-  if (modalitaTest && !AMBIENTI_CON_MODALITA_TEST.includes(ambiente)) {
-    throw new ErroreConfigurazione(`MODALITA_TEST non consentita in "${ambiente}"`);
+  const testMode = env.TEST_MODE === 'on';
+  if (testMode && !TEST_MODE_ENVIRONMENTS.includes(environment)) {
+    throw new ConfigError(`TEST_MODE not allowed in "${environment}"`);
   }
   const access =
     env.ACCESS_TEAM_DOMAIN && env.ACCESS_AUD
       ? { teamDomain: env.ACCESS_TEAM_DOMAIN, aud: env.ACCESS_AUD }
       : null;
-  if (!access && !modalitaTest && ambiente !== 'demo') {
-    throw new ErroreConfigurazione('ACCESS_TEAM_DOMAIN e ACCESS_AUD sono obbligatori');
+  if (!access && !testMode && environment !== 'demo') {
+    throw new ConfigError('ACCESS_TEAM_DOMAIN and ACCESS_AUD are required');
   }
   return {
-    ambiente,
-    dominio,
-    nomeGruppo: env.NOME_GRUPPO ?? 'PPU',
-    modalitaTest,
+    environment,
+    domain,
+    groupName: env.GROUP_NAME ?? 'PPU',
+    testMode,
     access,
   };
 }

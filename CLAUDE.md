@@ -74,7 +74,8 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 - **Lingua:**
   - UI, documentazione e ADR in italiano.
   - Schema del database in italiano: tabelle, colonne e valori di dominio (`associati`, `unita`, `riunioni`, `'da_riportare'`), senza accenti. Anche le chiavi del file di configurazione del gruppo seguono lo schema.
-  - Tutto il codice in inglese: nomi di file, funzioni, variabili e tipi, commenti (anche nell'SQL), messaggi di errore e descrizioni dei test.
+  - Tutto il codice in inglese: nomi di file, funzioni, variabili e tipi, commenti (anche nell'SQL), percorsi e campi delle API, variabili d'ambiente, messaggi di log ed errori interni, descrizioni dei test.
+  - I testi che l'utente legge sono UI e restano in italiano, anche quando li produce il codice (per esempio il `message` degli errori delle API).
 - **Migrazioni:** lo schema esiste solo come migrazioni SQL numerate in `migrations/` (`wrangler d1 migrations`). Mai modifiche a mano sul database. Ogni migrazione deve funzionare sia con la versione corrente sia con la precedente (beta e produzione condividono lo stesso D1): prima si aggiunge, poi si toglie in una migrazione successiva.
 - **Dati iniziali** (dettagli in `seed/README.md`): branche, unità e tipi di tag dal file di configurazione del gruppo (esempio in `config/gruppo.esempio.json`, tradotto in SQL da `scripts/group-seed.ts`); `seed/base/` con il catalogo di progressione; dati finti per preview, test E2E e demo generati da `scripts/demo-seed.ts`, senza file SQL nel repository.
 - **Configurazione:** dominio, nome del gruppo e branding in configurazione e segreti Cloudflare; branche, unità e tipi di tag nel file di configurazione del gruppo, che ognuno compila con ciò che gli serve e che si può riapplicare per aggiungere voci. Nessun valore specifico del gruppo nel codice.

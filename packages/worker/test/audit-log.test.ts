@@ -1,27 +1,27 @@
 import { env } from 'cloudflare:workers';
 import { describe, expect, it } from 'vitest';
-import { istruzioniModifiche, nuovaOperazione, registraAccesso } from '../src/servizi/registro.ts';
+import { changeLogStatements, logAccess, newOperation } from '../src/services/audit-log.ts';
 
-describe('registro', () => {
-  it('salva dato e registro nello stesso batch', async () => {
-    const op = nuovaOperazione('capo.eg@example.org', 'pwa');
+describe('audit log', () => {
+  it('saves data and log in the same batch', async () => {
+    const op = newOperation('capo.eg@example.org', 'pwa');
     await env.DB.batch([
       env.DB.prepare("UPDATE associati SET cap = '00001' WHERE id = 13"),
-      ...istruzioniModifiche(env.DB, op, [
+      ...changeLogStatements(env.DB, op, [
         {
-          entita: 'associati',
-          entitaId: 13,
-          campo: 'cap',
-          prima: '00000',
-          dopo: '00001',
+          entity: 'associati',
+          entityId: 13,
+          field: 'cap',
+          before: '00000',
+          after: '00001',
           buonaStrada: true,
         },
         {
-          entita: 'associati',
-          entitaId: 13,
-          campo: 'note_privacy',
-          prima: null,
-          dopo: 'x',
+          entity: 'associati',
+          entityId: 13,
+          field: 'note_privacy',
+          before: null,
+          after: 'x',
           buonaStrada: false,
         },
       ]),
@@ -49,26 +49,26 @@ describe('registro', () => {
     ]);
   });
 
-  it('se il registro fallisce, il dato non cambia', async () => {
-    const op = nuovaOperazione('capo.eg@example.org', 'pwa');
-    const righe = istruzioniModifiche(env.DB, { ...op, canale: 'sconosciuto' as 'pwa' }, [
+  it('if the log fails, the data does not change', async () => {
+    const op = newOperation('capo.eg@example.org', 'pwa');
+    const rows = changeLogStatements(env.DB, { ...op, channel: 'unknown' as 'pwa' }, [
       {
-        entita: 'associati',
-        entitaId: 14,
-        campo: 'cap',
-        prima: '00000',
-        dopo: '00002',
+        entity: 'associati',
+        entityId: 14,
+        field: 'cap',
+        before: '00000',
+        after: '00002',
         buonaStrada: true,
       },
     ]);
     await expect(
-      env.DB.batch([env.DB.prepare("UPDATE associati SET cap = '00002' WHERE id = 14"), ...righe]),
+      env.DB.batch([env.DB.prepare("UPDATE associati SET cap = '00002' WHERE id = 14"), ...rows]),
     ).rejects.toThrow();
     const cap = await env.DB.prepare('SELECT cap FROM associati WHERE id = 14').first('cap');
     expect(cap).toBe('00000');
   });
 
-  it("il database rifiuta la conferma Buona Strada da parte dell'autore", async () => {
+  it('the database rejects a Buona Strada confirmation by the author', async () => {
     await expect(
       env.DB.prepare(
         `UPDATE modifiche SET stato_buona_strada = 'riportata', confermata_da = autore_email,
@@ -77,13 +77,13 @@ describe('registro', () => {
     ).rejects.toThrow();
   });
 
-  it('registra le letture sensibili', async () => {
-    await registraAccesso(env.DB, {
+  it('logs sensitive reads', async () => {
+    await logAccess(env.DB, {
       email: 'capo.rs@example.org',
-      canale: 'pwa',
-      entita: 'associati',
-      entitaId: 25,
-      campi: ['codice_fiscale'],
+      channel: 'pwa',
+      entity: 'associati',
+      entityId: 25,
+      fields: ['codice_fiscale'],
     });
     const r = await env.DB.prepare('SELECT campi FROM accessi WHERE email = ?')
       .bind('capo.rs@example.org')

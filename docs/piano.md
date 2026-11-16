@@ -238,6 +238,8 @@ _[Diagramma: roadmap · 7 fasi in sequenza — da aggiungere]_
 - [ ] Pubblicazione del calendario delle attività (Google Calendar o feed ICS per unità)
 - [ ] Creazione automatica dei contatti dei genitori nella rubrica dei capi (Google People API)
 - [ ] Pulsante "Scrivi su WhatsApp" nella scheda: apre la chat con il genitore tramite link wa.me, senza API e senza costi
+- [ ] Foto profilo dell'associato: caricamento dalla PWA, salvataggio su R2 con giurisdizione UE, servita dal Worker come le immagini dei distintivi (ADR 0009); visibilità secondo i consensi
+- [ ] Documenti dell'associato, in caricamento e consultazione dalla PWA: archiviati sul Google Drive del Workspace del gruppo, in una struttura di cartelle che PPU rispecchia (per esempio una cartella per associato). Richiede un nuovo ADR, perché oggi Workspace serve solo per l'identità (ADR 0003)
 - [ ] Kit per altri gruppi: guida di installazione e script di setup (D1 in UE, Access, client OAuth)
 
 ## Punti aperti
@@ -251,3 +253,5 @@ _[Diagramma: roadmap · 7 fasi in sequenza — da aggiungere]_
 - [ ] Indirizzo da cui partiranno le mail ai genitori.
 - [ ] Licenza della documentazione per gli utenti (il codice è AGPL-3.0, per ora).
 - [ ] Notifiche: restare su Google Chat o aggiungere notifiche push nella PWA.
+- [ ] Foto profilo: quale consenso serve per salvarla e mostrarla, cosa succede quando l'associato viene archiviato.
+- [ ] Documenti su Drive: Drive condiviso o cartella, struttura delle cartelle, con quale account il Worker accede (per esempio un account di servizio limitato a quella cartella, senza altri privilegi sul dominio), quali tipi di documento sono ammessi (mai dati sanitari), cosa succede quando l'associato viene archiviato.

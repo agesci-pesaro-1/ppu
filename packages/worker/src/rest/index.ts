@@ -1,11 +1,13 @@
 import { Hono } from 'hono';
 import { type Config, readConfig } from '../config.ts';
+import { createDb, type Db } from '../db/index.ts';
 import type { Env } from '../env.ts';
 import { AppError } from '../errors.ts';
 import { emailFromRequest, loadUser, type User } from '../identity/index.ts';
 
 export interface Variables {
   config: Config;
+  db: Db;
   user: User;
 }
 
@@ -15,8 +17,10 @@ export const api = new Hono<{ Bindings: Env; Variables: Variables }>();
 api.use('*', async (c, next) => {
   const config = readConfig(c.env);
   const email = await emailFromRequest(c.req.raw, config);
+  const db = createDb(c.env.DB);
   c.set('config', config);
-  c.set('user', await loadUser(c.env.DB, email, config));
+  c.set('db', db);
+  c.set('user', await loadUser(db, email, config));
   await next();
 });
 

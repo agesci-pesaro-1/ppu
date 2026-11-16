@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "drizzle-orm": "0.45.4",
     "hono": "4.13.14",
     "jose": "6.2.13"
   },

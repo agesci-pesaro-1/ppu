@@ -1,31 +1,26 @@
 // Change log (`modifiche`) and sensitive-read log (`accessi`).
 //
-// `changeLogStatements` returns prepared statements, so whoever changes the
-// data runs them in the same db.batch() as the change: data and log are saved
-// together or not at all.
+// `changeLogInserts` returns Drizzle queries, so whoever changes the data runs
+// them in the same db.batch() as the change: data and log are saved together
+// or not at all.
+
+import type { Db } from '../db/index.ts';
+import {
+  type ACCESS_CHANNELS,
+  type ACCESS_ENTITIES,
+  accessLog,
+  type CHANGE_CHANNELS,
+  type CHANGE_ENTITIES,
+  changes,
+} from '../db/schema.ts';
 
 /** Values of the `canale` column. */
-export type Channel = 'mcp' | 'pwa' | 'admin' | 'import' | 'sistema';
-
+export type Channel = (typeof CHANGE_CHANNELS)[number];
+export type AccessChannel = (typeof ACCESS_CHANNELS)[number];
 /** Tables tracked in `modifiche` (CHECK in the migration: adding one needs a migration). */
-export type ChangeEntity =
-  | 'associati'
-  | 'storico_unita'
-  | 'tutori'
-  | 'relazioni'
-  | 'anni_scout'
-  | 'progressione'
-  | 'catalogo_progressione'
-  | 'tag'
-  | 'associati_tag'
-  | 'riunioni'
-  | 'presenze'
-  | 'utenti'
-  | 'utenti_unita'
-  | 'unita';
-
+export type ChangeEntity = (typeof CHANGE_ENTITIES)[number];
 /** Tables holding sensitive data whose reads are logged in `accessi`. */
-export type AccessEntity = 'associati' | 'tutori';
+export type AccessEntity = (typeof ACCESS_ENTITIES)[number];
 
 export interface ChangeRow {
   entity: ChangeEntity;
@@ -50,55 +45,48 @@ export function newOperation(authorEmail: string, channel: Channel): Operation {
 
 const json = (v: unknown): string | null => (v === undefined ? null : JSON.stringify(v));
 
-export function changeLogStatements(
-  db: D1Database,
-  operation: Operation,
-  rows: readonly ChangeRow[],
-): D1PreparedStatement[] {
-  const stmt = db.prepare(
-    `INSERT INTO modifiche (operazione, autore_email, canale, entita, entita_id, campo,
-                            valore_prima, valore_dopo, stato_buona_strada)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  );
+/**
+ * One INSERT per row, to put in the same db.batch() as the change. Not a single
+ * multi-row INSERT: D1 allows at most 100 bound parameters per query, and a
+ * mass operation would exceed it.
+ */
+export function changeLogInserts(db: Db, operation: Operation, rows: readonly ChangeRow[]) {
   return rows.map((r) =>
-    stmt.bind(
-      operation.id,
-      operation.authorEmail,
-      operation.channel,
-      r.entity,
-      String(r.entityId),
-      r.field,
-      json(r.before),
-      json(r.after),
-      r.buonaStrada ? 'da_riportare' : null,
-    ),
+    db.insert(changes).values({
+      operation: operation.id,
+      authorEmail: operation.authorEmail,
+      channel: operation.channel,
+      entity: r.entity,
+      entityId: String(r.entityId),
+      field: r.field,
+      valueBefore: json(r.before),
+      valueAfter: json(r.after),
+      buonaStradaStatus: r.buonaStrada ? 'da_riportare' : null,
+    }),
   );
 }
 
 export interface SensitiveRead {
   email: string;
-  channel: Exclude<Channel, 'import'>;
+  channel: AccessChannel;
   entity: AccessEntity;
   entityId?: string | number;
   fields: readonly string[];
   reason?: string;
 }
 
-export function accessLogStatement(db: D1Database, r: SensitiveRead): D1PreparedStatement {
-  return db
-    .prepare(
-      'INSERT INTO accessi (email, canale, entita, entita_id, campi, motivo) VALUES (?, ?, ?, ?, ?, ?)',
-    )
-    .bind(
-      r.email,
-      r.channel,
-      r.entity,
-      r.entityId === undefined ? null : String(r.entityId),
-      JSON.stringify(r.fields),
-      r.reason ?? null,
-    );
+/** INSERT into `accessi`, to batch with the read when convenient. */
+export function accessLogInsert(db: Db, r: SensitiveRead) {
+  return db.insert(accessLog).values({
+    email: r.email,
+    channel: r.channel,
+    entity: r.entity,
+    entityId: r.entityId === undefined ? null : String(r.entityId),
+    fields: JSON.stringify(r.fields),
+    reason: r.reason ?? null,
+  });
 }
 
-export async function logAccess(db: D1Database, r: SensitiveRead): Promise<void> {
-  await accessLogStatement(db, r).run();
+export async function logAccess(db: Db, r: SensitiveRead): Promise<void> {
+  await accessLogInsert(db, r).run();
 }

@@ -1,4 +1,7 @@
+import { eq, sql } from 'drizzle-orm';
 import type { Config } from '../config.ts';
+import type { Db } from '../db/index.ts';
+import { users, userUnits } from '../db/schema.ts';
 import { AppError } from '../errors.ts';
 import { emailFromAccess } from './access.ts';
 
@@ -15,17 +18,6 @@ export interface User {
   buonaStrada: boolean;
   webmaster: boolean;
   betaTester: boolean;
-}
-
-interface UserRow {
-  email: string;
-  associato_id: number | null;
-  accesso_completo: number;
-  buona_strada: number;
-  webmaster: number;
-  beta_tester: number;
-  escluso: number;
-  unita: string | null;
 }
 
 export function isInDomain(email: string, domain: string): boolean {
@@ -55,39 +47,34 @@ export async function emailFromRequest(request: Request, config: Config): Promis
  * row is a read-only leader. Excluded accounts are rejected; in beta only beta
  * testers get in.
  */
-export async function loadUser(db: D1Database, email: string, config: Config): Promise<User> {
+export async function loadUser(db: Db, email: string, config: Config): Promise<User> {
   const row = await db
-    .prepare(
-      `SELECT u.email, u.associato_id, u.accesso_completo, u.buona_strada, u.webmaster,
-              u.beta_tester, u.escluso, group_concat(uu.unita_id) AS unita
-         FROM utenti u LEFT JOIN utenti_unita uu ON uu.email = u.email
-        WHERE u.email = ?
-        GROUP BY u.email`,
-    )
-    .bind(email)
-    .first<UserRow>();
+    .select({
+      memberId: users.memberId,
+      fullAccess: users.fullAccess,
+      buonaStrada: users.buonaStrada,
+      webmaster: users.webmaster,
+      betaTester: users.betaTester,
+      excluded: users.excluded,
+      units: sql<string | null>`group_concat(${userUnits.unitId})`,
+    })
+    .from(users)
+    .leftJoin(userUnits, eq(userUnits.email, users.email))
+    .where(eq(users.email, email))
+    .groupBy(users.email)
+    .get();
 
-  const user: User = row
-    ? {
-        email,
-        memberId: row.associato_id,
-        units: row.unita ? row.unita.split(',').sort() : [],
-        fullAccess: row.accesso_completo === 1,
-        buonaStrada: row.buona_strada === 1,
-        webmaster: row.webmaster === 1,
-        betaTester: row.beta_tester === 1,
-      }
-    : {
-        email,
-        memberId: null,
-        units: [],
-        fullAccess: false,
-        buonaStrada: false,
-        webmaster: false,
-        betaTester: false,
-      };
+  const user: User = {
+    email,
+    memberId: row?.memberId ?? null,
+    units: row?.units ? row.units.split(',').sort() : [],
+    fullAccess: row?.fullAccess ?? false,
+    buonaStrada: row?.buonaStrada ?? false,
+    webmaster: row?.webmaster ?? false,
+    betaTester: row?.betaTester ?? false,
+  };
 
-  if (row?.escluso === 1) {
+  if (row?.excluded) {
     throw new AppError('excluded', 'Questo account non ha accesso a PPU.');
   }
   if (config.environment === 'beta' && !user.betaTester) {

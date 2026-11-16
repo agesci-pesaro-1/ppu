@@ -5,6 +5,7 @@ Backend unico di PPU (ADR 0004): API REST per la PWA, e in seguito endpoint MCP.
 ## Struttura
 
 - `src/config.ts`: legge e valida la configurazione dell'installazione.
+- `src/db/`: client Drizzle e `schema.ts`, che rispecchia le migrazioni (ADR 0010). Se una migrazione cambia tabelle o colonne, va aggiornato anche questo file: `test/schema.test.ts` confronta i due.
 - `src/identity/`: identità dal JWT di Cloudflare Access (o dall'header di test in locale e preview) e caricamento di unità e ruoli da `utenti`.
 - `src/services/permissions.ts`: le regole di permesso, in un solo posto.
 - `src/services/audit-log.ts`: registro delle modifiche (`modifiche`, nello stesso batch del dato) e delle letture sensibili (`accessi`).

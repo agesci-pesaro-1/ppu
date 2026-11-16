@@ -1,13 +1,22 @@
 import { env } from 'cloudflare:workers';
+import { asc, eq, sql } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
-import { changeLogStatements, logAccess, newOperation } from '../src/services/audit-log.ts';
+import { createDb } from '../src/db/index.ts';
+import { accessLog, changes, members } from '../src/db/schema.ts';
+import { changeLogInserts, logAccess, newOperation } from '../src/services/audit-log.ts';
+
+const db = createDb(env.DB);
+
+const postcodeOf = async (id: number) =>
+  (await db.select({ postcode: members.postcode }).from(members).where(eq(members.id, id)).get())
+    ?.postcode;
 
 describe('audit log', () => {
   it('saves data and log in the same batch', async () => {
     const op = newOperation('capo.eg@example.org', 'pwa');
-    await env.DB.batch([
-      env.DB.prepare("UPDATE associati SET cap = '00001' WHERE id = 13"),
-      ...changeLogStatements(env.DB, op, [
+    await db.batch([
+      db.update(members).set({ postcode: '00001' }).where(eq(members.id, 13)),
+      ...changeLogInserts(db, op, [
         {
           entity: 'associati',
           entityId: 13,
@@ -26,32 +35,39 @@ describe('audit log', () => {
         },
       ]),
     ]);
-    const { results } = await env.DB.prepare(
-      'SELECT campo, valore_prima, valore_dopo, stato_buona_strada, canale FROM modifiche WHERE operazione = ? ORDER BY id',
-    )
-      .bind(op.id)
-      .all();
-    expect(results).toEqual([
+    const rows = await db
+      .select({
+        field: changes.field,
+        valueBefore: changes.valueBefore,
+        valueAfter: changes.valueAfter,
+        buonaStradaStatus: changes.buonaStradaStatus,
+        channel: changes.channel,
+      })
+      .from(changes)
+      .where(eq(changes.operation, op.id))
+      .orderBy(asc(changes.id));
+    expect(rows).toEqual([
       {
-        campo: 'cap',
-        valore_prima: '"00000"',
-        valore_dopo: '"00001"',
-        stato_buona_strada: 'da_riportare',
-        canale: 'pwa',
+        field: 'cap',
+        valueBefore: '"00000"',
+        valueAfter: '"00001"',
+        buonaStradaStatus: 'da_riportare',
+        channel: 'pwa',
       },
       {
-        campo: 'note_privacy',
-        valore_prima: 'null',
-        valore_dopo: '"x"',
-        stato_buona_strada: null,
-        canale: 'pwa',
+        field: 'note_privacy',
+        valueBefore: 'null',
+        valueAfter: '"x"',
+        buonaStradaStatus: null,
+        channel: 'pwa',
       },
     ]);
+    expect(await postcodeOf(13)).toBe('00001');
   });
 
   it('if the log fails, the data does not change', async () => {
     const op = newOperation('capo.eg@example.org', 'pwa');
-    const rows = changeLogStatements(env.DB, { ...op, channel: 'unknown' as 'pwa' }, [
+    const log = changeLogInserts(db, { ...op, channel: 'unknown' as 'pwa' }, [
       {
         entity: 'associati',
         entityId: 14,
@@ -62,32 +78,38 @@ describe('audit log', () => {
       },
     ]);
     await expect(
-      env.DB.batch([env.DB.prepare("UPDATE associati SET cap = '00002' WHERE id = 14"), ...rows]),
+      db.batch([db.update(members).set({ postcode: '00002' }).where(eq(members.id, 14)), ...log]),
     ).rejects.toThrow();
-    const cap = await env.DB.prepare('SELECT cap FROM associati WHERE id = 14').first('cap');
-    expect(cap).toBe('00000');
+    expect(await postcodeOf(14)).toBe('00000');
   });
 
   it('the database rejects a Buona Strada confirmation by the author', async () => {
     await expect(
-      env.DB.prepare(
-        `UPDATE modifiche SET stato_buona_strada = 'riportata', confermata_da = autore_email,
-           confermata_il = '2026-11-12T00:00:00Z' WHERE operazione = 'demo-op-1'`,
-      ).run(),
+      db
+        .update(changes)
+        .set({
+          buonaStradaStatus: 'riportata',
+          confirmedBy: sql`${changes.authorEmail}`,
+          confirmedAt: '2026-11-12T00:00:00Z',
+        })
+        .where(eq(changes.operation, 'demo-op-1'))
+        .run(),
     ).rejects.toThrow();
   });
 
   it('logs sensitive reads', async () => {
-    await logAccess(env.DB, {
+    await logAccess(db, {
       email: 'capo.rs@example.org',
       channel: 'pwa',
       entity: 'associati',
       entityId: 25,
       fields: ['codice_fiscale'],
     });
-    const r = await env.DB.prepare('SELECT campi FROM accessi WHERE email = ?')
-      .bind('capo.rs@example.org')
-      .first('campi');
-    expect(r).toBe('["codice_fiscale"]');
+    const row = await db
+      .select({ fields: accessLog.fields })
+      .from(accessLog)
+      .where(eq(accessLog.email, 'capo.rs@example.org'))
+      .get();
+    expect(row?.fields).toBe('["codice_fiscale"]');
   });
 });

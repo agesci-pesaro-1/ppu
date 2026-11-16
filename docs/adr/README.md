@@ -23,3 +23,4 @@ Ogni scelta architetturale di PPU è registrata qui come ADR (Architecture Decis
 | [0007](0007-un-installazione-per-gruppo.md) | Un'installazione separata per ogni gruppo | Accettata |
 | [0008](0008-buona-strada-fonte-ufficiale.md) | Buona Strada fonte ufficiale, allineamento manuale tracciato nel registro | Accettata |
 | [0009](0009-immagini-dei-distintivi-dal-worker.md) | Immagini dei distintivi scaricate e servite dal Worker | Accettata |
+| [0010](0010-drizzle-per-le-query.md) | Drizzle per le query, schema nelle migrazioni SQL | Accettata |

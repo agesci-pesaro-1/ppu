@@ -22,13 +22,15 @@ Il piano completo è in `docs/piano.md`. Le decisioni architetturali sono in `do
 
 ### Identità e permessi
 - Google Workspace serve **solo** per identità e login. Nessun gruppo né attributo Workspace viene letto.
-- Un account del dominio configurato è un capo con **lettura su tutto**.
-- Unità e ruoli stanno nella tabella `utenti` (chiave: email):
+- Il login è riservato agli account del dominio configurato, ma **entra in PPU solo chi ha una riga nella tabella `utenti`** (ADR 0011). Una riga senza unità né ruoli è un capo con **lettura su tutto**. Chi non ha una riga riceve un errore che lo invita a chiedere al webmaster.
+- Unità e ruoli stanno nella tabella `utenti` (chiave: email), gestita dal webmaster con l'MCP admin:
   - `unita`: una o più unità in cui il capo può modificare;
   - `accesso_completo`: modifica su tutte le unità;
   - `buona_strada`: può confermare l'allineamento con Buona Strada;
   - `webmaster`: accede all'MCP admin;
-  - `beta_tester`, `escluso`.
+  - `beta_tester`;
+  - `escluso`: accesso revocato (le righe non si cancellano).
+- Il primo webmaster si inserisce a mano una volta, all'installazione (`docs/installazione/pipeline.md`).
 - Ogni unità può avere più capi con gli stessi permessi.
 - I dati di un capo li modifica il capo stesso o chi ha accesso completo.
 - **I permessi si controllano sempre nel livello di servizi**, mai solo nella UI o nel prompt del modello. MCP e REST chiamano le stesse funzioni.

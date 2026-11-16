@@ -161,7 +161,7 @@ authorizeApp.get(CALLBACK_PATH, async (c) => {
       redirectUri: new URL(CALLBACK_PATH, c.req.url).toString(),
       domain: config.domain,
     });
-    // Same checks as the PWA: excluded accounts out, only testers in beta.
+    // Same checks as the PWA: only enabled users, only testers in beta.
     await loadUser(createDb(c.env.DB), identity.email, config);
     const props: McpProps = { email: identity.email, googleRefreshToken: identity.refreshToken };
     const { redirectTo } = await api.completeAuthorization({

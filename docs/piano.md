@@ -16,7 +16,7 @@ PPU (Progressione Personale Unitaria) è il gestionale degli associati del grupp
 
 ## Utenti e ruoli
 
-Workspace serve solo per l'identità: creazione degli account e login. Chi ha un account @agescipesaro1.it è un capo e può leggere; unità e ruoli stanno nella tabella `utenti` del database, gestita dal webmaster.
+Workspace serve solo per l'identità: creazione degli account e login. Chi ha un account @agescipesaro1.it può fare login, ma entra in PPU solo se il webmaster gli ha creato una scheda nella tabella `utenti` del database, dove stanno anche unità e ruoli.
 
 | Ruolo | Dove si definisce | Può |
 | --- | --- | --- |
@@ -28,12 +28,12 @@ Workspace serve solo per l'identità: creazione degli account e login. Chi ha un
 
 - **Unità:** Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca.
 - **Ruoli nel database:** si gestiscono dall'MCP admin, in futuro anche da una dashboard. Nessun gruppo né attributo su Workspace.
-- Un account @agescipesaro1.it senza scheda in `utenti` è un capo in sola lettura.
+- Entra in PPU solo un account del dominio con una scheda in `utenti` (ADR 0011): senza scheda il login Google riesce ma PPU risponde «Non sei ancora abilitato a PPU: chiedi al webmaster del gruppo». Una scheda senza unità né ruoli è un capo in sola lettura. Il primo webmaster si inserisce a mano all'installazione.
 - Account rimosso o sospeso su Workspace = login impossibile, quindi accesso revocato anche se la scheda resta nel database.
 - Ogni unità può avere più capi, tutti con gli stessi permessi e lo stesso flusso di conferma; un capo può seguire più unità. Un capo assegnato ai Lupetti non modifica le Coccinelle.
 - I dati di un capo li modifica il capo stesso o chi ha accesso completo.
 - Ragazzi e genitori non accedono al sistema; in futuro riceveranno solo messaggi.
-- Un account del dominio che non è un capo (per esempio una segreteria) si esclude con un flag nella sua scheda `utenti`.
+- Il flag `escluso` nella scheda `utenti` revoca l'accesso (per esempio a un ex capo): le schede non si cancellano.
 
 ## Architettura e stack
 

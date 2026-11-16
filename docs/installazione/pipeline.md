@@ -53,6 +53,13 @@ Una sola volta, da chi amministra l'account Cloudflare del gruppo:
 1. Creare il D1 di produzione **con giurisdizione UE**. La giurisdizione si sceglie solo alla creazione: dalla dashboard (*Storage & Databases → D1 → Create*, *Jurisdiction: EU*) oppure con `wrangler d1 create ppu --jurisdiction eu`. Annotare nome e ID in `PPU_D1_NAME` e `PPU_D1_ID`.
 2. Creare in Cloudflare Access un'applicazione per ciascun indirizzo pubblico (beta e produzione), con Google Workspace come provider e la regola sul dominio; per la beta, la regola ammette solo i tester. Copiare l'*Application Audience (AUD) Tag* in `PPU_ACCESS_AUD` dell'environment corrispondente.
 3. Il primo rilascio applica le migrazioni. I dati del gruppo (`pnpm -s seed:group config/gruppo.json`) e il seed base vanno applicati una volta sul D1 di produzione, in quest'ordine (`seed/README.md`; verrà automatizzato dallo script di installazione).
+4. Inserire il **primo webmaster**. Entra in PPU solo chi ha una riga nella tabella `utenti` (ADR 0011), quindi senza questo passo nessuno può entrare, nemmeno nell'MCP admin. Dalla dashboard di Cloudflare (*Storage & Databases → D1 →* database di produzione *→ Console*), una sola volta:
+
+   ```sql
+   INSERT INTO utenti (email, webmaster) VALUES ('nome.cognome@example.org', 1);
+   ```
+
+   Usare l'email Workspace della persona, in minuscolo. È l'unica scrittura a mano sui dati: da qui in poi gli altri capi (e un secondo webmaster, consigliato) si abilitano dall'MCP admin con `set_user`, con anteprima, conferma e registro.
 
 Il Worker di beta e produzione **non** è pubblicato su `workers.dev`: è raggiungibile solo dalla rotta configurata, protetta da Access. Senza il JWT di Access ogni chiamata risponde 401.
 

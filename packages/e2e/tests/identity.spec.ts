@@ -25,6 +25,12 @@ test('account from another domain: 403', async ({ request }) => {
   expect(await r.json()).toMatchObject({ error: { code: 'domain_not_allowed' } });
 });
 
+test('domain account not enabled: 403', async ({ request }) => {
+  const r = await request.get('/api/me', as('nuovo.capo@example.org'));
+  expect(r.status()).toBe(403);
+  expect(await r.json()).toMatchObject({ error: { code: 'not_registered' } });
+});
+
 test('excluded account: 403', async ({ request }) => {
   const r = await request.get('/api/me', as('segreteria@example.org'));
   expect(r.status()).toBe(403);
@@ -68,8 +74,8 @@ const users = [
     roles: { fullAccess: false, buonaStrada: false, webmaster: true, betaTester: true },
   },
   {
-    // Domain account without a row in `utenti`: read-only leader.
-    email: 'nuovo.capo@example.org',
+    // Row in `utenti` without units or roles: read-only leader.
+    email: 'capo.coca@example.org',
     units: [],
     roles: { fullAccess: false, buonaStrada: false, webmaster: false, betaTester: false },
   },

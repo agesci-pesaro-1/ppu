@@ -15,7 +15,7 @@ Serve solo per il login: nessuna API Google viene usata e nessun privilegio sul 
    - **URI di reindirizzamento autorizzati**: `https://<host-del-worker>/oauth/google/callback` (uno per ambiente: produzione, beta, preview se serve).
 4. Annota **ID client** e **segreto client**.
 
-Il tipo "Interno" e il controllo del Worker sul claim `hd` garantiscono che entrino solo account del dominio configurato in `DOMINIO`.
+Il tipo "Interno" e il controllo del Worker sul claim `hd` garantiscono che entrino solo account del dominio configurato in `DOMAIN`.
 
 ## 2. Risorse e segreti Cloudflare
 
@@ -50,19 +50,21 @@ Prima di usarlo con dati reali, disattiva nelle impostazioni di Claude l'uso del
 
 | Strumento | Cosa fa |
 | --- | --- |
-| `chi_sono` | Email e ruoli dell'utente collegato |
-| `elenca_utenti` | Capi registrati con unità e ruoli |
-| `imposta_utente` | Propone la creazione o modifica di un utente (unità, ruoli, esclusione, scheda associato) |
-| `elenca_unita` | Unità con stato, associati attivi e numero di capi |
-| `imposta_unita` | Propone l'aggiunta, la rinomina o l'attivazione/disattivazione di un'unità |
-| `elenca_tag` | Tag con tipo, stato e utilizzi |
-| `cambia_stato_tag` | Propone di rendere un tag ufficiale, archiviarlo o riportarlo a libero |
-| `unisci_tag` | Propone l'unione di due tag |
-| `conferma_operazione` | Applica un'operazione proposta, dopo il "sì" esplicito |
-| `annulla_operazione` | Annulla un'operazione proposta |
+| `whoami` | Email e ruoli dell'utente collegato |
+| `list_users` | Capi registrati con unità e ruoli |
+| `set_user` | Propone la creazione o modifica di un utente (unità, ruoli, esclusione, scheda associato) |
+| `list_units` | Unità con stato, associati attivi e numero di capi |
+| `set_unit` | Propone l'aggiunta, la rinomina o l'attivazione/disattivazione di un'unità |
+| `list_tags` | Tag con tipo, stato e utilizzi |
+| `set_tag_status` | Propone di rendere un tag ufficiale, archiviarlo o riportarlo a libero |
+| `merge_tags` | Propone l'unione di due tag |
+| `confirm_operation` | Applica un'operazione proposta, dopo il "sì" esplicito |
+| `cancel_operation` | Annulla un'operazione proposta |
+
+I nomi degli strumenti e dei loro parametri sono in inglese, come il resto del codice; l'assistente parla comunque in italiano e i testi delle anteprime e degli errori sono in italiano.
 
 Le anteprime scadono dopo 15 minuti. Le operazioni di massa (per esempio unire due squadriglie) chiedono di ripetere nella conferma il numero di elementi mostrato nell'anteprima.
 
 ## Preview e sviluppo locale
 
-In `locale` e `preview` (con `MODALITA_TEST=attiva`) l'endpoint accetta anche l'header `X-Ppu-Utente-Test: webmaster@example.org`, senza OAuth, per i test automatici. In beta e produzione questa modalità è rifiutata dalla configurazione.
+In `local` e `preview` (con `TEST_MODE=on`) l'endpoint accetta anche l'header `X-Ppu-Test-User: webmaster@example.org`, senza OAuth, per i test automatici. In beta e produzione questa modalità è rifiutata dalla configurazione.

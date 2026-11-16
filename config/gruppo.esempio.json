@@ -1,0 +1,22 @@
+{
+  "branche": [
+    { "id": "lc", "nome": "Lupetti e Coccinelle" },
+    { "id": "eg", "nome": "Esploratori e Guide" },
+    { "id": "rs", "nome": "Rover e Scolte" },
+    { "id": "coca", "nome": "Comunità capi" }
+  ],
+  "unita": [
+    { "id": "lupetti", "nome": "Lupetti", "branca": "lc" },
+    { "id": "coccinelle", "nome": "Coccinelle", "branca": "lc" },
+    { "id": "esploratori", "nome": "Esploratori", "branca": "eg" },
+    { "id": "guide", "nome": "Guide", "branca": "eg" },
+    { "id": "noviziato", "nome": "Noviziato", "branca": "rs" },
+    { "id": "clan", "nome": "Clan/Fuoco", "branca": "rs" },
+    { "id": "coca", "nome": "Co.Ca.", "branca": "coca" }
+  ],
+  "tipi_tag": [
+    { "id": "squadriglia", "nome": "Squadriglia", "esclusivo": true },
+    { "id": "sestiglia", "nome": "Sestiglia", "esclusivo": true },
+    { "id": "varie", "nome": "Varie" }
+  ]
+}

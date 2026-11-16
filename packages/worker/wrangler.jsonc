@@ -1,12 +1,12 @@
-// Configurazione del Worker PPU.
+// PPU Worker configuration.
 //
-// Nessun valore specifico del gruppo qui. Negli ambienti pubblicati la pipeline
-// genera wrangler.generato.json con scripts/configura-wrangler.ts, inserendo
-// dominio, Access, database e rotte dalle variabili di GitHub
-// (docs/installazione/pipeline.md). Il generatore rifiuta MODALITA_TEST fuori
-// da locale e preview.
+// No group-specific values here. In the deployed environments the pipeline
+// generates wrangler.generated.json with scripts/wrangler-config.ts, filling
+// in domain, Access, database and routes from the GitHub variables
+// (docs/installazione/pipeline.md). The generator rejects TEST_MODE outside
+// local and preview.
 //
-// Commenti solo su righe intere: il generatore li toglie riga per riga.
+// Comments only on whole lines: the generator strips them line by line.
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "ppu",
@@ -14,31 +14,31 @@
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
-  // In locale la modalità di test si attiva da .dev.vars (vedi .dev.vars.example),
-  // mai qui: questa sezione è la base anche degli ambienti pubblicati.
+  // Locally, test mode is turned on from .dev.vars (see .dev.vars.example),
+  // never here: this section is also the base of the deployed environments.
   "vars": {
-    "AMBIENTE": "locale"
+    "ENVIRONMENT": "local"
   },
-  // KV del provider OAuth dell'MCP (token e client cifrati o sotto hash).
+  // KV of the MCP's OAuth provider (tokens and clients, hashed or encrypted).
   "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "00000000000000000000000000000000" }],
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "ppu-locale",
+      "database_name": "ppu-local",
       "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "../../migrations"
     }
   ],
   "env": {
-    // Una per pull request: D1 separato con seed demo, identità simulata.
+    // One per pull request: separate D1 with demo data, simulated identity.
     "preview": {
       "name": "ppu-preview",
       "workers_dev": true,
       "vars": {
-        "AMBIENTE": "preview",
-        "DOMINIO": "example.org",
-        "NOME_GRUPPO": "Anteprima PPU",
-        "MODALITA_TEST": "attiva"
+        "ENVIRONMENT": "preview",
+        "DOMAIN": "example.org",
+        "GROUP_NAME": "Anteprima PPU",
+        "TEST_MODE": "on"
       },
       "d1_databases": [
         {
@@ -49,12 +49,12 @@
         }
       ]
     },
-    // Al merge su main. Usa il D1 di produzione (ADR 0008).
+    // On merge to main. Uses the production D1 (ADR 0006).
     "beta": {
       "name": "ppu-beta",
       "workers_dev": false,
       "vars": {
-        "AMBIENTE": "beta"
+        "ENVIRONMENT": "beta"
       },
       "d1_databases": [
         {
@@ -65,12 +65,12 @@
         }
       ]
     },
-    // Promozione manuale da GitHub.
-    "produzione": {
-      "name": "ppu-produzione",
+    // Manual promotion from GitHub.
+    "production": {
+      "name": "ppu-production",
       "workers_dev": false,
       "vars": {
-        "AMBIENTE": "produzione"
+        "ENVIRONMENT": "production"
       },
       "d1_databases": [
         {

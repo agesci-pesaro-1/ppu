@@ -4,3 +4,6 @@
 DOMAIN=example.org
 GROUP_NAME=Gruppo Demo
 TEST_MODE=on
+# Optional: Google login for the MCP (a test OAuth client, never the production one).
+# GOOGLE_CLIENT_ID=
+# GOOGLE_CLIENT_SECRET=

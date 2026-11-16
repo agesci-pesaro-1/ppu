@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { readConfig } from '../src/config.ts';
 import type { Env } from '../src/env.ts';
 
-const base = { DB: {} as D1Database, DOMAIN: 'example.org' } satisfies Partial<Env>;
+const base = {
+  DB: {} as D1Database,
+  OAUTH_KV: {} as KVNamespace,
+  DOMAIN: 'example.org',
+} satisfies Partial<Env>;
 const access = { ACCESS_TEAM_DOMAIN: 'demo.cloudflareaccess.com', ACCESS_AUD: 'aud' };
 
 describe('readConfig', () => {

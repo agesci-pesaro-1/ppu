@@ -13,6 +13,7 @@ export interface Config {
   groupName: string;
   testMode: boolean;
   access: { teamDomain: string; aud: string } | null;
+  google: { clientId: string; clientSecret: string } | null;
 }
 
 export class ConfigError extends Error {}
@@ -42,11 +43,17 @@ export function readConfig(env: Env): Config {
   if (!access && !testMode && environment !== 'demo') {
     throw new ConfigError('ACCESS_TEAM_DOMAIN and ACCESS_AUD are required');
   }
+  // Google login for the MCP: optional (without it, the MCP endpoint only accepts test mode).
+  const google =
+    env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+      ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET }
+      : null;
   return {
     environment,
     domain,
     groupName: env.GROUP_NAME ?? 'PPU',
     testMode,
     access,
+    google,
   };
 }

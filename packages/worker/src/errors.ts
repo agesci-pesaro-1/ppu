@@ -6,6 +6,8 @@ export type ErrorCode =
   | 'forbidden'
   | 'not_found'
   | 'bad_request'
+  | 'conflict'
+  | 'invalid_preview'
   | 'configuration';
 
 const HTTP_STATUS: Record<ErrorCode, number> = {
@@ -16,6 +18,8 @@ const HTTP_STATUS: Record<ErrorCode, number> = {
   forbidden: 403,
   not_found: 404,
   bad_request: 400,
+  conflict: 409,
+  invalid_preview: 409,
   configuration: 500,
 };
 

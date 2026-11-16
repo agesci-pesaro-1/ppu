@@ -52,6 +52,10 @@ export const CHANGE_ENTITIES = [
 /** Tables holding sensitive data whose reads are logged in `accessi`. */
 export const ACCESS_ENTITIES = ['associati', 'tutori'] as const;
 
+/** Channels that can propose a change (`anteprime.canale`). */
+export const PREVIEW_CHANNELS = ['mcp', 'pwa', 'admin'] as const;
+export const PREVIEW_STATUSES = ['in_attesa', 'confermata', 'annullata', 'scaduta'] as const;
+
 // ---------------------------------------------------------------------------
 // Group structure
 // ---------------------------------------------------------------------------
@@ -339,4 +343,22 @@ export const accessLog = sqliteTable('accessi', {
   entityId: text('entita_id'),
   fields: text('campi'),
   reason: text('motivo'),
+});
+
+// ---------------------------------------------------------------------------
+// Previews waiting for confirmation
+// ---------------------------------------------------------------------------
+
+export const previews = sqliteTable('anteprime', {
+  id: text('id').primaryKey(),
+  authorEmail: text('autore_email').notNull(),
+  channel: text('canale', { enum: PREVIEW_CHANNELS }).notNull(),
+  type: text('tipo').notNull(),
+  payload: text('payload').notNull(),
+  preview: text('anteprima').notNull(),
+  count: integer('conteggio').notNull().default(1),
+  status: text('stato', { enum: PREVIEW_STATUSES }).notNull().default('in_attesa'),
+  createdAt: createdAt(),
+  expiresAt: text('scade_il').notNull(),
+  closedAt: text('chiuso_il'),
 });

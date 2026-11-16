@@ -29,15 +29,15 @@ In modalità di test l'identità si passa con l'header `X-Ppu-Test-User: <email>
 
 ```bash
 cp .dev.vars.example .dev.vars
-pnpm db:locale .wrangler/state
+pnpm db:local .wrangler/state
 pnpm dev
 ```
 
-`pnpm db:locale` ricrea da zero il D1 locale con migrazioni, seed base e seed demo. `wrangler dev` usa `.wrangler/state` come cartella predefinita.
+`pnpm db:local` ricrea da zero il D1 locale con migrazioni, configurazione d'esempio del gruppo, seed base e dati demo. `wrangler dev` usa `.wrangler/state` come cartella predefinita.
 
 ## Ambienti pubblicati
 
-`wrangler.jsonc` contiene le sezioni `preview`, `beta` e `produzione` senza valori del gruppo. La pipeline genera `wrangler.generato.json` con `scripts/configura-wrangler.ts` (vedi `docs/installazione/pipeline.md`).
+`wrangler.jsonc` contiene le sezioni `preview`, `beta` e `production` senza valori del gruppo. La pipeline genera `wrangler.generated.json` con `scripts/wrangler-config.ts` (vedi `docs/installazione/pipeline.md`).
 
 ## Test
 

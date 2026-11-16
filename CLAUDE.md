@@ -110,5 +110,5 @@ Fase 0 — Fondamenta. Ordine suggerito:
 - `pnpm -s seed:group [file] > gruppo.sql`: SQL dei dati del gruppo dal file di configurazione (default: l'esempio).
 - `pnpm -s seed:demo > demo.sql`: SQL dei dati finti da `scripts/demo-seed.ts`.
 - `pnpm e2e`: test E2E Playwright contro `wrangler dev` con D1 locale e seed demo (con `E2E_BASE_URL` contro una preview).
-- `pnpm --filter @ppu/worker db:locale`: ricrea il D1 locale con migrazioni, configurazione d'esempio, seed base e dati demo.
-- Pipeline (GitHub Actions) e configurazione per gruppo: `docs/installazione/pipeline.md`. La configurazione di deploy si genera con `scripts/configura-wrangler.ts`.
+- `pnpm --filter @ppu/worker db:local`: ricrea il D1 locale con migrazioni, configurazione d'esempio, seed base e dati demo.
+- Pipeline (GitHub Actions) e configurazione per gruppo: `docs/installazione/pipeline.md`. La configurazione di deploy si genera con `scripts/wrangler-config.ts`.

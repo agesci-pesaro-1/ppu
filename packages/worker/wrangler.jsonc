@@ -1,7 +1,7 @@
 // PPU Worker configuration.
 //
 // No group-specific values here. In the deployed environments the pipeline
-// generates wrangler.generato.json with scripts/configura-wrangler.ts, filling
+// generates wrangler.generated.json with scripts/wrangler-config.ts, filling
 // in domain, Access, database and routes from the GitHub variables
 // (docs/installazione/pipeline.md). The generator rejects TEST_MODE outside
 // local and preview.
@@ -63,10 +63,9 @@
         }
       ]
     },
-    // Manual promotion from GitHub. The section keeps the name of the GitHub
-    // environment ("produzione"); the Worker sees ENVIRONMENT=production.
-    "produzione": {
-      "name": "ppu-produzione",
+    // Manual promotion from GitHub.
+    "production": {
+      "name": "ppu-production",
       "workers_dev": false,
       "vars": {
         "ENVIRONMENT": "production"

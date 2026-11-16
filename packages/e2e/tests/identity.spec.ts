@@ -1,37 +1,37 @@
 import { expect, test } from '@playwright/test';
 
-// Test a livello di API contro la preview (o wrangler dev in locale).
-// Gli utenti sono quelli finti del seed demo, tutti su example.org.
+// API-level tests against the preview (or wrangler dev locally).
+// Users are the fake ones of the demo data, all on example.org.
 const HEADER = 'X-Ppu-Test-User';
-const come = (email: string) => ({ headers: { [HEADER]: email } });
+const as = (email: string) => ({ headers: { [HEADER]: email } });
 
-test('/health risponde senza autenticazione', async ({ request }) => {
+test('/health answers without authentication', async ({ request }) => {
   const r = await request.get('/health');
   expect(r.status()).toBe(200);
-  const corpo = await r.json();
-  expect(corpo.status).toBe('ok');
-  expect(['local', 'preview']).toContain(corpo.environment);
+  const body = await r.json();
+  expect(body.status).toBe('ok');
+  expect(['local', 'preview']).toContain(body.environment);
 });
 
-test('senza identità: 401', async ({ request }) => {
+test('no identity: 401', async ({ request }) => {
   const r = await request.get('/api/me');
   expect(r.status()).toBe(401);
   expect(await r.json()).toMatchObject({ error: { code: 'unauthenticated' } });
 });
 
-test('account di un altro dominio: 403', async ({ request }) => {
-  const r = await request.get('/api/me', come('qualcuno@altrodominio.org'));
+test('account from another domain: 403', async ({ request }) => {
+  const r = await request.get('/api/me', as('qualcuno@altrodominio.org'));
   expect(r.status()).toBe(403);
   expect(await r.json()).toMatchObject({ error: { code: 'domain_not_allowed' } });
 });
 
-test('account escluso: 403', async ({ request }) => {
-  const r = await request.get('/api/me', come('segreteria@example.org'));
+test('excluded account: 403', async ({ request }) => {
+  const r = await request.get('/api/me', as('segreteria@example.org'));
   expect(r.status()).toBe(403);
   expect(await r.json()).toMatchObject({ error: { code: 'excluded' } });
 });
 
-const ruoli = [
+const users = [
   {
     email: 'capo.lupetti@example.org',
     units: ['lupetti'],
@@ -68,17 +68,17 @@ const ruoli = [
     roles: { fullAccess: false, buonaStrada: false, webmaster: true, betaTester: true },
   },
   {
-    // Account del dominio senza riga in `utenti`: capo in sola lettura.
+    // Domain account without a row in `utenti`: read-only leader.
     email: 'nuovo.capo@example.org',
     units: [],
     roles: { fullAccess: false, buonaStrada: false, webmaster: false, betaTester: false },
   },
 ];
 
-for (const atteso of ruoli) {
-  test(`/api/me per ${atteso.email}`, async ({ request }) => {
-    const r = await request.get('/api/me', come(atteso.email));
+for (const expected of users) {
+  test(`/api/me for ${expected.email}`, async ({ request }) => {
+    const r = await request.get('/api/me', as(expected.email));
     expect(r.status()).toBe(200);
-    expect(await r.json()).toMatchObject(atteso);
+    expect(await r.json()).toMatchObject(expected);
   });
 }

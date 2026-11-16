@@ -238,6 +238,8 @@ _[Diagramma: roadmap · 7 fasi in sequenza — da aggiungere]_
 - [ ] Pubblicazione del calendario delle attività (Google Calendar o feed ICS per unità)
 - [ ] Creazione automatica dei contatti dei genitori nella rubrica dei capi (Google People API)
 - [ ] Pulsante "Scrivi su WhatsApp" nella scheda: apre la chat con il genitore tramite link wa.me, senza API e senza costi
+- [ ] Foto profilo dell'associato: caricamento dalla PWA, salvataggio su R2 con giurisdizione UE, servita dal Worker come le immagini dei distintivi del catalogo. È una foto interna, trattata come gli altri dati della scheda: nessun consenso aggiuntivo oltre ai consensi per le foto pubblicate. Quando l'associato viene archiviato la foto resta su R2
+- [ ] Documenti dell'associato in PDF (per esempio la richiesta di iscrizione e l'informativa privacy firmata, a supporto del campo `informativa`), in caricamento e consultazione dalla PWA: archiviati sul Google Drive del Workspace del gruppo, in una struttura di cartelle che PPU rispecchia (per esempio una cartella per associato). Preferibile accedere a Drive con l'account del capo che ha fatto login, così la visibilità dei documenti dipende anche dai permessi di Drive; altrimenti un account di servizio. Richiede un nuovo ADR, perché oggi Workspace serve solo per l'identità (ADR 0003)
 - [ ] Kit per altri gruppi: guida di installazione e script di setup (D1 in UE, Access, client OAuth)
 
 ## Punti aperti
@@ -251,3 +253,4 @@ _[Diagramma: roadmap · 7 fasi in sequenza — da aggiungere]_
 - [ ] Indirizzo da cui partiranno le mail ai genitori.
 - [ ] Licenza della documentazione per gli utenti (il codice è AGPL-3.0, per ora).
 - [ ] Notifiche: restare su Google Chat o aggiungere notifiche push nella PWA.
+- [ ] Documenti su Drive: il Drive condiviso del gruppo esiste già, con una cartella dedicata a PPU; resta da definire la struttura delle cartelle. Accesso con l'account del capo: il login di Access dà solo l'identità, quindi serve un secondo consenso OAuth con un permesso su Drive, chiesto la prima volta che il capo apre i documenti (una schermata di Google, senza rifare il login), con il token conservato cifrato dal Worker; dall'MCP il permesso si può chiedere nello stesso login Google. In alternativa un account di servizio limitato a quella cartella; come si combinano i permessi di Drive con quelli di PPU, che restano comunque controllati nel livello di servizi; elenco dei tipi di documento ammessi (mai dati sanitari); cosa succede quando l'associato viene archiviato.

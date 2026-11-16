@@ -1,6 +1,12 @@
 // PPU Worker configuration.
-// No group-specific values here: domain, name and Access are set as variables
-// or secrets of the installation (see the package README).
+//
+// No group-specific values here. In the deployed environments the pipeline
+// generates wrangler.generated.json with scripts/wrangler-config.ts, filling
+// in domain, Access, database and routes from the GitHub variables
+// (docs/installazione/pipeline.md). The generator rejects TEST_MODE outside
+// local and preview.
+//
+// Comments only on whole lines: the generator strips them line by line.
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "ppu",
@@ -20,5 +26,58 @@
       "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "../../migrations"
     }
-  ]
+  ],
+  "env": {
+    // One per pull request: separate D1 with demo data, simulated identity.
+    "preview": {
+      "name": "ppu-preview",
+      "workers_dev": true,
+      "vars": {
+        "ENVIRONMENT": "preview",
+        "DOMAIN": "example.org",
+        "GROUP_NAME": "Anteprima PPU",
+        "TEST_MODE": "on"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ppu-preview",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "../../migrations"
+        }
+      ]
+    },
+    // On merge to main. Uses the production D1 (ADR 0006).
+    "beta": {
+      "name": "ppu-beta",
+      "workers_dev": false,
+      "vars": {
+        "ENVIRONMENT": "beta"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ppu",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "../../migrations"
+        }
+      ]
+    },
+    // Manual promotion from GitHub.
+    "production": {
+      "name": "ppu-production",
+      "workers_dev": false,
+      "vars": {
+        "ENVIRONMENT": "production"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ppu",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "../../migrations"
+        }
+      ]
+    }
+  }
 }

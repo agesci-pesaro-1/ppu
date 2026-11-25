@@ -88,7 +88,7 @@ Nella home dell'account, alla voce **Domini** (o **Siti web**), controlla che ci
    - nome: `ppu`;
    - **Località: Giurisdizione → UE**. ⚠️ La giurisdizione si sceglie **solo alla creazione**: se sbagli, devi creare un nuovo database.
    - Via API: `POST /accounts/{account_id}/d1/database` con `{"name": "ppu", "jurisdiction": "eu"}`. Per verificare, `GET /accounts/{account_id}/d1/database/{id}` deve restituire `"jurisdiction": "eu"`.
-2. Copia il **Database ID**: servirà come `PPU_D1_ID` (e `PPU_D1_NOME` = `ppu`).
+2. Copia il **Database ID**: servirà come `PPU_D1_ID` (e `PPU_D1_NAME` = `ppu`).
 3. **Archiviazione e database → KV → Crea namespace**, nome `ppu-oauth`. Copia l'**ID**: servirà come `PPU_KV_OAUTH_ID`. Contiene solo token e client OAuth (cifrati o sotto hash), nessun dato degli associati.
 
 Non applicare migrazioni né seed a mano: lo fa la pipeline al primo rilascio.
@@ -147,15 +147,15 @@ Repository → **Settings**.
 
 | Nome | Valore |
 | --- | --- |
-| `PPU_DOMINIO` | `example.org` |
-| `PPU_NOME_GRUPPO` | nome del gruppo (facoltativa) |
+| `PPU_DOMAIN` | `example.org` |
+| `PPU_GROUP_NAME` | nome del gruppo (facoltativa) |
 | `PPU_ACCESS_TEAM_DOMAIN` | `esempio.cloudflareaccess.com` |
-| `PPU_D1_NOME` | `ppu` |
+| `PPU_D1_NAME` | `ppu` |
 | `PPU_D1_ID` | ID del passo 2.3 |
 | `PPU_KV_OAUTH_ID` | ID del KV del passo 2.3 |
-| `PPU_WEBMASTER_INIZIALE` | email del primo webmaster, per esempio `webmaster@example.org` |
+| `PPU_INITIAL_WEBMASTER` | email del primo webmaster, per esempio `webmaster@example.org` |
 
-`PPU_WEBMASTER_INIZIALE` serve solo alla prima installazione: il rilascio lo registra come webmaster **solo se nella tabella `utenti` non c'è ancora nessun webmaster**. Dopo, ruoli e utenti si gestiscono dall'MCP admin; la variabile si può lasciare o cancellare.
+`PPU_INITIAL_WEBMASTER` serve solo alla prima installazione: il rilascio lo registra come webmaster **solo se nella tabella `utenti` non c'è ancora nessun webmaster**. Dopo, ruoli e utenti si gestiscono dall'MCP admin; la variabile si può lasciare o cancellare.
 
 ### 3.3 Environments
 
@@ -164,21 +164,22 @@ Repository → **Settings**.
 | Nome | Protezione | Variabili |
 | --- | --- | --- |
 | `beta` | *Deployment branches*: solo `main` | `PPU_ACCESS_AUD` = AUD dell'app beta; `PPU_ROUTE` = `ppu-api-beta.example.org` |
-| `produzione` | *Deployment branches*: solo `main`; **Required reviewers**: chi dà il via libera dopo i tester | `PPU_ACCESS_AUD` = AUD dell'app di produzione; `PPU_ROUTE` = `ppu-api.example.org` |
+| `production` | *Deployment branches*: solo `main`; **Required reviewers**: chi dà il via libera dopo i tester | `PPU_ACCESS_AUD` = AUD dell'app di produzione; `PPU_ROUTE` = `ppu-api.example.org` |
 
 ---
 
 ## 4. Primo rilascio
 
-1. Fai il merge su `main`. Il workflow **Rilascio**:
-   - applica le migrazioni e il seed base al D1 di produzione;
+1. Metti nel repository il file di configurazione del gruppo, `config/gruppo.json`, partendo da `config/gruppo.esempio.json` ([seed/README.md](../../seed/README.md)).
+2. Fai il merge su `main`. Il workflow **Release**:
+   - applica le migrazioni, i dati del gruppo e il seed base al D1 di produzione;
    - registra il primo webmaster;
    - pubblica la beta su `ppu-api-beta.example.org`;
    - carica i segreti del login Google.
-2. Controlla: `https://ppu-api-beta.example.org/salute` risponde `{"stato":"ok","ambiente":"beta"}`.
-3. Il webmaster collega l'MCP admin a Claude (vedi [mcp-admin.md](mcp-admin.md)) con l'URL `https://ppu-api-beta.example.org/mcp/admin`, e assegna unità e ruoli ai capi. Ricorda di segnare come `beta_tester` chi deve provare la beta.
-4. Import dal foglio: [import.md](import.md).
-5. Quando i tester danno il via libera: **Actions → Rilascio → Run workflow → produzione**. Il revisore dell'environment approva e la produzione va su `ppu-api.example.org`.
+3. Controlla: `https://ppu-api-beta.example.org/health` risponde `{"status":"ok","environment":"beta"}`.
+4. Il webmaster collega l'MCP admin a Claude (vedi [mcp-admin.md](mcp-admin.md)) con l'URL `https://ppu-api-beta.example.org/mcp/admin`, e abilita i capi con `set_user` (entra solo chi ha una riga in `utenti`), assegnando unità e ruoli. Ricorda di segnare come `beta_tester` chi deve provare la beta.
+5. Import dal foglio: [import.md](import.md).
+6. Quando i tester danno il via libera: **Actions → Release → Run workflow → production**. Il revisore dell'environment approva e la produzione va su `ppu-api.example.org`.
 
 ## Problemi frequenti
 
@@ -188,6 +189,7 @@ Repository → **Settings**.
 | `PPU_KV_OAUTH_ID mancante` (o un'altra variabile) | variabile del repository o dell'environment non impostata |
 | Creazione dell'applicazione Access: `domain does not belong to zone` | il dominio non è una zona dell'account Cloudflare di Zero Trust (passo 2.1) |
 | Errore di autorizzazione nel deploy | permessi del token (passo 2.2), in particolare sulla zona per il dominio personalizzato |
-| `/api/io` risponde 401 anche dopo il login | `PPU_ACCESS_AUD` dell'environment diverso dall'AUD dell'applicazione Access |
+| `/api/me` risponde 401 anche dopo il login | `PPU_ACCESS_AUD` dell'environment diverso dall'AUD dell'applicazione Access |
 | Google: `redirect_uri_mismatch` | URI di reindirizzamento del client `PPU MCP` diverso dall'indirizzo del Worker |
 | L'MCP risponde "permesso negato" | l'utente non è webmaster nella tabella `utenti` |
+| «Non sei ancora abilitato a PPU» | l'account non ha una riga in `utenti`: lo abilita il webmaster con `set_user` (ADR 0011) |

@@ -1,34 +1,34 @@
 import { exports } from 'cloudflare:workers';
 import { describe, expect, it } from 'vitest';
-import { HEADER_UTENTE_TEST } from '../src/identita/index.ts';
+import { TEST_USER_HEADER } from '../src/identity/index.ts';
 
 let id = 0;
-async function rpc(metodo: string, params: unknown, email?: string, percorso = '/mcp/admin') {
+async function rpc(method: string, params: unknown, email?: string, path = '/mcp/admin') {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json, text/event-stream',
     'MCP-Protocol-Version': '2025-06-18',
   };
-  if (email) headers[HEADER_UTENTE_TEST] = email;
+  if (email) headers[TEST_USER_HEADER] = email;
   return exports.default.fetch(
-    new Request(`https://ppu.test${percorso}`, {
+    new Request(`https://ppu.test${path}`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ jsonrpc: '2.0', id: ++id, method: metodo, params }),
+      body: JSON.stringify({ jsonrpc: '2.0', id: ++id, method, params }),
     }),
   );
 }
 
-const testo = (r: { result: { content: { text: string }[] } }) => r.result.content[0]?.text ?? '';
+const text = (r: { result: { content: { text: string }[] } }) => r.result.content[0]?.text ?? '';
 
 describe('MCP admin', () => {
-  it('senza token risponde 401 con la sfida OAuth', async () => {
+  it('without a token answers 401 with the OAuth challenge', async () => {
     const r = await rpc('tools/list', {});
     expect(r.status).toBe(401);
     expect(r.headers.get('WWW-Authenticate')).toMatch(/resource_metadata/);
   });
 
-  it('pubblica i metadati OAuth del server', async () => {
+  it("publishes the server's OAuth metadata", async () => {
     const r = await exports.default.fetch(
       new Request('https://ppu.test/.well-known/oauth-authorization-server'),
     );
@@ -37,58 +37,64 @@ describe('MCP admin', () => {
     expect(meta.authorization_endpoint).toBe('https://ppu.test/authorize');
   });
 
-  it('elenca gli strumenti', async () => {
+  it('lists the tools', async () => {
     const r = await rpc('tools/list', {}, 'webmaster@example.org');
     expect(r.status).toBe(200);
-    const corpo = (await r.json()) as { result: { tools: { name: string }[] } };
-    expect(corpo.result.tools.map((t) => t.name)).toEqual(
+    const body = (await r.json()) as { result: { tools: { name: string }[] } };
+    expect(body.result.tools.map((t) => t.name)).toEqual(
       expect.arrayContaining([
-        'elenca_utenti',
-        'imposta_utente',
-        'elenca_unita',
-        'imposta_unita',
-        'elenca_tag',
-        'cambia_stato_tag',
-        'unisci_tag',
-        'conferma_operazione',
-        'annulla_operazione',
+        'whoami',
+        'list_users',
+        'set_user',
+        'list_units',
+        'set_unit',
+        'list_tags',
+        'set_tag_status',
+        'merge_tags',
+        'confirm_operation',
+        'cancel_operation',
       ]),
     );
   });
 
-  it('propone e conferma una modifica', async () => {
-    const proposta = await rpc(
+  it('proposes and confirms a change', async () => {
+    const proposal = await rpc(
       'tools/call',
-      { name: 'cambia_stato_tag', arguments: { tag_id: 8, stato: 'ufficiale' } },
+      { name: 'set_tag_status', arguments: { tagId: 8, status: 'ufficiale' } },
       'webmaster@example.org',
     );
-    const anteprima = JSON.parse(testo((await proposta.json()) as never)) as { id: string };
-    expect(anteprima.id).toBeTruthy();
-    const esito = await rpc(
+    const preview = JSON.parse(text((await proposal.json()) as never)) as { id: string };
+    expect(preview.id).toBeTruthy();
+    const outcome = await rpc(
       'tools/call',
-      { name: 'conferma_operazione', arguments: { id: anteprima.id } },
+      { name: 'confirm_operation', arguments: { id: preview.id } },
       'webmaster@example.org',
     );
-    expect(JSON.parse(testo((await esito.json()) as never))).toMatchObject({ id: anteprima.id });
+    expect(JSON.parse(text((await outcome.json()) as never))).toMatchObject({ id: preview.id });
   });
 
-  it('chi non è webmaster riceve un errore dallo strumento', async () => {
+  it('who is not a webmaster gets an error from the tool', async () => {
     const r = await rpc(
       'tools/call',
-      { name: 'elenca_utenti', arguments: {} },
+      { name: 'list_users', arguments: {} },
       'capogruppo@example.org',
     );
-    const corpo = (await r.json()) as { result: { isError: boolean; content: { text: string }[] } };
-    expect(corpo.result.isError).toBe(true);
-    expect(corpo.result.content[0]?.text).toMatch(/permesso_negato/);
+    const body = (await r.json()) as { result: { isError: boolean; content: { text: string }[] } };
+    expect(body.result.isError).toBe(true);
+    expect(body.result.content[0]?.text).toMatch(/forbidden/);
   });
 
-  it('un account escluso non entra', async () => {
+  it('an excluded account is rejected', async () => {
     const r = await rpc('tools/list', {}, 'segreteria@example.org');
     expect(r.status).toBe(403);
   });
 
-  it("l'endpoint per tutti i capi non è ancora attivo", async () => {
+  it('a domain account not enabled in utenti is rejected', async () => {
+    const r = await rpc('tools/list', {}, 'nuovo.capo@example.org');
+    expect(r.status).toBe(403);
+  });
+
+  it('the endpoint for every leader is not active yet', async () => {
     const r = await rpc('tools/list', {}, 'webmaster@example.org', '/mcp');
     expect(r.status).toBe(404);
   });

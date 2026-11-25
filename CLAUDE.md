@@ -10,6 +10,8 @@ Il piano completo è in `docs/piano.md`. Le decisioni architetturali sono in `do
   - endpoint MCP remoto (Streamable HTTP) per gli assistenti AI, con OAuth Google tramite `workers-oauth-provider`, limitato al dominio configurato;
   - API REST per la PWA.
 - **Database:** Cloudflare D1 (SQLite), creato con `--jurisdiction eu`. La giurisdizione si imposta solo alla creazione.
+- **Accesso ai dati:** Drizzle ORM per le query; `packages/worker/src/db/schema.ts` rispecchia le migrazioni, che restano la fonte di verità (ADR 0010).
+- **File:** Cloudflare R2 con giurisdizione UE, per le immagini dei distintivi: il Worker le scarica dalla fonte e le serve alla PWA, che non chiama mai siti esterni (ADR 0009).
 - **PWA:** Svelte + Vite + `vite-plugin-pwa`, build statica su Cloudflare Pages, protetta da Cloudflare Access (Google Workspace come provider, regola sul dominio). Il Worker verifica il JWT di Access su ogni chiamata della PWA.
 - **MCP admin:** strumenti riservati al webmaster (utenti, ruoli, unità, revisione dei tag).
 - **Notifiche:** webhook in ingresso di Google Chat.
@@ -20,19 +22,21 @@ Il piano completo è in `docs/piano.md`. Le decisioni architetturali sono in `do
 
 ### Identità e permessi
 - Google Workspace serve **solo** per identità e login. Nessun gruppo né attributo Workspace viene letto.
-- Un account del dominio configurato è un capo con **lettura su tutto**.
-- Unità e ruoli stanno nella tabella `utenti` (chiave: email):
+- Il login è riservato agli account del dominio configurato, ma **entra in PPU solo chi ha una riga nella tabella `utenti`** (ADR 0011). Una riga senza unità né ruoli è un capo con **lettura su tutto**. Chi non ha una riga riceve un errore che lo invita a chiedere al webmaster.
+- Unità e ruoli stanno nella tabella `utenti` (chiave: email), gestita dal webmaster con l'MCP admin:
   - `unita`: una o più unità in cui il capo può modificare;
   - `accesso_completo`: modifica su tutte le unità;
   - `buona_strada`: può confermare l'allineamento con Buona Strada;
   - `webmaster`: accede all'MCP admin;
-  - `beta_tester`, `escluso`.
+  - `beta_tester`;
+  - `escluso`: accesso revocato (le righe non si cancellano).
+- Il primo webmaster si inserisce a mano una volta, all'installazione (`docs/installazione/pipeline.md`).
 - Ogni unità può avere più capi con gli stessi permessi.
 - I dati di un capo li modifica il capo stesso o chi ha accesso completo.
 - **I permessi si controllano sempre nel livello di servizi**, mai solo nella UI o nel prompt del modello. MCP e REST chiamano le stesse funzioni.
 
 ### Unità
-Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca. Le unità attive sono configurabili per gruppo.
+Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca. Le unità attive sono configurabili per gruppo: il file di configurazione crea quelle iniziali, poi si gestiscono dall'MCP admin (aggiunta, rinomina, disattivazione), con anteprima, conferma e registro.
 
 ### Flusso delle modifiche
 - Ogni modifica passa da **anteprima prima/dopo → conferma esplicita** di chi la fa.
@@ -53,14 +57,15 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 
 ## Modello dati (sintesi)
 
-- `associati`: id interno (chiave), codice censimento (univoco, facoltativo), anagrafica, unità attuale, residenza (indirizzo, CAP, comune, provincia), contatti, privacy, stato (attivo/archiviato).
+- `associati`: id interno (chiave), codice censimento (univoco, facoltativo), anagrafica, unità attuale, residenza (indirizzo, CAP, comune, provincia), contatti, flag "riceve comunicazioni", privacy, stato (attivo/archiviato).
 - `storico_unita`: associato, unità, anno scout.
-- `tutori`: associato, relazione, anagrafica, CF, contatti, flag "riceve comunicazioni", collegamento facoltativo a un associato (capo che è anche genitore), archiviato.
+- `tutori`: associato, ruolo (madre, padre, tutore, affidatario, altro), anagrafica, CF, contatti, collegamento facoltativo a un associato (capo che è anche genitore), archiviato.
 - `relazioni`: due associati + tipo; l'inversa si crea in automatico.
 - `anni_scout`: nome, data di inizio (data dei passaggi, variabile), attuale. Si crea con l'azione "Crea nuovo anno".
 - `progressione`: voci dal catalogo di branca o voci libere (data, tipo, descrizione).
-- `catalogo_progressione`: voci note per branca.
-- `tag`: nome, tipo, stato (libero/ufficiale/archiviato), anno facoltativo, flag esclusivo, creato da. Qualsiasi capo crea e usa tag; il webmaster li rende ufficiali, li unisce o li archivia.
+- `catalogo_progressione`: voci note per branca, versionate per data di aggiornamento del Regolamento metodologico (`versioni_regolamento`).
+- `tipi_tag`: dal file di configurazione del gruppo, li decide il webmaster; il tipo `varie` (obbligatorio) raccoglie le proposte non categorizzate ed è il predefinito.
+- `tag`: nome, tipo, stato (libero/ufficiale/archiviato), anno facoltativo, flag esclusivo, creato da. Qualsiasi capo crea e usa tag, quanti ne vuole dentro ogni tipo; il webmaster li rende ufficiali, li unisce o li archivia.
 - `associati_tag`: associato, tag, anno scout, nota.
 - `riunioni` e `presenze`: per ogni associato presente/assente/giustificato, motivazione facoltativa, registrabile anche prima della riunione.
 - `utenti`: vedi sopra.
@@ -69,10 +74,14 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 
 ## Convenzioni
 
-- **Lingua:** UI, documentazione utente e ADR in italiano. Tabelle e colonne di dominio in italiano (`associati`, `unita`, `riunioni`), senza accenti. Codice tecnico (funzioni di infrastruttura, utility) in inglese.
-- **Migrazioni:** lo schema esiste solo come migrazioni SQL numerate in `migrations/` (`wrangler d1 migrations`). Mai modifiche a mano sul database. Ogni migrazione deve funzionare sia con la versione corrente sia con la precedente (beta e produzione condividono lo stesso D1): prima si aggiunge, poi si toglie in una migrazione successiva.
-- **Seed:** `seed/base/` con i dati standard AGESCI (branche, unità, cataloghi, tipi di tag); `seed/demo/` con dati finti per preview, test E2E e demo.
-- **Configurazione:** dominio, nome del gruppo e branding in configurazione e segreti Cloudflare; le unità sono righe della tabella `unita` (ADR 0013). Nessun valore specifico del gruppo nel codice.
+- **Lingua:**
+  - UI, documentazione e ADR in italiano.
+  - Schema del database in italiano: tabelle, colonne e valori di dominio (`associati`, `unita`, `riunioni`, `'da_riportare'`), senza accenti. Anche le chiavi del file di configurazione del gruppo seguono lo schema.
+  - Tutto il codice in inglese: nomi di file, funzioni, variabili e tipi, commenti (anche nell'SQL), percorsi e campi delle API, variabili d'ambiente, messaggi di log ed errori interni, descrizioni dei test.
+  - I testi che l'utente legge sono UI e restano in italiano, anche quando li produce il codice (per esempio il `message` degli errori delle API).
+- **Migrazioni:** lo schema esiste solo come migrazioni SQL numerate in `migrations/` (`wrangler d1 migrations`). Mai modifiche a mano sul database. Ogni migrazione deve funzionare sia con la versione corrente sia con la precedente (beta e produzione condividono lo stesso D1): prima si aggiunge, poi si toglie in una migrazione successiva. Se cambiano tabelle o colonne, nella stessa pull request si aggiorna anche lo schema Drizzle: un test confronta i due.
+- **Dati iniziali** (dettagli in `seed/README.md`): branche, unità e tipi di tag dal file di configurazione del gruppo (esempio in `config/gruppo.esempio.json`, tradotto in SQL da `scripts/group-seed.ts`); `seed/base/` con il catalogo di progressione; dati finti per preview, test E2E e demo generati da `scripts/demo-seed.ts`, senza file SQL nel repository.
+- **Configurazione:** dominio, nome del gruppo e branding in configurazione e segreti Cloudflare; branche, unità e tipi di tag nel file di configurazione del gruppo, che ognuno compila con ciò che gli serve e che si può riapplicare per aggiungere voci. Branche e tipi di tag cambiano solo dal file; per le unità il file vale per l'installazione, poi la fonte è il database, modificato dall'MCP admin (il file non sovrascrive le unità esistenti). Nessun valore specifico del gruppo nel codice.
 - **ADR:** `docs/adr/NNNN-titolo.md` (contesto, decisione, alternative, conseguenze, stato). Un ADR accettato non si modifica: se ne scrive uno nuovo che lo supera.
 - **Commit:** firmati con DCO (`git commit -s`). Pull request piccole, una cosa per volta.
 
@@ -88,7 +97,7 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 
 Fase 0 — Fondamenta. Ordine suggerito:
 1. Struttura del repository, README, LICENSE (AGPL-3.0), CONTRIBUTING con DCO.
-2. ADR 0001–0011 dalle decisioni del piano.
+2. ADR 0001–0008 dalle decisioni architetturali del piano.
 3. Prima migrazione dello schema + seed base + seed demo.
 4. Worker con login Google, lettura della tabella `utenti`, registro modifiche e accessi.
 5. Pipeline GitHub Actions (lint, test, build, preview, E2E).
@@ -98,9 +107,10 @@ Fase 0 — Fondamenta. Ordine suggerito:
 ## Comandi
 
 - `pnpm check`: lint e formattazione (Biome).
-- `pnpm test`: test dello schema (`node:sqlite`) e del Worker (Vitest nel runtime Workers).
+- `pnpm test`: test dello schema (SQLite in memoria con `node:sqlite`) e del Worker (Vitest nel runtime Workers).
 - `pnpm typecheck`: controllo dei tipi TypeScript.
-- `pnpm seed:demo`: rigenera `seed/demo/demo.sql` da `scripts/genera-seed-demo.ts`.
+- `pnpm -s seed:group [file] > gruppo.sql`: SQL dei dati del gruppo dal file di configurazione (default: l'esempio).
+- `pnpm -s seed:demo > demo.sql`: SQL dei dati finti da `scripts/demo-seed.ts`.
 - `pnpm e2e`: test E2E Playwright contro `wrangler dev` con D1 locale e seed demo (con `E2E_BASE_URL` contro una preview).
-- `pnpm --filter @ppu/worker db:locale`: ricrea il D1 locale con migrazioni, seed base e demo.
-- Pipeline (GitHub Actions) e configurazione per gruppo: `docs/installazione/pipeline.md`. La configurazione di deploy si genera con `scripts/configura-wrangler.ts`.
+- `pnpm --filter @ppu/worker db:local`: ricrea il D1 locale con migrazioni, configurazione d'esempio, seed base e dati demo.
+- Pipeline (GitHub Actions) e configurazione per gruppo: `docs/installazione/pipeline.md`. La configurazione di deploy si genera con `scripts/wrangler-config.ts`.

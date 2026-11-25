@@ -34,7 +34,7 @@ Guida di installazione: [docs/installazione/cloudflare-e-google.md](docs/install
 2. **Cloudflare**: il dominio del gruppo deve essere una zona **dello stesso account** di Zero Trust; database D1 `ppu` con giurisdizione **UE** (si sceglie solo alla creazione); KV `ppu-oauth`; team Zero Trust (`<team>.cloudflareaccess.com`).
 3. **Zero Trust → Integrazioni → Provider di identità**: provider **Google** (non Google Workspace) con il client `PPU Access`.
 4. **Applicazioni Access** self-hosted solo sul percorso `/api`: `PPU API` (email del dominio) e `PPU API beta` (elenco dei tester), solo Google, reindirizzamento diretto a Google, sessione di 12 ore.
-5. **GitHub**: segreti, variabili (`PPU_D1_ID`, `PPU_KV_OAUTH_ID`, ...) ed environment `beta`/`produzione` con l'AUD di ciascuna applicazione.
+5. **GitHub**: segreti, variabili (`PPU_D1_ID`, `PPU_KV_OAUTH_ID`, ...) ed environment `beta`/`production` con l'AUD di ciascuna applicazione.
 
 ## Sviluppo
 

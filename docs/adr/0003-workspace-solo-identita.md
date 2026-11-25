@@ -1,6 +1,6 @@
 # 0003. Workspace solo per identità, ruoli nel database
 
-- **Stato:** Accettata
+- **Stato:** Accettata; la parte sugli account senza scheda in `utenti` è superata da [0011](0011-accesso-solo-con-riga-in-utenti.md)
 - **Data:** 2026-11-12
 
 ## Contesto

@@ -1,170 +1,166 @@
-// Strumenti MCP riservati al webmaster. Ogni strumento chiama i servizi, che
-// controllano i permessi: questo file non decide nulla da solo.
+// MCP tools reserved to the webmaster. Every tool calls the services, which
+// check the permissions: this file decides nothing on its own.
+//
+// Tool descriptions are read by the model; the texts the user reads (preview
+// descriptions, error messages) come from the services, in Italian.
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker';
 import { z } from 'zod';
-import { ErrorePpu } from '../errori.ts';
-import { elencaTag } from '../servizi/admin/tag.ts';
-import { elencaUnita } from '../servizi/admin/unita.ts';
-import { elencaUtenti, richiediWebmaster } from '../servizi/admin/utenti.ts';
-import { annulla, conferma, proponi } from '../servizi/anteprime.ts';
-import type { Contesto } from '../servizi/contesto.ts';
+import { AppError } from '../errors.ts';
+import { listTags } from '../services/admin/tags.ts';
+import { listUnits } from '../services/admin/units.ts';
+import { ensureWebmaster, listUsers } from '../services/admin/users.ts';
+import type { Context } from '../services/context.ts';
+import { cancel, confirm, propose } from '../services/previews.ts';
 
-const NOTA_CONFERMA =
-  'Non modifica nulla: restituisce un\'anteprima prima/dopo con un id. Mostrala all\'utente e, solo dopo il suo esplicito "sì", chiama conferma_operazione.';
+const CONFIRMATION_NOTE =
+  'Changes nothing: returns a before/after preview with an id. Show it to the user and call confirm_operation only after their explicit "yes".';
 
-async function esegui(fn: () => Promise<unknown>): Promise<CallToolResult> {
+const TAG_STATUS = z.enum(['libero', 'ufficiale', 'archiviato']);
+
+async function run(fn: () => Promise<unknown>): Promise<CallToolResult> {
   try {
-    const risultato = await fn();
-    return { content: [{ type: 'text', text: JSON.stringify(risultato ?? { ok: true }) }] };
+    const result = await fn();
+    return { content: [{ type: 'text', text: JSON.stringify(result ?? { ok: true }) }] };
   } catch (e) {
-    if (e instanceof ErrorePpu) {
-      return { isError: true, content: [{ type: 'text', text: `${e.codice}: ${e.message}` }] };
+    if (e instanceof AppError) {
+      return { isError: true, content: [{ type: 'text', text: `${e.code}: ${e.message}` }] };
     }
     throw e;
   }
 }
 
-export function creaServerAdmin(ctx: Contesto): McpServer {
+export function createAdminServer(ctx: Context): McpServer {
   const server = new McpServer(
     { name: 'ppu-admin', version: '0.1.0' },
     {
       jsonSchemaValidator: new CfWorkerJsonSchemaValidator(),
       instructions:
-        'Strumenti di amministrazione di PPU, riservati al webmaster. Ogni modifica passa da anteprima e conferma esplicita.',
+        'PPU administration tools, reserved to the webmaster. Every change goes through a preview and an explicit confirmation. Talk to the user in Italian.',
     },
   );
 
   server.registerTool(
-    'chi_sono',
+    'whoami',
     {
-      description: "Mostra email e ruoli dell'utente collegato.",
+      description: 'Shows the email and roles of the connected user.',
       annotations: { readOnlyHint: true },
     },
     () =>
-      esegui(async () => ({
-        email: ctx.utente.email,
-        webmaster: ctx.utente.webmaster,
-        accessoCompleto: ctx.utente.accessoCompleto,
+      run(async () => ({
+        email: ctx.user.email,
+        webmaster: ctx.user.webmaster,
+        fullAccess: ctx.user.fullAccess,
       })),
   );
 
   server.registerTool(
-    'elenca_utenti',
+    'list_users',
     {
-      description: 'Elenca i capi registrati nella tabella utenti con unità e ruoli.',
+      description: 'Lists the leaders in the utenti table with their units and roles.',
       annotations: { readOnlyHint: true },
     },
-    () => esegui(() => elencaUtenti(ctx)),
+    () => run(() => listUsers(ctx)),
   );
 
   server.registerTool(
-    'imposta_utente',
+    'set_user',
     {
-      description: `Crea un utente o ne cambia unità, ruoli o scheda associato. I campi omessi restano invariati; "unita" sostituisce l'elenco. ${NOTA_CONFERMA}`,
+      description: `Creates a user (only users in this table can access PPU) or changes their units, roles or member record. Omitted fields stay unchanged; "units" replaces the list. ${CONFIRMATION_NOTE}`,
       inputSchema: {
-        email: z.string().describe('Email Workspace del capo'),
-        unita: z.array(z.string()).optional().describe('Id delle unità in cui può modificare'),
-        accesso_completo: z.boolean().optional(),
-        buona_strada: z.boolean().optional(),
+        email: z.string().describe("Leader's Workspace email"),
+        units: z.array(z.string()).optional().describe('Ids of the units where they can edit'),
+        fullAccess: z.boolean().optional(),
+        buonaStrada: z.boolean().optional(),
         webmaster: z.boolean().optional(),
-        beta_tester: z.boolean().optional(),
-        escluso: z
-          .boolean()
-          .optional()
-          .describe('Esclude un account del dominio che non è un capo'),
-        associato_id: z.number().int().nullable().optional().describe('Scheda associato del capo'),
+        betaTester: z.boolean().optional(),
+        excluded: z.boolean().optional().describe('Revokes access to PPU (rows are never deleted)'),
+        memberId: z.number().int().nullable().optional().describe("Leader's member record"),
       },
     },
-    (args) => esegui(() => proponi(ctx, 'utente.imposta', args)),
+    (args) => run(() => propose(ctx, 'user.set', args)),
   );
 
   server.registerTool(
-    'elenca_unita',
+    'list_units',
     {
-      description: 'Elenca le unità con stato, associati attivi e numero di capi.',
+      description: 'Lists the units with their state, active members and number of leaders.',
       annotations: { readOnlyHint: true },
     },
-    () => esegui(() => elencaUnita(ctx)),
+    () => run(() => listUnits(ctx)),
   );
 
   server.registerTool(
-    'imposta_unita',
+    'set_unit',
     {
-      description: `Aggiunge un'unità o ne cambia nome, branca, ordine o stato attivo. Le unità non si cancellano: si disattivano. ${NOTA_CONFERMA}`,
+      description: `Adds a unit or changes its name, branch, order or active state. Units are never deleted: they are deactivated. ${CONFIRMATION_NOTE}`,
       inputSchema: {
-        id: z.string().describe('Identificativo, per esempio "lupetti" o "branco_misto"'),
-        nome: z.string().optional(),
-        branca_id: z.enum(['lc', 'eg', 'rs', 'coca']).optional(),
-        attiva: z.boolean().optional(),
-        ordine: z.number().int().optional(),
+        id: z.string().describe('Identifier, e.g. "lupetti" or "branco_misto"'),
+        name: z.string().optional(),
+        branchId: z.string().optional().describe('Id of a configured branch, e.g. "lc"'),
+        active: z.boolean().optional(),
+        sortOrder: z.number().int().optional(),
       },
     },
-    (args) => esegui(() => proponi(ctx, 'unita.imposta', args)),
+    (args) => run(() => propose(ctx, 'unit.set', args)),
   );
 
   server.registerTool(
-    'elenca_tag',
+    'list_tags',
     {
-      description: 'Elenca i tag con tipo, stato e numero di utilizzi attivi, per la revisione.',
-      inputSchema: {
-        stato: z.enum(['libero', 'ufficiale', 'archiviato']).optional(),
-        tipo: z.string().optional(),
-      },
+      description: 'Lists the tags with type, status and number of active uses, for the review.',
+      inputSchema: { status: TAG_STATUS.optional(), type: z.string().optional() },
       annotations: { readOnlyHint: true },
     },
-    (args) => esegui(() => elencaTag(ctx, args)),
+    (args) => run(() => listTags(ctx, args)),
   );
 
   server.registerTool(
-    'cambia_stato_tag',
+    'set_tag_status',
     {
-      description: `Rende un tag ufficiale, lo archivia o lo riporta a libero. ${NOTA_CONFERMA}`,
-      inputSchema: {
-        tag_id: z.number().int(),
-        stato: z.enum(['libero', 'ufficiale', 'archiviato']),
-      },
+      description: `Makes a tag official (ufficiale), archives it (archiviato) or sets it back to free (libero). ${CONFIRMATION_NOTE}`,
+      inputSchema: { tagId: z.number().int(), status: TAG_STATUS },
     },
-    (args) => esegui(() => proponi(ctx, 'tag.stato', args)),
+    (args) => run(() => propose(ctx, 'tag.status', args)),
   );
 
   server.registerTool(
-    'unisci_tag',
+    'merge_tags',
     {
-      description: `Unisce il tag "da_id" nel tag "a_id": le assegnazioni passano al secondo, il primo viene archiviato. ${NOTA_CONFERMA}`,
-      inputSchema: { da_id: z.number().int(), a_id: z.number().int() },
+      description: `Merges tag "fromId" into tag "toId": the assignments move to the second, the first is archived. ${CONFIRMATION_NOTE}`,
+      inputSchema: { fromId: z.number().int(), toId: z.number().int() },
     },
-    (args) => esegui(() => proponi(ctx, 'tag.unisci', args)),
+    (args) => run(() => propose(ctx, 'tag.merge', args)),
   );
 
   server.registerTool(
-    'conferma_operazione',
+    'confirm_operation',
     {
       description:
-        'Applica un\'operazione proposta, dopo il "sì" esplicito dell\'utente. Per le operazioni di massa passa anche "conteggio" con il numero mostrato nell\'anteprima.',
-      inputSchema: { id: z.string(), conteggio: z.number().int().optional() },
+        'Applies a proposed operation, after the user\'s explicit "yes". For mass operations also pass "count" with the number shown in the preview.',
+      inputSchema: { id: z.string(), count: z.number().int().optional() },
       annotations: { destructiveHint: false },
     },
     (args) =>
-      esegui(async () => {
-        richiediWebmaster(ctx);
-        return conferma(ctx, args.id, { conteggio: args.conteggio });
+      run(async () => {
+        ensureWebmaster(ctx);
+        return confirm(ctx, args.id, { count: args.count });
       }),
   );
 
   server.registerTool(
-    'annulla_operazione',
+    'cancel_operation',
     {
-      description: "Annulla un'operazione proposta e non ancora confermata.",
+      description: 'Cancels a proposed operation that has not been confirmed yet.',
       inputSchema: { id: z.string() },
     },
     (args) =>
-      esegui(async () => {
-        richiediWebmaster(ctx);
-        await annulla(ctx, args.id);
-        return { annullata: args.id };
+      run(async () => {
+        ensureWebmaster(ctx);
+        await cancel(ctx, args.id);
+        return { cancelled: args.id };
       }),
   );
 

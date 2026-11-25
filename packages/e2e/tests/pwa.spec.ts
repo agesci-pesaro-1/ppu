@@ -41,6 +41,15 @@ test.describe('PWA', () => {
     await expect(page.getByText('Genitori e tutori')).toBeVisible();
     await expect(page.getByText('Figlio/a di')).toBeVisible();
     await expect(page.locator('body')).not.toContainText(/DEMO\d|DEMOT/);
+    // Unit history: every entry shows both the scout year and the unit
+    const history = page
+      .locator('.card')
+      .filter({ has: page.getByRole('heading', { name: 'Storico unità' }) })
+      .getByRole('listitem');
+    await expect(history.first()).toBeVisible();
+    for (const item of await history.all()) {
+      await expect(item).toHaveText(/^\d{4}\/\d{2} · \S/);
+    }
     if (SCREENSHOT_DIR) {
       await page.screenshot({ path: `${SCREENSHOT_DIR}/screenshot-pwa-card.png` });
       await page.screenshot({

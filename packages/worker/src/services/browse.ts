@@ -230,6 +230,9 @@ export async function memberCard(db: Db, user: User, id: number): Promise<Member
     .from(members)
     .as('other');
 
+  // db.batch() on D1 returns rows as objects keyed by column name: two selected
+  // columns with the same SQL name (e.g. `nome` from two joined tables) collapse
+  // into one. Joined columns that clash are aliased with `.as()`.
   const [guardianRows, relationshipRows, tagRows, progressionRows, counts, latest, history] =
     await db.batch([
       db
@@ -290,7 +293,7 @@ export async function memberCard(db: Db, user: User, id: number): Promise<Member
         .select({
           date: meetings.date,
           type: meetings.type,
-          unit: units.name,
+          unit: sql<string>`${units.name}`.as('unit'),
           status: attendance.status,
           reason: attendance.reason,
         })
@@ -301,7 +304,10 @@ export async function memberCard(db: Db, user: User, id: number): Promise<Member
         .orderBy(desc(meetings.date))
         .limit(10),
       db
-        .select({ year: scoutYears.name, unit: units.name })
+        .select({
+          year: sql<string>`${scoutYears.name}`.as('year'),
+          unit: sql<string>`${units.name}`.as('unit'),
+        })
         .from(unitHistory)
         .innerJoin(scoutYears, eq(scoutYears.id, unitHistory.scoutYearId))
         .innerJoin(units, eq(units.id, unitHistory.unitId))

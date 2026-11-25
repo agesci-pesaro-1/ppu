@@ -86,8 +86,28 @@ describe('browsing', () => {
       'figlio',
       'fratello',
     ]);
-    expect(c.unitHistory.length).toBeGreaterThan(0);
     expect(c.privacy).toMatchObject({ privacyNotice: true });
+  });
+
+  it('card: unit history has both year and unit (joined `nome` columns)', async () => {
+    const id = await memberId('Arcangeli Emma');
+    const expected = (
+      await env.DB.prepare(
+        `SELECT y.nome AS year, u.nome AS unit FROM storico_unita s
+           JOIN anni_scout y ON y.id = s.anno_scout_id
+           JOIN unita u ON u.id = s.unita_id
+         WHERE s.associato_id = ? ORDER BY y.data_inizio DESC, u.ordine`,
+      )
+        .bind(id)
+        .all<{ year: string; unit: string }>()
+    ).results;
+    expect(expected.length).toBeGreaterThan(0);
+    const c = (await (await get(`/api/members/${id}`, LEADER)).json()) as {
+      unitHistory: { year: string; unit: string }[];
+      attendance: { latest: { date: string; unit: string }[] };
+    };
+    expect(c.unitHistory).toEqual(expected);
+    for (const r of c.attendance.latest) expect(r.unit).toEqual(expect.any(String));
   });
 
   it("card: adult members' archived guardians are not shown", async () => {

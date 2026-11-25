@@ -1,0 +1,96 @@
+# Release: on merge to main, migrations on the production D1 and beta deploy;
+# production is promoted by hand ("production" environment with approval).
+# Deploys only from here, never from a local machine.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy
+        type: choice
+        options: [production, beta]
+        default: production
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.event_name == 'push' && 'beta' || inputs.environment }}
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ github.event_name == 'push' && 'beta' || inputs.environment }}
+    env:
+      TARGET: ${{ github.event_name == 'push' && 'beta' || inputs.environment }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Check prerequisites
+        id: prerequisites
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::Cloudflare secrets missing: release skipped (docs/installazione/pipeline.md)."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Install and check
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+          pnpm check
+          pnpm typecheck
+          pnpm test
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Generate the configuration
+        env:
+          PPU_ENVIRONMENT: ${{ env.TARGET }}
+          PPU_D1_NAME: ${{ vars.PPU_D1_NAME }}
+          PPU_D1_ID: ${{ vars.PPU_D1_ID }}
+          PPU_DOMAIN: ${{ vars.PPU_DOMAIN }}
+          PPU_GROUP_NAME: ${{ vars.PPU_GROUP_NAME }}
+          PPU_ACCESS_TEAM_DOMAIN: ${{ vars.PPU_ACCESS_TEAM_DOMAIN }}
+          PPU_ACCESS_AUD: ${{ vars.PPU_ACCESS_AUD }}
+          PPU_ROUTE: ${{ vars.PPU_ROUTE }}
+        run: node scripts/wrangler-config.ts
+
+      # Defence in depth, on top of src/config.ts and the generator.
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Block test mode outside previews
+        working-directory: packages/worker
+        run: |
+          if grep -q 'TEST_MODE' wrangler.generated.json; then
+            echo "::error::The $TARGET configuration contains TEST_MODE: deploy blocked."
+            exit 1
+          fi
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Migrations on the production D1
+        working-directory: packages/worker
+        env:
+          CI: "1"
+        run: pnpm exec wrangler d1 migrations apply DB --remote -c wrangler.generated.json --env "$TARGET"
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Deploy the Worker
+        working-directory: packages/worker
+        run: |
+          pnpm exec wrangler deploy -c wrangler.generated.json --env "$TARGET" \
+            --message "${GITHUB_SHA::7} from GitHub Actions"

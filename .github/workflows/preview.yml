@@ -1,0 +1,133 @@
+# One preview per pull request: separate D1 with demo data, Worker with a
+# simulated identity, E2E tests. Skipped (with a notice) without Cloudflare
+# secrets or for pull requests from forks, which receive no secrets.
+name: Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Preview and E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NAME: ppu-preview-pr-${{ github.event.pull_request.number }}
+    steps:
+      - name: Check prerequisites
+        id: prerequisites
+        env:
+          FROM_FORK: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          if [ "$FROM_FORK" = "true" ]; then
+            echo "::notice::Pull request from a fork: preview skipped (no secrets available)."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          elif [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID missing: preview skipped (docs/installazione/pipeline.md)."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Install dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Create the preview D1 (if missing)
+        id: d1
+        working-directory: packages/worker
+        run: |
+          id="$(pnpm exec wrangler d1 list --json | jq -r --arg n "$NAME" '.[] | select(.name == $n) | .uuid')"
+          if [ -z "$id" ]; then
+            pnpm exec wrangler d1 create "$NAME" --jurisdiction eu
+            id="$(pnpm exec wrangler d1 list --json | jq -r --arg n "$NAME" '.[] | select(.name == $n) | .uuid')"
+          fi
+          test -n "$id"
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Generate the configuration
+        env:
+          PPU_ENVIRONMENT: preview
+          PPU_D1_NAME: ${{ env.NAME }}
+          PPU_D1_ID: ${{ steps.d1.outputs.id }}
+          PPU_WORKER_NAME: ${{ env.NAME }}
+        run: node scripts/wrangler-config.ts
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Migrations and initial data
+        working-directory: packages/worker
+        env:
+          CI: "1"
+        run: |
+          w() { pnpm exec wrangler "$@" -c wrangler.generated.json --env preview; }
+          w d1 migrations apply DB --remote
+          # Example configuration and seed/base can be applied again (seed/README.md).
+          node ../../scripts/group-seed.ts > "$RUNNER_TEMP/group.sql"
+          w d1 execute DB --remote --file "$RUNNER_TEMP/group.sql"
+          for f in ../../seed/base/*.sql; do w d1 execute DB --remote --file "$f"; done
+          # Demo data uses fixed ids: only applied to an empty database.
+          n="$(w d1 execute DB --remote --json --command 'SELECT count(*) AS n FROM associati' | jq -r '.[0].results[0].n')"
+          if [ "$n" = "0" ]; then
+            node ../../scripts/demo-seed.ts > "$RUNNER_TEMP/demo.sql"
+            w d1 execute DB --remote --file "$RUNNER_TEMP/demo.sql"
+          else
+            echo "Demo data already present ($n members)."
+          fi
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Deploy the Worker
+        id: deploy
+        working-directory: packages/worker
+        run: |
+          pnpm exec wrangler deploy -c wrangler.generated.json --env preview | tee deploy.log
+          url="$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1)"
+          test -n "$url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Comment the address on the pull request
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        with:
+          # The comment is read by people: it stays in Italian.
+          script: |
+            const marker = '<!-- ppu-preview -->';
+            const body = `${marker}\n**Preview:** ${process.env.URL}\n\nSolo dati inventati. Identità simulata con l'header \`X-Ppu-Test-User\` (utenti dei dati demo su example.org).\n\nCommit: ${context.payload.pull_request.head.sha}`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const existing = comments.find((c) => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: E2E tests on the preview
+        env:
+          E2E_BASE_URL: ${{ steps.deploy.outputs.url }}
+          CI: "1"
+        run: pnpm --filter @ppu/e2e e2e

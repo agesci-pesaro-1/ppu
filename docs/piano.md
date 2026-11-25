@@ -59,10 +59,10 @@ Database D1 (SQLite) con giurisdizione UE: ogni voce sotto è una tabella, i per
 
 | Collezione | Contenuto |
 | --- | --- |
-| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, telefono casa, email); privacy (informativa con data, consensi 2A, 2B, 2C, note privacy); stato (attivo o archiviato) |
-| `associati/{id}` → genitori/tutori | Lista: relazione, anagrafica, CF, cellulare, email, flag "riceve comunicazioni", collegamento facoltativo al profilo se il tutore è anche associato. Archiviati automaticamente ai 18 anni |
+| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, email); flag "riceve comunicazioni"; privacy (informativa con data, consensi 2A, 2B, 2C, note privacy); stato (attivo o archiviato) |
+| `associati/{id}` → genitori/tutori | Lista: ruolo (madre, padre, tutore, affidatario, altro), anagrafica, CF, cellulare, email, collegamento facoltativo al profilo se il tutore è anche associato. Archiviati automaticamente ai 18 anni |
 | `associati/{id}/progressione/{voce}` | Voci dal catalogo di branca (prede, specialità, voli, tappe, brevetti…) o voci libere (data, tipo, descrizione). Le vecchie note generali diventano voci libere |
-| `relazioni/{id}` | Due associati + tipo (genitore/figlio, fratello/sorella, zio/nipote, cugino, coniuge, altro), con l'inversa creata in automatico. Vale anche per i capi |
+| `relazioni/{id}` | Due associati + tipo (genitore/figlio, fratello/sorella, zio/nipote, cugino, altro), con l'inversa creata in automatico. Vale anche per i capi |
 | `catalogo/{branca}` | Voci note di progressione per branca, gestite da chi ha accesso completo |
 | `riunioni/{id}` | Unità, data, tipo; per ogni associato presente, assente o giustificato, con motivazione facoltativa (anche comunicata prima della riunione) |
 | `modifiche/{id}` | Registro: autore, data, campo, prima/dopo, assistente usato, stato Buona Strada, chi ha confermato |
@@ -71,6 +71,7 @@ Database D1 (SQLite) con giurisdizione UE: ogni voce sotto è una tabella, i per
 - **`utenti/{email}`:** unità (una o più), accesso completo, Buona Strada, webmaster, esclusione; gestita dal webmaster tramite MCP admin.
 - **`anni_scout`:** nome (per esempio 2026/27), data di inizio, anno attuale. L'anno cambia alla data dei passaggi, che varia ogni anno: chi ha accesso completo preme "Crea nuovo anno" e da lì partono i passaggi.
 - **`tag/{id}`:** nome, tipo, stato (libero, ufficiale, archiviato), anno scout facoltativo, flag "esclusivo" (una sola voce di quel tipo per persona e anno, per esempio la squadriglia), creato da. Qualsiasi capo li crea e li usa su tutti gli associati; il webmaster vede tutti i tag con il loro utilizzo e decide quali rendere ufficiali, quali unire e quali archiviare.
+- **`tipi_tag`:** li decide solo il webmaster, nel file di configurazione del gruppo; dentro ogni tipo qualsiasi capo crea i tag che vuole. La configurazione d'esempio contiene squadriglia, sestiglia e varie. Il tipo **varie** raccoglie le proposte non categorizzate ed è il predefinito quando un capo non sceglie un tipo: nella revisione il webmaster sposta quei tag nel tipo giusto o crea un tipo nuovo.
 - **`associati_tag`:** associato, tag, anno scout, nota facoltativa, chi e quando. Salvati subito con registro, fuori dal flusso Buona Strada.
 - **Fuori dal sistema:** dati sanitari, che restano offline.
 - **Codici fiscali:** usati solo per Buona Strada, non mostrati nelle viste normali.
@@ -146,9 +147,9 @@ Un altro gruppo deve poter partire da zero con un repository, un account Cloudfl
 
 - **Un'installazione per gruppo:** stesso codice, Worker, D1 e Access separati. Nessun dato condiviso tra gruppi: ogni gruppo è titolare dei propri dati.
 - **Migrazioni come fonte di verità:** lo schema esiste solo come migrazioni SQL numerate (`wrangler d1 migrations`), applicate in ordine dalla pipeline; mai modifiche a mano sul database.
-- **Dati di base (seed):** branche e unità standard AGESCI, cataloghi di progressione per branca, tipi di tag comuni. Ogni gruppo li adatta dopo l'installazione.
-- **Dati finti (seed di test):** associati, famiglie e riunioni inventati, usati da preview, test E2E e demo. Mai dati reali nel repository.
-- **Configurazione, non codice:** dominio, nome del gruppo, unità attive, colori e logo stanno in un file di configurazione e nei segreti di Cloudflare. Niente @agescipesaro1.it scritto nel codice.
+- **Dati di base:** branche, unità e tipi di tag dal file di configurazione del gruppo, che ognuno compila con ciò che gli serve partendo dall'esempio con le unità standard AGESCI; il catalogo di progressione dal Regolamento metodologico, solo per le branche configurate.
+- **Dati finti (seed di test):** associati, famiglie e riunioni inventati, generati da uno script e usati da preview, test E2E e demo. Nessun file SQL di dati nel repository, mai dati reali.
+- **Configurazione, non codice:** dominio, nome del gruppo, branche, unità, tipi di tag, colori e logo stanno in un file di configurazione e nei segreti di Cloudflare. Niente @agescipesaro1.it scritto nel codice.
 - **Import generico:** l'import dal foglio usa una mappatura delle colonne configurabile, partendo dal formato del nostro foglio.
 - **Aggiornamenti:** rilasci con versione e changelog; un gruppo aggiorna con il codice nuovo e la pipeline applica le migrazioni mancanti.
 - **Documentazione:** README, guida di installazione passo passo, ADR pubblici, guida per chi contribuisce.

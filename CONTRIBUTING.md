@@ -26,12 +26,26 @@ pnpm check
 
 `pnpm check` esegue lint e formattazione con Biome; `pnpm format` corregge la formattazione.
 
+Perché questi strumenti:
+
+- **pnpm** gestisce i workspace (`packages/*`) in modo rigoroso; la versione è fissata in `packageManager` e si attiva con Corepack.
+- **Biome** fa lint e formattazione con un solo strumento e poca configurazione, al posto di ESLint e Prettier. Da riconsiderare se mancassero regole per i componenti Svelte.
+- Le versioni di Node.js (`.nvmrc`, `engines`) e degli strumenti sono fissate nel repository e si aggiornano con pull request dedicate.
+
 ## Pull request
 
 - Una cosa per volta: pull request piccole e focalizzate.
 - Le funzionalità grandi si dividono in più pull request in sequenza.
 - Ogni pull request passa dalla pipeline (lint, test, build, preview, E2E) e da una revisione prima del merge.
 - Se la modifica cambia una decisione registrata, aggiungi un nuovo ADR nella stessa pull request.
+
+## Licenza
+
+Il codice è distribuito con licenza [AGPL-3.0](LICENSE) (`AGPL-3.0-only`), per ora. Chiunque può usarlo, anche commercialmente, ma chi offre PPU come servizio online a terzi deve pubblicare le proprie modifiche: con GPL-3.0 l'obbligo scatterebbe solo distribuendo il software, con MIT o Apache-2.0 non ci sarebbe affatto.
+
+- Le dipendenze devono avere licenze compatibili con AGPL-3.0.
+- I contributi si accettano con la firma DCO, senza cessione del copyright (niente CLA). Di conseguenza un cambio di licenza futuro richiederebbe il consenso dei contributori.
+- La licenza della documentazione per gli utenti è ancora da decidere.
 
 ## Firma DCO
 

@@ -1,16 +1,16 @@
 # Pipeline di GitHub Actions
 
-PPU si pubblica solo da GitHub Actions, mai da una macchina locale (ADR 0008). Questa guida elenca cosa configurare nel repository del proprio gruppo.
+PPU si pubblica solo da GitHub Actions, mai da una macchina locale. Questa guida elenca cosa configurare nel repository del proprio gruppo.
 
 ## Flussi
 
 | Workflow | Quando | Cosa fa |
 | --- | --- | --- |
 | `ci.yml` | ogni pull request e ogni push su `main` | `pnpm check`, `pnpm typecheck`, `pnpm test`; controllo della firma DCO su ogni commit della pull request |
-| `preview.yml` | apertura e aggiornamento di una pull request | crea il D1 `ppu-preview-pr-<n>` (giurisdizione UE), applica migrazioni, seed base e seed demo, pubblica il Worker `ppu-preview-pr-<n>` su `workers.dev` con identità simulata, commenta l'indirizzo sulla pull request, esegue i test E2E |
-| `preview-chiusura.yml` | chiusura o merge della pull request | elimina Worker e D1 della preview |
-| `rilascio.yml` | push su `main` | test, migrazioni e seed base sul D1 di produzione, primo webmaster se assente, deploy della **beta**, segreti del login Google |
-| `rilascio.yml` | avvio manuale (*Run workflow*) | deploy della **produzione** (dopo l'approvazione dell'environment) o di nuovo della beta |
+| `preview.yml` | apertura e aggiornamento di una pull request | crea il D1 `ppu-preview-pr-<n>` (giurisdizione UE), applica migrazioni, configurazione d'esempio del gruppo, seed base e dati demo, pubblica il Worker `ppu-preview-pr-<n>` su `workers.dev` con identità simulata, commenta l'indirizzo sulla pull request, esegue i test E2E |
+| `preview-cleanup.yml` | chiusura o merge della pull request | elimina Worker e D1 della preview |
+| `release.yml` | push su `main` | test, migrazioni sul D1 di produzione, dati del gruppo e seed base (se c'è `config/gruppo.json`), primo webmaster se assente, deploy della **beta**, segreti del login Google |
+| `release.yml` | avvio manuale (*Run workflow*) | deploy della **produzione** (dopo l'approvazione dell'environment) o di nuovo della beta |
 
 Senza i segreti di Cloudflare, preview e rilascio si saltano con un avviso: la CI funziona comunque. Le pull request da fork non ricevono segreti, quindi non hanno preview.
 
@@ -31,13 +31,13 @@ Senza i segreti di Cloudflare, preview e rilascio si saltano con un avviso: la C
 
 | Nome | Esempio | Note |
 | --- | --- | --- |
-| `PPU_DOMINIO` | `example.org` | Dominio Google Workspace del gruppo |
-| `PPU_NOME_GRUPPO` | `Gruppo Esempio 1` | Facoltativa |
+| `PPU_DOMAIN` | `example.org` | Dominio Google Workspace del gruppo |
+| `PPU_GROUP_NAME` | `Gruppo Esempio 1` | Facoltativa |
 | `PPU_ACCESS_TEAM_DOMAIN` | `esempio.cloudflareaccess.com` | Team di Cloudflare Access |
-| `PPU_D1_NOME` | `ppu` | Nome del D1 di produzione, condiviso da beta e produzione |
+| `PPU_D1_NAME` | `ppu` | Nome del D1 di produzione, condiviso da beta e produzione |
 | `PPU_D1_ID` | `xxxxxxxx-xxxx-...` | ID del D1 di produzione |
 | `PPU_KV_OAUTH_ID` | `0123abcd...` | ID del KV namespace `OAUTH_KV` del provider OAuth dell'MCP |
-| `PPU_WEBMASTER_INIZIALE` | `webmaster@example.org` | Primo webmaster: registrato solo se in `utenti` non c'è ancora nessun webmaster |
+| `PPU_INITIAL_WEBMASTER` | `webmaster@example.org` | Facoltativa. Primo webmaster: registrato solo se in `utenti` non c'è ancora nessun webmaster |
 
 ## Environments
 
@@ -46,7 +46,7 @@ Senza i segreti di Cloudflare, preview e rilascio si saltano con un avviso: la C
 | Environment | Protezione | Variabili dell'environment |
 | --- | --- | --- |
 | `beta` | branch di deploy: solo `main` | `PPU_ACCESS_AUD` (audience dell'applicazione Access della beta), `PPU_ROUTE` (per esempio `ppu-api-beta.example.org`, facoltativa) |
-| `produzione` | branch di deploy: solo `main`; **revisori obbligatori** (chi dà il via libera dopo i tester) | `PPU_ACCESS_AUD`, `PPU_ROUTE` |
+| `production` | branch di deploy: solo `main`; **revisori obbligatori** (chi dà il via libera dopo i tester) | `PPU_ACCESS_AUD`, `PPU_ROUTE` |
 
 Le variabili dell'environment hanno la precedenza su quelle del repository con lo stesso nome.
 
@@ -54,36 +54,45 @@ Le variabili dell'environment hanno la precedenza su quelle del repository con l
 
 Una sola volta, da chi amministra l'account Cloudflare del gruppo:
 
-1. Creare il D1 di produzione **con giurisdizione UE**. La giurisdizione si sceglie solo alla creazione: dalla dashboard (*Storage & Databases → D1 → Create*, *Jurisdiction: EU*) oppure con `wrangler d1 create ppu --jurisdiction eu`. Annotare nome e ID in `PPU_D1_NOME` e `PPU_D1_ID`.
+1. Creare il D1 di produzione **con giurisdizione UE**. La giurisdizione si sceglie solo alla creazione: dalla dashboard (*Storage & Databases → D1 → Create*, *Jurisdiction: EU*) oppure con `wrangler d1 create ppu --jurisdiction eu`. Annotare nome e ID in `PPU_D1_NAME` e `PPU_D1_ID`.
 2. Creare in Cloudflare Access, per ciascun indirizzo pubblico (beta e produzione), un'applicazione su tutto l'indirizzo con Google come provider, la regola sul dominio e i percorsi dell'MCP come percorsi pubblici (`/mcp`, `/oauth/*`, `/authorize`, `/.well-known/*`). Copiare l'*Application Audience (AUD) Tag* dell'applicazione in `PPU_ACCESS_AUD` dell'environment corrispondente. Dettagli in [cloudflare-e-google.md](cloudflare-e-google.md), passo 2.6.
 3. Creare il KV namespace per l'OAuth dell'MCP e annotarne l'ID in `PPU_KV_OAUTH_ID`.
-4. Il rilascio applica migrazioni e seed base (idempotente) e registra il primo webmaster. La guida completa passo passo è in [cloudflare-e-google.md](cloudflare-e-google.md).
+4. Mettere nel repository il file di configurazione del gruppo, `config/gruppo.json` (`seed/README.md`). Ogni rilascio applica migrazioni, dati del gruppo e seed base, in quest'ordine: si possono riapplicare senza toccare ciò che c'è già. Senza il file il rilascio salta questo passo con un avviso.
+5. Registrare il **primo webmaster**. Entra in PPU solo chi ha una riga nella tabella `utenti` (ADR 0011), quindi senza questo passo nessuno può entrare, nemmeno nell'MCP admin. Il modo più semplice è la variabile `PPU_INITIAL_WEBMASTER`: il rilascio la registra solo se non c'è ancora nessun webmaster, con una riga nel registro `modifiche`. In alternativa, dalla dashboard di Cloudflare (*Storage & Databases → D1 →* database di produzione *→ Console*), una sola volta:
 
-Il Worker di beta e produzione **non** è pubblicato su `workers.dev`: è raggiungibile solo dalla rotta configurata, protetta da Access. Serve anche la PWA come asset statici (ADR 0014): la pipeline esegue `pnpm --filter @ppu/pwa build` prima di `wrangler deploy`. Senza il JWT di Access ogni chiamata all'API risponde 401.
+   ```sql
+   INSERT INTO utenti (email, webmaster) VALUES ('nome.cognome@example.org', 1);
+   ```
+
+   Usare l'email Workspace della persona, in minuscolo. È l'unica scrittura a mano sui dati: da qui in poi gli altri capi (e un secondo webmaster, consigliato) si abilitano dall'MCP admin con `set_user`, con anteprima, conferma e registro.
+
+La guida completa passo passo, con Google Cloud e Cloudflare Access, è in [cloudflare-e-google.md](cloudflare-e-google.md).
+
+Il Worker di beta e produzione **non** è pubblicato su `workers.dev`: è raggiungibile solo dalla rotta configurata, protetta da Access. Serve anche la PWA come asset statici (ADR 0012): la pipeline esegue `pnpm --filter @ppu/pwa build` prima di `wrangler deploy`. Senza il JWT di Access ogni chiamata all'API risponde 401.
 
 ## Preview
 
 - D1 e Worker per pull request, eliminati alla chiusura. Un solo KV namespace `ppu-preview-oauth`, condiviso da tutte le preview, creato al primo uso.
-- Solo dati del seed demo, dominio `example.org`, identità simulata con l'header `X-Ppu-Utente-Test`. La preview è pubblica su `workers.dev` ma non contiene dati reali.
-- Il seed demo si applica solo a un D1 vuoto; i push successivi applicano soltanto le migrazioni nuove.
+- Solo dati demo (generati da `scripts/demo-seed.ts`), dominio `example.org`, identità simulata con l'header `X-Ppu-Test-User`. La preview è pubblica su `workers.dev` ma non contiene dati reali.
+- I dati demo si applicano solo a un D1 vuoto; i push successivi applicano soltanto le migrazioni nuove.
 
 ## Protezioni sulla modalità di test
 
 L'identità simulata non può arrivare in beta o produzione per tre motivi indipendenti:
 
 1. `wrangler.jsonc` la attiva solo nella sezione `preview`;
-2. `scripts/configura-wrangler.ts` rifiuta di generare una configurazione di beta o produzione che la contenga, e `rilascio.yml` blocca il deploy se il file generato la nomina;
-3. il Worker stesso (`src/config.ts`) rifiuta di avviarsi con `MODALITA_TEST` fuori da `locale` e `preview`.
+2. `scripts/wrangler-config.ts` rifiuta di generare una configurazione di beta o produzione che la contenga, e `release.yml` blocca il deploy se il file generato la nomina;
+3. il Worker stesso (`src/config.ts`) rifiuta di avviarsi con `TEST_MODE` fuori da `local` e `preview`.
 
 ## Rollback
 
 Per tornare alla versione precedente del Worker, da un workflow o da chi ha accesso all'account Cloudflare:
 
 ```bash
-pnpm exec wrangler rollback --name ppu-produzione --message "Motivo del rollback"
+pnpm exec wrangler rollback --name ppu-production --message "Motivo del rollback"
 ```
 
-Per la beta il Worker si chiama `ppu-beta`. Il rollback riguarda solo il codice: le migrazioni sono sempre retrocompatibili con la versione precedente (ADR 0008), quindi il database non va toccato.
+Per la beta il Worker si chiama `ppu-beta`. Il rollback riguarda solo il codice: le migrazioni sono sempre retrocompatibili con la versione precedente (ADR 0006), quindi il database non va toccato.
 
 ## Test E2E in locale
 
@@ -91,7 +100,7 @@ Per la beta il Worker si chiama `ppu-beta`. Il rollback riguarda solo il codice:
 pnpm e2e
 ```
 
-Playwright prepara un D1 locale da zero (migrazioni, seed base e demo in `packages/worker/.wrangler/e2e`), avvia `wrangler dev` con l'identità simulata ed esegue i test. Per provarli contro una preview già pubblicata:
+Playwright prepara un D1 locale da zero (migrazioni, configurazione d'esempio, seed base e dati demo in `packages/worker/.wrangler/e2e`), avvia `wrangler dev` con l'identità simulata ed esegue i test. Per provarli contro una preview già pubblicata:
 
 ```bash
 E2E_BASE_URL=https://ppu-preview-pr-12.esempio.workers.dev pnpm e2e

@@ -2,22 +2,22 @@ import type { OAuthHelpers } from '@cloudflare/workers-oauth-provider';
 
 export interface Env {
   DB: D1Database;
-  /** 'locale' | 'preview' | 'beta' | 'produzione' | 'demo' */
-  AMBIENTE: string;
-  /** Dominio Google Workspace del gruppo, per esempio "example.org". */
-  DOMINIO: string;
-  NOME_GRUPPO?: string;
-  /** Team di Cloudflare Access: "<team>.cloudflareaccess.com". */
+  /** 'local' | 'preview' | 'beta' | 'production' | 'demo' */
+  ENVIRONMENT: string;
+  /** The group's Google Workspace domain, e.g. "example.org". */
+  DOMAIN: string;
+  GROUP_NAME?: string;
+  /** Cloudflare Access team: "<team>.cloudflareaccess.com". */
   ACCESS_TEAM_DOMAIN?: string;
-  /** Audience (AUD tag) dell'applicazione Access della PWA. */
+  /** Audience (AUD tag) of the PWA's Access application. */
   ACCESS_AUD?: string;
-  /** "attiva" solo in locale e preview: identità simulata. */
-  MODALITA_TEST?: string;
-  /** KV usato dal provider OAuth dell'MCP (token, client, consensi). */
+  /** "on" only in local and preview: simulated identity. */
+  TEST_MODE?: string;
+  /** KV used by the MCP's OAuth provider (tokens, clients, grants). */
   OAUTH_KV: KVNamespace;
-  /** Client OAuth Google (Cloud Console) per il login dell'MCP. */
+  /** Google OAuth client (Cloud Console) for the MCP login. */
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
-  /** Iniettato da OAuthProvider nelle richieste non-API. */
+  /** Injected by OAuthProvider into non-API requests. */
   OAUTH_PROVIDER?: OAuthHelpers;
 }

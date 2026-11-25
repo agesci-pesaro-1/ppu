@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "db:locale": "scripts/prepara-db-locale.sh",
-    "dev:e2e": "pnpm --filter @ppu/pwa build && scripts/prepara-db-locale.sh .wrangler/e2e && wrangler dev --persist-to .wrangler/e2e --var MODALITA_TEST:attiva --var DOMINIO:example.org",
+    "db:local": "scripts/setup-local-db.sh",
+    "dev:e2e": "pnpm --filter @ppu/pwa build && scripts/setup-local-db.sh .wrangler/e2e && wrangler dev --persist-to .wrangler/e2e --var TEST_MODE:on --var DOMAIN:example.org",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -14,6 +14,7 @@
     "@cfworker/json-schema": "4.1.1",
     "@cloudflare/workers-oauth-provider": "1.2.4",
     "@modelcontextprotocol/sdk": "1.32.2",
+    "drizzle-orm": "0.45.4",
     "hono": "4.13.14",
     "jose": "6.2.13",
     "zod": "4.6.7"

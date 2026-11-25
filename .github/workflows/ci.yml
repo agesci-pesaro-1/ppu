@@ -1,4 +1,4 @@
-# Controlli su ogni pull request e su main: lint, tipi, test, firma DCO.
+# Checks on every pull request and on main: lint, types, tests, DCO sign-off.
 name: CI
 
 on:
@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  controlli:
-    name: Lint, tipi e test
+  checks:
+    name: Lint, types and tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-      - name: Abilita pnpm (Corepack)
+      - name: Enable pnpm (Corepack)
         run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
@@ -31,7 +31,7 @@ jobs:
       - run: pnpm test
 
   dco:
-    name: Firma DCO
+    name: DCO sign-off
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -40,21 +40,21 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Ogni commit ha "Signed-off-by" dell'autore
+      - name: Every commit has the author's "Signed-off-by"
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
-          mancanti=0
+          missing=0
           for sha in $(git rev-list --no-merges "$BASE..$HEAD"); do
-            autore="$(git log -1 --format='%an <%ae>' "$sha")"
-            if ! git log -1 --format='%B' "$sha" | grep -qiF "Signed-off-by: $autore"; then
-              echo "::error::Il commit $sha non ha la riga 'Signed-off-by: $autore'"
-              mancanti=$((mancanti + 1))
+            author="$(git log -1 --format='%an <%ae>' "$sha")"
+            if ! git log -1 --format='%B' "$sha" | grep -qiF "Signed-off-by: $author"; then
+              echo "::error::Commit $sha has no 'Signed-off-by: $author' line"
+              missing=$((missing + 1))
             fi
           done
-          if [ "$mancanti" -gt 0 ]; then
-            echo "Firma i commit con 'git commit -s' (vedi CONTRIBUTING.md)."
+          if [ "$missing" -gt 0 ]; then
+            echo "Sign the commits with 'git commit -s' (see CONTRIBUTING.md)."
             exit 1
           fi
-          echo "Tutti i commit sono firmati."
+          echo "All commits are signed off."

@@ -1,158 +1,152 @@
-// Client dell'API REST del Worker (stessa origine). Nessun dato personale viene
-// salvato nel browser: ogni dato arriva dalla rete a ogni apertura.
+// Client of the Worker's REST API (same origin). No personal data is stored in
+// the browser: every piece of data comes from the network on every opening.
+// Error messages are shown to the user (Italian).
 
-export interface Io {
-  gruppo: string;
-  ambiente: string;
-  modalitaTest: boolean;
+export interface Me {
+  group: string;
+  environment: string;
+  testMode: boolean;
   email: string;
-  unita: string[];
-  ruoli: {
-    accessoCompleto: boolean;
+  units: string[];
+  roles: {
+    fullAccess: boolean;
     buonaStrada: boolean;
     webmaster: boolean;
     betaTester: boolean;
   };
-  associatoId: number | null;
+  memberId: number | null;
 }
 
-export interface Unita {
+export interface Unit {
   id: string;
-  nome: string;
-  branca: string;
-  associati: number;
+  name: string;
+  branch: string;
+  members: number;
 }
 
-export interface VoceElenco {
+export interface ListEntry {
   id: number;
-  cognome: string;
-  nome: string;
-  unita: { id: string; nome: string } | null;
-  annoNascita: number | null;
-  eta: number | null;
-  stato: 'attivo' | 'archiviato';
-  tag: string[];
+  lastName: string;
+  firstName: string;
+  unit: { id: string; name: string } | null;
+  birthYear: number | null;
+  age: number | null;
+  status: 'attivo' | 'archiviato';
+  tags: string[];
 }
 
-export interface Scheda {
+export interface MemberCard {
   id: number;
-  codiceCensimento: string | null;
-  cognome: string;
-  nome: string;
-  dataNascita: string | null;
-  luogoNascita: string | null;
-  eta: number | null;
-  unita: { id: string; nome: string } | null;
-  stato: 'attivo' | 'archiviato';
-  eCapo: boolean;
-  residenza: {
-    indirizzo: string | null;
-    cap: string | null;
-    comune: string | null;
-    provincia: string | null;
-  };
-  contatti: { cellulare: string | null; telefonoCasa: string | null; email: string | null };
+  censusCode: string | null;
+  lastName: string;
+  firstName: string;
+  birthDate: string | null;
+  birthPlace: string | null;
+  age: number | null;
+  unit: { id: string; name: string } | null;
+  status: 'attivo' | 'archiviato';
+  isLeader: boolean;
+  contacts: { mobile: string | null; email: string | null; receivesCommunications: boolean };
   privacy: {
-    informativa: boolean;
-    informativaData: string | null;
-    consenso2a: boolean;
-    consenso2b: boolean;
-    consenso2c: boolean;
-    note: string | null;
+    privacyNotice: boolean;
+    privacyNoticeDate: string | null;
+    consent2a: boolean;
+    consent2b: boolean;
+    consent2c: boolean;
+    notes: string | null;
   };
-  tutori: {
+  guardians: {
     id: number;
-    relazione: string;
-    cognome: string;
-    nome: string;
-    cellulare: string | null;
+    role: string;
+    lastName: string;
+    firstName: string;
+    mobile: string | null;
     email: string | null;
-    riceveComunicazioni: boolean;
-    associatoCollegatoId: number | null;
+    linkedMemberId: number | null;
   }[];
-  relazioni: { tipo: string; associatoId: number; cognome: string; nome: string }[];
-  tag: { nome: string; tipo: string }[];
-  progressione: { data: string | null; tipo: string | null; descrizione: string | null }[];
-  presenze: {
-    conteggi: { presente: number; assente: number; giustificato: number };
-    ultime: {
-      data: string;
-      tipo: string;
-      unita: string;
-      stato: string;
-      motivazione: string | null;
+  relationships: { type: string; memberId: number; lastName: string; firstName: string }[];
+  tags: { name: string; type: string }[];
+  progression: { date: string | null; type: string | null; description: string | null }[];
+  attendance: {
+    counts: { presente: number; assente: number; giustificato: number };
+    latest: {
+      date: string;
+      type: string;
+      unit: string;
+      status: string;
+      reason: string | null;
     }[];
   };
-  storicoUnita: { anno: string; unita: string }[];
-  puoModificare: boolean;
+  unitHistory: { year: string; unit: string }[];
+  canEdit: boolean;
 }
 
-export interface UtenteDemo {
+export interface DemoUser {
   email: string;
-  etichetta: string;
-  descrizione: string;
+  label: string;
+  description: string;
 }
 
-export class ErroreApi extends Error {
+export class ApiError extends Error {
   constructor(
-    readonly stato: number,
-    readonly codice: string,
-    messaggio: string,
+    readonly status: number,
+    readonly code: string,
+    message: string,
   ) {
-    super(messaggio);
+    super(message);
   }
 }
 
-async function richiesta<T>(percorso: string): Promise<T> {
+async function request<T>(path: string): Promise<T> {
   let r: Response;
   try {
-    r = await fetch(percorso, {
+    r = await fetch(path, {
       credentials: 'same-origin',
       headers: { Accept: 'application/json' },
     });
   } catch {
-    throw new ErroreApi(0, 'rete', 'Connessione non disponibile.');
+    throw new ApiError(0, 'network', 'Connessione non disponibile.');
   }
   if (!r.ok) {
-    let codice = 'errore';
-    let messaggio = `Errore ${r.status}`;
+    let code = 'error';
+    let message = `Errore ${r.status}`;
     try {
-      const corpo = (await r.json()) as { errore?: { codice?: string; messaggio?: string } };
-      codice = corpo.errore?.codice ?? codice;
-      messaggio = corpo.errore?.messaggio ?? messaggio;
+      const body = (await r.json()) as { error?: { code?: string; message?: string } };
+      code = body.error?.code ?? code;
+      message = body.error?.message ?? message;
     } catch {
-      // risposta non JSON (per esempio la pagina di Access)
+      // not a JSON answer (e.g. the Access page)
     }
-    throw new ErroreApi(r.status, codice, messaggio);
+    throw new ApiError(r.status, code, message);
   }
   return (await r.json()) as T;
 }
 
 export const api = {
-  io: () => richiesta<Io>('/api/io'),
-  unita: () => richiesta<Unita[]>('/api/unita'),
-  associati: (filtri: { q?: string; unita?: string }) => {
+  me: () => request<Me>('/api/me'),
+  units: () => request<Unit[]>('/api/units'),
+  members: (filters: { q?: string; unit?: string }) => {
     const p = new URLSearchParams();
-    if (filtri.q) p.set('q', filtri.q);
-    if (filtri.unita) p.set('unita', filtri.unita);
+    if (filters.q) p.set('q', filters.q);
+    if (filters.unit) p.set('unit', filters.unit);
     const qs = p.toString();
-    return richiesta<VoceElenco[]>(`/api/associati${qs ? `?${qs}` : ''}`);
+    return request<ListEntry[]>(`/api/members${qs ? `?${qs}` : ''}`);
   },
-  scheda: (id: number) => richiesta<Scheda>(`/api/associati/${id}`),
-  utentiDemo: () => richiesta<UtenteDemo[]>('/api/demo/utenti'),
+  member: (id: number) => request<MemberCard>(`/api/members/${id}`),
+  demoUsers: () => request<DemoUser[]>('/api/demo/users'),
 };
 
-// Modalità di test (solo preview e locale): il Worker imposta un cookie HttpOnly
-// con l'utente scelto, e lo accetta solo in quella modalità.
-async function inviaDemo(percorso: string, corpo: unknown): Promise<void> {
-  const r = await fetch(percorso, {
+// Test mode (preview and local only): the Worker sets an HttpOnly cookie with
+// the chosen user, and accepts it only in that mode.
+async function postDemo(path: string, body: unknown): Promise<void> {
+  const r = await fetch(path, {
     method: 'POST',
     credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(corpo),
+    body: JSON.stringify(body),
   });
-  if (!r.ok) throw new ErroreApi(r.status, 'demo', 'Impossibile cambiare utente.');
+  if (!r.ok) throw new ApiError(r.status, 'demo', 'Impossibile cambiare utente.');
 }
 
-export const scegliUtenteTest = (email: string) => inviaDemo('/api/demo/accedi', { email });
-export const esciUtenteTest = () => inviaDemo('/api/demo/esci', {});
+export const pickTestUser = (email: string) => postDemo('/api/demo/login', { email });
+export const leaveTestUser = () => postDemo('/api/demo/logout', {});

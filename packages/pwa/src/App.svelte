@@ -1,127 +1,127 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api, ErroreApi, esciUtenteTest, type Io, type UtenteDemo } from './lib/api.ts';
-  import Elenco from './lib/Elenco.svelte';
-  import SceltaRuolo from './lib/SceltaRuolo.svelte';
-  import Scheda from './lib/Scheda.svelte';
+  import { ApiError, api, type DemoUser, leaveTestUser, type Me } from './lib/api.ts';
+  import MemberCard from './lib/MemberCard.svelte';
+  import MemberList from './lib/MemberList.svelte';
+  import RolePicker from './lib/RolePicker.svelte';
 
-  type Stato =
-    | { tipo: 'caricamento' }
-    | { tipo: 'pronto'; io: Io }
-    | { tipo: 'scelta'; utenti: UtenteDemo[]; messaggio?: string }
-    | { tipo: 'errore'; messaggio: string };
+  type View =
+    | { kind: 'loading' }
+    | { kind: 'ready'; me: Me }
+    | { kind: 'pick'; users: DemoUser[]; message?: string }
+    | { kind: 'error'; message: string };
 
-  let stato = $state<Stato>({ tipo: 'caricamento' });
-  // Navigazione con l'hash: #/ elenco, #/associato/12 scheda.
-  let percorso = $state(location.hash || '#/');
+  let view = $state<View>({ kind: 'loading' });
+  // Hash navigation: #/ list, #/member/12 card.
+  let route = $state(location.hash || '#/');
 
-  const idScheda = $derived.by(() => {
-    const m = /^#\/associato\/(\d+)$/.exec(percorso);
+  const cardId = $derived.by(() => {
+    const m = /^#\/member\/(\d+)$/.exec(route);
     return m ? Number(m[1]) : null;
   });
 
-  async function avvia() {
-    stato = { tipo: 'caricamento' };
+  async function start() {
+    view = { kind: 'loading' };
     try {
-      stato = { tipo: 'pronto', io: await api.io() };
-      document.title = `PPU · ${stato.io.gruppo}`;
+      view = { kind: 'ready', me: await api.me() };
+      document.title = `PPU · ${view.me.group}`;
     } catch (e) {
-      const errore = e instanceof ErroreApi ? e : new ErroreApi(0, 'errore', 'Errore inatteso.');
-      // In preview (modalità di test) si sceglie un utente finto; altrove il
-      // login lo fa Cloudflare Access prima ancora di arrivare qui.
-      if (errore.stato === 401 || errore.stato === 403) {
+      const error = e instanceof ApiError ? e : new ApiError(0, 'error', 'Errore inatteso.');
+      // In preview (test mode) the user picks a fake user; elsewhere Cloudflare
+      // Access does the login before the request even gets here.
+      if (error.status === 401 || error.status === 403) {
         try {
-          const utenti = await api.utentiDemo();
-          stato = {
-            tipo: 'scelta',
-            utenti,
-            ...(errore.stato === 403 ? { messaggio: errore.message } : {}),
+          const users = await api.demoUsers();
+          view = {
+            kind: 'pick',
+            users,
+            ...(error.status === 403 ? { message: error.message } : {}),
           };
           return;
         } catch {
-          // modalità di test non attiva
+          // test mode not on
         }
       }
-      stato = { tipo: 'errore', messaggio: errore.message };
+      view = { kind: 'error', message: error.message };
     }
   }
 
-  async function cambiaUtente() {
-    await esciUtenteTest().catch(() => {});
+  async function switchUser() {
+    await leaveTestUser().catch(() => {});
     location.hash = '#/';
-    avvia();
+    start();
   }
 
   onMount(() => {
-    const aggiorna = () => {
-      percorso = location.hash || '#/';
+    const update = () => {
+      route = location.hash || '#/';
       window.scrollTo(0, 0);
     };
-    window.addEventListener('hashchange', aggiorna);
-    avvia();
-    return () => window.removeEventListener('hashchange', aggiorna);
+    window.addEventListener('hashchange', update);
+    start();
+    return () => window.removeEventListener('hashchange', update);
   });
 
-  function descriviRuoli(io: Io): string {
+  function describeRoles(me: Me): string {
     const r: string[] = [];
-    if (io.ruoli.accessoCompleto) r.push('accesso completo');
-    else if (io.unita.length > 0) r.push(`modifica: ${io.unita.join(', ')}`);
-    if (io.ruoli.buonaStrada) r.push('Buona Strada');
-    if (io.ruoli.webmaster) r.push('webmaster');
+    if (me.roles.fullAccess) r.push('accesso completo');
+    else if (me.units.length > 0) r.push(`modifica: ${me.units.join(', ')}`);
+    if (me.roles.buonaStrada) r.push('Buona Strada');
+    if (me.roles.webmaster) r.push('webmaster');
     return r.join(' · ') || 'sola lettura';
   }
 </script>
 
-<header class="testata">
-  <div class="testata-riga">
-    <a class="marchio" href="#/">
-      <img src="/icona.svg" alt="" width="28" height="28" />
-      <span>{stato.tipo === 'pronto' ? stato.io.gruppo : 'PPU'}</span>
+<header class="topbar">
+  <div class="topbar-row">
+    <a class="brand" href="#/">
+      <img src="/icon.svg" alt="" width="28" height="28" />
+      <span>{view.kind === 'ready' ? view.me.group : 'PPU'}</span>
     </a>
-    {#if stato.tipo === 'pronto'}
-      <div class="utente">
-        <span class="email">{stato.io.email}</span>
-        <span class="ruoli">{descriviRuoli(stato.io)}</span>
+    {#if view.kind === 'ready'}
+      <div class="user">
+        <span class="email">{view.me.email}</span>
+        <span class="roles">{describeRoles(view.me)}</span>
       </div>
     {/if}
   </div>
-  {#if stato.tipo === 'pronto' && stato.io.modalitaTest}
-    <div class="banda-test">
+  {#if view.kind === 'ready' && view.me.testMode}
+    <div class="test-band">
       Anteprima con dati inventati ·
-      <button type="button" onclick={cambiaUtente}>cambia utente</button>
+      <button type="button" onclick={switchUser}>cambia utente</button>
     </div>
   {/if}
 </header>
 
-<main class="contenitore">
-  {#if stato.tipo === 'caricamento'}
-    <p class="messaggio">Caricamento…</p>
-  {:else if stato.tipo === 'scelta'}
-    <SceltaRuolo utenti={stato.utenti} messaggio={stato.messaggio} onscelta={avvia} />
-  {:else if stato.tipo === 'errore'}
-    <div class="messaggio">
-      <p class="errore">{stato.messaggio}</p>
-      <button type="button" class="riprova" onclick={avvia}>Riprova</button>
+<main class="container">
+  {#if view.kind === 'loading'}
+    <p class="message">Caricamento…</p>
+  {:else if view.kind === 'pick'}
+    <RolePicker users={view.users} message={view.message} onpick={start} />
+  {:else if view.kind === 'error'}
+    <div class="message">
+      <p class="error">{view.message}</p>
+      <button type="button" class="retry" onclick={start}>Riprova</button>
     </div>
-  {:else if idScheda !== null}
-    {#key idScheda}
-      <Scheda id={idScheda} />
+  {:else if cardId !== null}
+    {#key cardId}
+      <MemberCard id={cardId} />
     {/key}
   {:else}
-    <Elenco />
+    <MemberList />
   {/if}
 </main>
 
 <style>
-  .testata {
+  .topbar {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: var(--primario);
-    color: var(--sul-primario);
+    background: var(--primary);
+    color: var(--on-primary);
     padding-top: env(safe-area-inset-top);
   }
-  .testata-riga {
+  .topbar-row {
     max-width: 720px;
     margin: 0 auto;
     padding: 10px 16px;
@@ -130,7 +130,7 @@
     justify-content: space-between;
     gap: 12px;
   }
-  .marchio {
+  .brand {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -140,16 +140,16 @@
     font-size: 1.05rem;
     min-width: 0;
   }
-  .marchio span {
+  .brand span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .marchio img {
+  .brand img {
     border-radius: 7px;
     flex: none;
   }
-  .utente {
+  .user {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -164,17 +164,17 @@
     white-space: nowrap;
     max-width: 52vw;
   }
-  .ruoli {
+  .roles {
     opacity: 0.85;
   }
-  .banda-test {
-    background: var(--avviso-sfondo);
-    color: var(--avviso);
+  .test-band {
+    background: var(--warning-bg);
+    color: var(--warning);
     font-size: 0.8rem;
     text-align: center;
     padding: 4px 16px;
   }
-  .banda-test button {
+  .test-band button {
     background: none;
     border: 0;
     padding: 0;
@@ -182,11 +182,11 @@
     cursor: pointer;
     color: inherit;
   }
-  .riprova {
+  .retry {
     margin-top: 8px;
     padding: 8px 16px;
     border-radius: 999px;
-    border: 1px solid var(--bordo);
-    background: var(--superficie);
+    border: 1px solid var(--border);
+    background: var(--surface);
   }
 </style>

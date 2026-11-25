@@ -18,7 +18,7 @@ Gestionale degli associati per gruppi scout AGESCI. I capi consultano e modifica
 | --- | --- |
 | Backend | TypeScript su Cloudflare Workers: endpoint MCP (Streamable HTTP, OAuth Google) e API REST |
 | Database | Cloudflare D1 (SQLite) con giurisdizione UE |
-| PWA | Svelte + Vite, servita dallo stesso Worker (ADR 0014), protetta da Cloudflare Access |
+| PWA | Svelte + Vite, servita dallo stesso Worker (ADR 0012), protetta da Cloudflare Access |
 | Identità | Google Workspace, solo per il login |
 | Notifiche | Webhook in ingresso di Google Chat |
 
@@ -34,7 +34,7 @@ Guida di installazione: [docs/installazione/cloudflare-e-google.md](docs/install
 2. **Cloudflare**: il dominio del gruppo deve essere una zona **dello stesso account** di Zero Trust; database D1 `ppu` con giurisdizione **UE** (si sceglie solo alla creazione); KV `ppu-oauth`; team Zero Trust (`<team>.cloudflareaccess.com`).
 3. **Zero Trust → Integrazioni → Provider di identità**: provider **Google** (non Google Workspace) con il client `PPU Access`.
 4. **Applicazioni Access** self-hosted su tutto l'indirizzo: `PPU` e `PPU beta` (email del dominio; in beta il Worker ammette solo i `beta_tester`), solo Google, sessione di 12 ore, con i percorsi dell'MCP pubblici (`/mcp`, `/oauth/*`, `/authorize`, `/.well-known/*`).
-5. **GitHub**: segreti, variabili (`PPU_D1_ID`, `PPU_KV_OAUTH_ID`, ...) ed environment `beta`/`produzione` con l'AUD di ciascuna applicazione.
+5. **GitHub**: segreti, variabili (`PPU_D1_ID`, `PPU_KV_OAUTH_ID`, ...) ed environment `beta`/`production` con l'AUD di ciascuna applicazione.
 
 ## Sviluppo
 

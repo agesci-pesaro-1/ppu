@@ -1,18 +1,18 @@
 :root {
-  --sfondo: #f6f7f4;
-  --superficie: #ffffff;
-  --testo: #1d2420;
-  --testo-tenue: #5c6660;
-  --bordo: #dfe3dc;
-  --primario: #2f5d3a;
-  --primario-tenue: #e3eee5;
-  --sul-primario: #ffffff;
-  --avviso: #8a5a00;
-  --avviso-sfondo: #fff4dc;
-  --errore: #a3261b;
-  --si: #2f6b3d;
+  --background: #f6f7f4;
+  --surface: #ffffff;
+  --text: #1d2420;
+  --text-muted: #5c6660;
+  --border: #dfe3dc;
+  --primary: #2f5d3a;
+  --primary-soft: #e3eee5;
+  --on-primary: #ffffff;
+  --warning: #8a5a00;
+  --warning-bg: #fff4dc;
+  --error: #a3261b;
+  --yes: #2f6b3d;
   --no: #a3261b;
-  --raggio: 14px;
+  --radius: 14px;
   color-scheme: light;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   line-height: 1.45;
@@ -21,18 +21,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --sfondo: #121613;
-    --superficie: #1b211d;
-    --testo: #e8ece9;
-    --testo-tenue: #9aa59e;
-    --bordo: #2c342f;
-    --primario: #7fbf8c;
-    --primario-tenue: #23362a;
-    --sul-primario: #0f1a12;
-    --avviso: #f0c46a;
-    --avviso-sfondo: #3a2f17;
-    --errore: #ff8a7d;
-    --si: #7fbf8c;
+    --background: #121613;
+    --surface: #1b211d;
+    --text: #e8ece9;
+    --text-muted: #9aa59e;
+    --border: #2c342f;
+    --primary: #7fbf8c;
+    --primary-soft: #23362a;
+    --on-primary: #0f1a12;
+    --warning: #f0c46a;
+    --warning-bg: #3a2f17;
+    --error: #ff8a7d;
+    --yes: #7fbf8c;
     --no: #ff8a7d;
     color-scheme: dark;
   }
@@ -44,13 +44,13 @@
 
 body {
   margin: 0;
-  background: var(--sfondo);
-  color: var(--testo);
+  background: var(--background);
+  color: var(--text);
   min-height: 100dvh;
 }
 
 a {
-  color: var(--primario);
+  color: var(--primary);
 }
 
 button {
@@ -58,50 +58,50 @@ button {
   color: inherit;
 }
 
-.contenitore {
+.container {
   max-width: 720px;
   margin: 0 auto;
   padding: 0 16px 32px;
 }
 
-.scheda-card {
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio);
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 14px 16px;
   margin: 12px 0;
 }
 
-.scheda-card h2 {
+.card h2 {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--testo-tenue);
+  color: var(--text-muted);
   margin: 0 0 8px;
 }
 
-.tenue {
-  color: var(--testo-tenue);
+.muted {
+  color: var(--text-muted);
 }
 
 .chip {
   display: inline-block;
   padding: 2px 10px;
   border-radius: 999px;
-  background: var(--primario-tenue);
-  color: var(--testo);
+  background: var(--primary-soft);
+  color: var(--text);
   font-size: 0.8rem;
   margin: 2px 4px 2px 0;
 }
 
-.messaggio {
+.message {
   padding: 24px 16px;
   text-align: center;
-  color: var(--testo-tenue);
+  color: var(--text-muted);
 }
 
-.errore {
-  color: var(--errore);
+.error {
+  color: var(--error);
 }
 
 .sr-only {

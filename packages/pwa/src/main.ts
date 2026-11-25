@@ -2,7 +2,7 @@ import { mount } from 'svelte';
 import './app.css';
 import App from './App.svelte';
 
-const destinazione = document.getElementById('app');
-if (!destinazione) throw new Error('Elemento #app mancante');
+const target = document.getElementById('app');
+if (!target) throw new Error('missing #app element');
 
-export default mount(App, { target: destinazione });
+export default mount(App, { target });

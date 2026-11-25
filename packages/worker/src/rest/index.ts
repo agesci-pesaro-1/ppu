@@ -1,152 +1,145 @@
 import { Hono } from 'hono';
-import { type Config, leggiConfig } from '../config.ts';
+import { type Config, readConfig } from '../config.ts';
+import { createDb, type Db } from '../db/index.ts';
 import type { Env } from '../env.ts';
-import { ErrorePpu } from '../errori.ts';
+import { AppError } from '../errors.ts';
 import {
-  COOKIE_UTENTE_TEST,
-  caricaUtente,
-  emailDallaRichiesta,
-  emailNelDominio,
-  type Utente,
-} from '../identita/index.ts';
-import { anteprimaImport, confermaImport } from '../import/servizio.ts';
-import {
-  cercaAssociati,
-  elencaUnita,
-  schedaAssociato,
-  utentiDemo,
-} from '../servizi/consultazione.ts';
+  emailFromRequest,
+  isInDomain,
+  loadUser,
+  TEST_USER_COOKIE,
+  type User,
+} from '../identity/index.ts';
+import { confirmImport, previewImport } from '../import/service.ts';
+import { demoUsers, listUnits, memberCard, searchMembers } from '../services/browse.ts';
 
-export interface Variabili {
+export interface Variables {
   config: Config;
-  utente: Utente;
+  db: Db;
+  user: User;
 }
 
-export const api = new Hono<{ Bindings: Env; Variables: Variabili }>();
+export const api = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Identità su ogni chiamata della PWA: JWT di Access (o identità di test in preview).
+// Identity on every PWA call: Access JWT (or the test identity in preview).
 api.use('*', async (c, next) => {
-  const config = leggiConfig(c.env);
-  const email = await emailDallaRichiesta(c.req.raw, config);
+  const config = readConfig(c.env);
+  const email = await emailFromRequest(c.req.raw, config);
+  const db = createDb(c.env.DB);
   c.set('config', config);
-  c.set('utente', await caricaUtente(c.env.DB, email, config));
+  c.set('db', db);
+  c.set('user', await loadUser(db, email, config));
   await next();
 });
 
-/** Profilo dell'utente corrente: email, unità e ruoli, più nome del gruppo e ambiente. */
-api.get('/io', (c) => {
-  const u = c.get('utente');
+/** Current user's profile: email, units and roles, plus group name and environment. */
+api.get('/me', (c) => {
+  const u = c.get('user');
   const config = c.get('config');
   return c.json({
-    gruppo: config.nomeGruppo,
-    ambiente: config.ambiente,
-    modalitaTest: config.modalitaTest,
+    group: config.groupName,
+    environment: config.environment,
+    testMode: config.testMode,
     email: u.email,
-    unita: u.unita,
-    ruoli: {
-      accessoCompleto: u.accessoCompleto,
+    units: u.units,
+    roles: {
+      fullAccess: u.fullAccess,
       buonaStrada: u.buonaStrada,
       webmaster: u.webmaster,
       betaTester: u.betaTester,
     },
-    associatoId: u.associatoId,
+    memberId: u.memberId,
   });
 });
 
-api.get('/unita', async (c) => c.json(await elencaUnita(c.env.DB, c.get('utente'))));
+api.get('/units', async (c) => c.json(await listUnits(c.get('db'), c.get('user'))));
 
-api.get('/associati', async (c) =>
+api.get('/members', async (c) =>
   c.json(
-    await cercaAssociati(c.env.DB, c.get('utente'), {
+    await searchMembers(c.get('db'), c.get('user'), {
       q: c.req.query('q'),
-      unita: c.req.query('unita'),
-      stato: c.req.query('stato'),
+      unit: c.req.query('unit'),
+      status: c.req.query('status'),
     }),
   ),
 );
 
-api.get('/associati/:id', async (c) =>
-  c.json(await schedaAssociato(c.env.DB, c.get('utente'), Number(c.req.param('id')))),
+api.get('/members/:id', async (c) =>
+  c.json(await memberCard(c.get('db'), c.get('user'), Number(c.req.param('id')))),
 );
 
+async function jsonBody(req: Request): Promise<Record<string, unknown>> {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    throw new AppError('bad_request', 'Il corpo della richiesta deve essere JSON.');
+  }
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+    throw new AppError('bad_request', 'Il corpo della richiesta deve essere un oggetto JSON.');
+  }
+  return body as Record<string, unknown>;
+}
+
+// Import from the sheet (webmaster only: the service checks the permission).
+api.post('/admin/import/preview', async (c) => {
+  const body = await jsonBody(c.req.raw);
+  return c.json(
+    await previewImport(c.get('db'), c.get('user'), { csv: body.csv, mapping: body.mapping }),
+  );
+});
+
+api.post('/admin/import/confirm', async (c) => {
+  const body = await jsonBody(c.req.raw);
+  return c.json(
+    await confirmImport(c.get('db'), c.get('user'), {
+      csv: body.csv,
+      mapping: body.mapping,
+      hash: body.hash,
+    }),
+  );
+});
+
 /**
- * Modalità di test (solo locale e preview): utenti finti da scegliere nella PWA.
- * Senza autenticazione, perché serve prima di avere un'identità; fuori dalla
- * modalità di test risponde 404.
+ * Test mode (local and preview only): fake users to pick in the PWA. No
+ * authentication, because it is needed before having an identity; outside test
+ * mode it answers 404.
  */
 export const demo = new Hono<{ Bindings: Env }>();
 
-function configTest(env: Env): Config {
-  const config = leggiConfig(env);
-  if (!config.modalitaTest) throw new ErrorePpu('non_trovato', 'Risorsa non trovata.');
+function testConfig(env: Env): Config {
+  const config = readConfig(env);
+  if (!config.testMode) throw new AppError('not_found', 'Risorsa non trovata.');
   return config;
 }
 
-demo.get('/utenti', async (c) => {
-  const config = configTest(c.env);
-  return c.json(await utentiDemo(c.env.DB, config.dominio));
+demo.get('/users', async (c) => {
+  const config = testConfig(c.env);
+  return c.json(await demoUsers(createDb(c.env.DB), config.domain));
 });
 
-/** Sceglie l'utente finto: il Worker imposta il cookie (HttpOnly) letto da src/identita. */
-demo.post('/accedi', async (c) => {
-  const config = configTest(c.env);
-  const corpo = await corpoJson(c.req.raw);
-  const email = typeof corpo.email === 'string' ? corpo.email.trim().toLowerCase() : '';
-  if (!emailNelDominio(email, config.dominio)) {
-    throw new ErrorePpu('richiesta_non_valida', 'Utente non valido.');
+/** Picks the fake user: the Worker sets the (HttpOnly) cookie read by src/identity. */
+demo.post('/login', async (c) => {
+  const config = testConfig(c.env);
+  const body = await jsonBody(c.req.raw);
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+  if (!isInDomain(email, config.domain)) {
+    throw new AppError('bad_request', 'Utente non valido.');
   }
-  const sicuro = new URL(c.req.url).protocol === 'https:' ? '; Secure' : '';
+  const secure = new URL(c.req.url).protocol === 'https:' ? '; Secure' : '';
   c.header(
     'Set-Cookie',
-    `${COOKIE_UTENTE_TEST}=${encodeURIComponent(email)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=28800${sicuro}`,
+    `${TEST_USER_COOKIE}=${encodeURIComponent(email)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=28800${secure}`,
   );
   return c.json({ email });
 });
 
-demo.post('/esci', (c) => {
-  configTest(c.env);
-  c.header('Set-Cookie', `${COOKIE_UTENTE_TEST}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`);
+demo.post('/logout', (c) => {
+  testConfig(c.env);
+  c.header('Set-Cookie', `${TEST_USER_COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`);
   return c.json({ ok: true });
 });
 
-async function corpoJson(req: Request): Promise<Record<string, unknown>> {
-  let corpo: unknown;
-  try {
-    corpo = await req.json();
-  } catch {
-    throw new ErrorePpu('richiesta_non_valida', 'Il corpo della richiesta deve essere JSON.');
-  }
-  if (typeof corpo !== 'object' || corpo === null || Array.isArray(corpo)) {
-    throw new ErrorePpu(
-      'richiesta_non_valida',
-      'Il corpo della richiesta deve essere un oggetto JSON.',
-    );
-  }
-  return corpo as Record<string, unknown>;
-}
-
-// Import dal foglio (solo webmaster: il permesso è controllato nel servizio).
-api.post('/admin/import/anteprima', async (c) => {
-  const corpo = await corpoJson(c.req.raw);
-  return c.json(
-    await anteprimaImport(c.env.DB, c.get('utente'), {
-      csv: corpo.csv,
-      mappatura: corpo.mappatura,
-    }),
-  );
-});
-
-api.post('/admin/import/conferma', async (c) => {
-  const corpo = await corpoJson(c.req.raw);
-  return c.json(
-    await confermaImport(c.env.DB, c.get('utente'), {
-      csv: corpo.csv,
-      mappatura: corpo.mappatura,
-      hash: corpo.hash,
-    }),
-  );
-});
-
 api.notFound(() => {
-  throw new ErrorePpu('non_trovato', 'Risorsa non trovata.');
+  throw new AppError('not_found', 'Risorsa non trovata.');
 });

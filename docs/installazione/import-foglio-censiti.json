@@ -15,7 +15,6 @@
     "indirizzo": "Residenza",
     "comune": "Comune",
     "cellulare": "CELL",
-    "telefono_casa": "Telefono Casa",
     "email": "EMAIL PERSONALE"
   },
   "unita": {
@@ -27,13 +26,13 @@
       "Guide": "guide",
       "Noviziato": "noviziato",
       "Clan": "clan",
-      "Fuoco": "fuoco",
+      "Fuoco": "clan",
       "Comunità Capi": "coca"
     }
   },
   "tutori": [
     {
-      "relazione": "padre",
+      "ruolo": "padre",
       "campi": {
         "cognome": "Cognome Padre",
         "nome": "Nome Padre",
@@ -45,7 +44,7 @@
       }
     },
     {
-      "relazione": "madre",
+      "ruolo": "madre",
       "campi": {
         "cognome": "Cognome Madre",
         "nome": "Nome Madre",

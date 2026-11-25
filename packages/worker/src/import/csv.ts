@@ -1,115 +1,115 @@
-// Parser CSV minimale (RFC 4180): virgolette, virgolette raddoppiate, a capo
-// dentro i campi, BOM iniziale, separatore ';' ',' o tabulazione rilevato
-// dalla riga di intestazione. Nessuna dipendenza esterna.
+// Minimal CSV parser (RFC 4180): quotes, doubled quotes, line breaks inside
+// fields, leading BOM, separator ';' ',' or tab detected from the header row.
+// No external dependencies. Error messages are shown to the user (Italian).
 
-export interface RigaCsv {
-  /** Riga del file in cui inizia il record (l'intestazione è la riga 1). */
-  numero: number;
-  valori: string[];
+export interface CsvRow {
+  /** File line where the record starts (the header is line 1). */
+  line: number;
+  values: string[];
 }
 
-export interface TabellaCsv {
-  separatore: string;
-  intestazioni: string[];
-  righe: RigaCsv[];
+export interface CsvTable {
+  separator: string;
+  headers: string[];
+  rows: CsvRow[];
 }
 
-export class ErroreCsv extends Error {}
+export class CsvError extends Error {}
 
-const SEPARATORI = [';', ',', '\t'] as const;
+const SEPARATORS = [';', ',', '\t'] as const;
 
-/** Sceglie il separatore più frequente fuori dalle virgolette nella prima riga. */
-export function rilevaSeparatore(testo: string): string {
-  const conteggi = new Map<string, number>(SEPARATORI.map((s) => [s, 0]));
-  let traVirgolette = false;
-  for (const ch of testo) {
-    if (ch === '"') traVirgolette = !traVirgolette;
-    else if (!traVirgolette && (ch === '\n' || ch === '\r')) break;
-    else if (!traVirgolette && conteggi.has(ch)) conteggi.set(ch, (conteggi.get(ch) ?? 0) + 1);
+/** Picks the most frequent separator outside quotes in the first row. */
+export function detectSeparator(text: string): string {
+  const counts = new Map<string, number>(SEPARATORS.map((s) => [s, 0]));
+  let inQuotes = false;
+  for (const ch of text) {
+    if (ch === '"') inQuotes = !inQuotes;
+    else if (!inQuotes && (ch === '\n' || ch === '\r')) break;
+    else if (!inQuotes && counts.has(ch)) counts.set(ch, (counts.get(ch) ?? 0) + 1);
   }
-  let migliore = ',';
-  let massimo = 0;
-  for (const [s, n] of conteggi) {
-    if (n > massimo) {
-      migliore = s;
-      massimo = n;
+  let best = ',';
+  let max = 0;
+  for (const [s, n] of counts) {
+    if (n > max) {
+      best = s;
+      max = n;
     }
   }
-  return migliore;
+  return best;
 }
 
-function record(testo: string, separatore: string): RigaCsv[] {
-  const risultato: RigaCsv[] = [];
-  let campo = '';
-  let valori: string[] = [];
-  let traVirgolette = false;
-  let riga = 1;
-  let inizio = 1;
-  const chiudi = () => {
-    valori.push(campo);
-    risultato.push({ numero: inizio, valori });
-    valori = [];
-    campo = '';
+function records(text: string, separator: string): CsvRow[] {
+  const result: CsvRow[] = [];
+  let field = '';
+  let values: string[] = [];
+  let inQuotes = false;
+  let line = 1;
+  let start = 1;
+  const close = () => {
+    values.push(field);
+    result.push({ line: start, values });
+    values = [];
+    field = '';
   };
-  for (let i = 0; i < testo.length; i += 1) {
-    const ch = testo[i];
-    if (traVirgolette) {
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i];
+    if (inQuotes) {
       if (ch === '"') {
-        if (testo[i + 1] === '"') {
-          campo += '"';
+        if (text[i + 1] === '"') {
+          field += '"';
           i += 1;
         } else {
-          traVirgolette = false;
+          inQuotes = false;
         }
       } else {
-        if (ch === '\n') riga += 1;
-        campo += ch;
+        if (ch === '\n') line += 1;
+        field += ch;
       }
-    } else if (ch === '"' && campo === '') {
-      traVirgolette = true;
-    } else if (ch === separatore) {
-      valori.push(campo);
-      campo = '';
+    } else if (ch === '"' && field === '') {
+      inQuotes = true;
+    } else if (ch === separator) {
+      values.push(field);
+      field = '';
     } else if (ch === '\r' || ch === '\n') {
-      if (ch === '\r' && testo[i + 1] === '\n') i += 1;
-      chiudi();
-      riga += 1;
-      inizio = riga;
+      if (ch === '\r' && text[i + 1] === '\n') i += 1;
+      close();
+      line += 1;
+      start = line;
     } else {
-      campo += ch;
+      field += ch;
     }
   }
-  if (traVirgolette) throw new ErroreCsv(`Virgolette non chiuse (riga ${inizio}).`);
-  if (campo !== '' || valori.length > 0) chiudi();
-  return risultato;
+  if (inQuotes) throw new CsvError(`Virgolette non chiuse (riga ${start}).`);
+  if (field !== '' || values.length > 0) close();
+  return result;
 }
 
-export function leggiCsv(testo: string): TabellaCsv {
-  const pulito = testo.startsWith('﻿') ? testo.slice(1) : testo;
-  if (pulito.trim() === '') throw new ErroreCsv('Il file CSV è vuoto.');
-  const separatore = rilevaSeparatore(pulito);
-  const [intestazione, ...dati] = record(pulito, separatore);
-  if (!intestazione) throw new ErroreCsv('Intestazione mancante.');
-  // Le intestazioni possono contenere a capo o spazi doppi (celle su più righe).
-  const intestazioni = intestazione.valori.map((h) => h.replace(/\s+/g, ' ').trim());
-  const viste = new Set<string>();
-  for (const h of intestazioni) {
-    const chiave = h.toLowerCase();
-    if (h !== '' && viste.has(chiave)) throw new ErroreCsv(`Colonna duplicata: "${h}".`);
-    viste.add(chiave);
+export function parseCsv(text: string): CsvTable {
+  const clean = text.startsWith('﻿') ? text.slice(1) : text;
+  if (clean.trim() === '') throw new CsvError('Il file CSV è vuoto.');
+  const separator = detectSeparator(clean);
+  const [header, ...data] = records(clean, separator);
+  if (!header) throw new CsvError('Intestazione mancante.');
+  // Headers may contain line breaks or double spaces (multi-line cells).
+  const headers = header.values.map((h) => h.replace(/\s+/g, ' ').trim());
+  const seen = new Set<string>();
+  for (const h of headers) {
+    const key = h.toLowerCase();
+    if (h !== '' && seen.has(key)) throw new CsvError(`Colonna duplicata: "${h}".`);
+    seen.add(key);
   }
-  const righe = dati.filter((r) => r.valori.some((v) => v.trim() !== ''));
-  for (const r of righe) {
-    if (r.valori.length > intestazioni.length) {
-      throw new ErroreCsv(
-        `La riga ${r.numero} ha ${r.valori.length} colonne, l'intestazione ${intestazioni.length}.`,
+  const rows = data.filter((r) => r.values.some((v) => v.trim() !== ''));
+  for (const r of rows) {
+    if (r.values.length > headers.length) {
+      throw new CsvError(
+        `La riga ${r.line} ha ${r.values.length} colonne, l'intestazione ${headers.length}.`,
       );
     }
   }
-  return { separatore, intestazioni, righe };
+  return { separator, headers, rows };
 }
 
-/** Chiave di confronto tra nomi di colonna: spazi normalizzati, senza maiuscole. */
-export function chiaveColonna(nome: string): string {
-  return nome.replace(/\s+/g, ' ').trim().toLowerCase();
+/** Comparison key between column names: normalised spaces, case-insensitive. */
+export function columnKey(name: string): string {
+  return name.replace(/\s+/g, ' ').trim().toLowerCase();
 }

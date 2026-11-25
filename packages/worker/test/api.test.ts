@@ -1,60 +1,67 @@
 import { exports } from 'cloudflare:workers';
 import { describe, expect, it } from 'vitest';
-import { HEADER_UTENTE_TEST } from '../src/identita/index.ts';
+import { TEST_USER_HEADER } from '../src/identity/index.ts';
 
-const chiama = (percorso: string, email?: string) =>
+const call = (path: string, email?: string) =>
   exports.default.fetch(
-    new Request(`https://ppu.test${percorso}`, {
-      headers: email ? { [HEADER_UTENTE_TEST]: email } : {},
+    new Request(`https://ppu.test${path}`, {
+      headers: email ? { [TEST_USER_HEADER]: email } : {},
     }),
   );
 
-describe('API REST', () => {
-  it('/salute risponde senza autenticazione', async () => {
-    const r = await chiama('/salute');
+describe('REST API', () => {
+  it('/health answers without authentication', async () => {
+    const r = await call('/health');
     expect(r.status).toBe(200);
-    expect(await r.json()).toEqual({ stato: 'ok', ambiente: 'locale' });
+    expect(await r.json()).toEqual({ status: 'ok', environment: 'local' });
   });
 
-  it('senza identità risponde 401', async () => {
-    const r = await chiama('/api/io');
+  it('answers 401 without an identity', async () => {
+    const r = await call('/api/me');
     expect(r.status).toBe(401);
-    expect(await r.json()).toMatchObject({ errore: { codice: 'non_autenticato' } });
+    expect(await r.json()).toMatchObject({ error: { code: 'unauthenticated' } });
   });
 
-  it('rifiuta account di altri domini', async () => {
-    const r = await chiama('/api/io', 'qualcuno@altrodominio.org');
+  it('rejects accounts from other domains', async () => {
+    const r = await call('/api/me', 'someone@otherdomain.org');
     expect(r.status).toBe(403);
-    expect(await r.json()).toMatchObject({ errore: { codice: 'dominio_non_ammesso' } });
+    expect(await r.json()).toMatchObject({ error: { code: 'domain_not_allowed' } });
   });
 
-  it('restituisce unità e ruoli dalla tabella utenti', async () => {
-    const r = await chiama('/api/io', 'Capo.EG@example.org');
+  it('returns units and roles from the utenti table', async () => {
+    const r = await call('/api/me', 'Capo.EG@example.org');
     expect(r.status).toBe(200);
     expect(await r.json()).toMatchObject({
       email: 'capo.eg@example.org',
-      unita: ['esploratori', 'guide'],
-      ruoli: { accessoCompleto: false, buonaStrada: false, webmaster: false, betaTester: true },
+      units: ['esploratori', 'guide'],
+      roles: { fullAccess: false, buonaStrada: false, webmaster: false, betaTester: true },
     });
   });
 
-  it('un account del dominio senza riga in utenti è un capo in sola lettura', async () => {
-    const r = await chiama('/api/io', 'nuovo.capo@example.org');
+  it('a domain account without a row in utenti is not enabled', async () => {
+    const r = await call('/api/me', 'nuovo.capo@example.org');
+    expect(r.status).toBe(403);
+    expect(await r.json()).toMatchObject({ error: { code: 'not_registered' } });
+  });
+
+  it('a row without units or roles is a read-only leader', async () => {
+    const r = await call('/api/me', 'capo.coca@example.org');
     expect(r.status).toBe(200);
     expect(await r.json()).toMatchObject({
-      unita: [],
-      ruoli: { accessoCompleto: false, buonaStrada: false, webmaster: false },
+      units: [],
+      roles: { fullAccess: false, buonaStrada: false, webmaster: false },
     });
   });
 
-  it('un account escluso non entra', async () => {
-    const r = await chiama('/api/io', 'segreteria@example.org');
+  it('an excluded account is rejected', async () => {
+    const r = await call('/api/me', 'segreteria@example.org');
     expect(r.status).toBe(403);
-    expect(await r.json()).toMatchObject({ errore: { codice: 'escluso' } });
+    expect(await r.json()).toMatchObject({ error: { code: 'excluded' } });
   });
 
-  it('percorso sconosciuto: 404 in JSON', async () => {
-    const r = await chiama('/api/inesistente', 'capo.eg@example.org');
+  it('unknown path: 404 in JSON', async () => {
+    const r = await call('/api/missing', 'capo.eg@example.org');
     expect(r.status).toBe(404);
+    expect(await r.json()).toMatchObject({ error: { code: 'not_found' } });
   });
 });

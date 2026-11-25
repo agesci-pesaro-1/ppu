@@ -34,7 +34,7 @@
   },
   "tutori": [
     {
-      "relazione": "madre",
+      "ruolo": "madre",
       "campi": {
         "nome": "Madre nome",
         "cognome": "Madre cognome",
@@ -43,7 +43,7 @@
       }
     },
     {
-      "relazione": "padre",
+      "ruolo": "padre",
       "campi": {
         "nome": "Padre nome",
         "cognome": "Padre cognome",

@@ -505,6 +505,8 @@ const users: User[] = [
   { email: 'capogruppo', member: 'Rossetti Paola', fullAccess: 1, buonaStrada: 1 },
   { email: 'genitore.capo', member: 'Arcangeli Stefano', units: ['esploratori'] },
   { email: 'webmaster', member: 'Gentili Roberto', webmaster: 1, betaTester: 1 },
+  // Read-only leader: a row without units or roles.
+  { email: 'capo.coca', member: 'Bianconi Laura' },
   { email: 'segreteria', excluded: 1 },
 ];
 for (const u of users) {
@@ -520,7 +522,7 @@ for (const u of users) {
   });
   for (const unit of u.units ?? []) insert('utenti_unita', { email, unita_id: unit });
 }
-// Bianconi Laura (Co.Ca.) has no row in utenti: a read-only leader.
+// nuovo.capo@example.org has no row in utenti: a domain account not enabled yet.
 
 // ---------------------------------------------------------------------------
 // Tags

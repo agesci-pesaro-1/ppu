@@ -43,9 +43,9 @@ export async function emailFromRequest(request: Request, config: Config): Promis
 }
 
 /**
- * Loads units and roles from the `utenti` table. A domain account without a
- * row is a read-only leader. Excluded accounts are rejected; in beta only beta
- * testers get in.
+ * Loads units and roles from the `utenti` table. Only accounts with a row get
+ * in (ADR 0011); a row without units or roles is a read-only leader. Excluded
+ * accounts are rejected; in beta only beta testers get in.
  */
 export async function loadUser(db: Db, email: string, config: Config): Promise<User> {
   const row = await db
@@ -64,19 +64,24 @@ export async function loadUser(db: Db, email: string, config: Config): Promise<U
     .groupBy(users.email)
     .get();
 
-  const user: User = {
-    email,
-    memberId: row?.memberId ?? null,
-    units: row?.units ? row.units.split(',').sort() : [],
-    fullAccess: row?.fullAccess ?? false,
-    buonaStrada: row?.buonaStrada ?? false,
-    webmaster: row?.webmaster ?? false,
-    betaTester: row?.betaTester ?? false,
-  };
-
-  if (row?.excluded) {
+  if (!row) {
+    throw new AppError(
+      'not_registered',
+      'Non sei ancora abilitato a PPU: chiedi al webmaster del gruppo.',
+    );
+  }
+  if (row.excluded) {
     throw new AppError('excluded', 'Questo account non ha accesso a PPU.');
   }
+  const user: User = {
+    email,
+    memberId: row.memberId,
+    units: row.units ? row.units.split(',').sort() : [],
+    fullAccess: row.fullAccess,
+    buonaStrada: row.buonaStrada,
+    webmaster: row.webmaster,
+    betaTester: row.betaTester,
+  };
   if (config.environment === 'beta' && !user.betaTester) {
     throw new AppError('not_beta_tester', 'La versione beta è riservata ai tester.');
   }

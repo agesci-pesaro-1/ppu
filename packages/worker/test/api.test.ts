@@ -38,8 +38,14 @@ describe('REST API', () => {
     });
   });
 
-  it('a domain account without a row in utenti is a read-only leader', async () => {
+  it('a domain account without a row in utenti is not enabled', async () => {
     const r = await call('/api/me', 'nuovo.capo@example.org');
+    expect(r.status).toBe(403);
+    expect(await r.json()).toMatchObject({ error: { code: 'not_registered' } });
+  });
+
+  it('a row without units or roles is a read-only leader', async () => {
+    const r = await call('/api/me', 'capo.coca@example.org');
     expect(r.status).toBe(200);
     expect(await r.json()).toMatchObject({
       units: [],

@@ -32,6 +32,7 @@ Non serve una chiave per i cookie: consenso e `state` sono legati al browser dal
 ## 3. Sessioni e revoca
 
 - I token di accesso durano un'ora; il rinnovo è possibile per 30 giorni.
+- Entra solo chi ha una riga in `utenti` (ADR 0011): ogni capo nuovo va abilitato con `set_user`. Il primo webmaster si inserisce all'installazione (`docs/installazione/pipeline.md`).
 - A ogni richiesta il Worker rilegge la tabella `utenti`: un account marcato `escluso` perde l'accesso subito.
 - A ogni rinnovo il Worker verifica con Google che l'account sia ancora attivo: un account sospeso o rimosso dal dominio non ottiene nuovi token.
 
@@ -52,7 +53,7 @@ Prima di usarlo con dati reali, disattiva nelle impostazioni di Claude l'uso del
 | --- | --- |
 | `whoami` | Email e ruoli dell'utente collegato |
 | `list_users` | Capi registrati con unità e ruoli |
-| `set_user` | Propone la creazione o modifica di un utente (unità, ruoli, esclusione, scheda associato) |
+| `set_user` | Propone la creazione o modifica di un utente (unità, ruoli, esclusione, scheda associato). Creare la riga è ciò che abilita un capo a entrare |
 | `list_units` | Unità con stato, associati attivi e numero di capi |
 | `set_unit` | Propone l'aggiunta, la rinomina o l'attivazione/disattivazione di un'unità. Dopo l'installazione le unità si gestiscono da qui, non dal file di configurazione (`seed/README.md`) |
 | `list_tags` | Tag con tipo, stato e utilizzi |

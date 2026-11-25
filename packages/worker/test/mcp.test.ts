@@ -89,6 +89,11 @@ describe('MCP admin', () => {
     expect(r.status).toBe(403);
   });
 
+  it('a domain account not enabled in utenti is rejected', async () => {
+    const r = await rpc('tools/list', {}, 'nuovo.capo@example.org');
+    expect(r.status).toBe(403);
+  });
+
   it('the endpoint for every leader is not active yet', async () => {
     const r = await rpc('tools/list', {}, 'webmaster@example.org', '/mcp');
     expect(r.status).toBe(404);

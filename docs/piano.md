@@ -16,7 +16,7 @@ PPU (Progressione Personale Unitaria) è il gestionale degli associati del grupp
 
 ## Utenti e ruoli
 
-Workspace serve solo per l'identità: creazione degli account e login. Chi ha un account @agescipesaro1.it è un capo e può leggere; unità e ruoli stanno nella tabella `utenti` del database, gestita dal webmaster.
+Workspace serve solo per l'identità: creazione degli account e login. Chi ha un account @agescipesaro1.it può fare login, ma entra in PPU solo se il webmaster gli ha creato una scheda nella tabella `utenti` del database, dove stanno anche unità e ruoli.
 
 | Ruolo | Dove si definisce | Può |
 | --- | --- | --- |
@@ -28,12 +28,12 @@ Workspace serve solo per l'identità: creazione degli account e login. Chi ha un
 
 - **Unità:** Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca.
 - **Ruoli nel database:** si gestiscono dall'MCP admin, in futuro anche da una dashboard. Nessun gruppo né attributo su Workspace.
-- Un account @agescipesaro1.it senza scheda in `utenti` è un capo in sola lettura.
+- Entra in PPU solo un account del dominio con una scheda in `utenti` (ADR 0011): senza scheda il login Google riesce ma PPU risponde «Non sei ancora abilitato a PPU: chiedi al webmaster del gruppo». Una scheda senza unità né ruoli è un capo in sola lettura. Il primo webmaster si inserisce a mano all'installazione.
 - Account rimosso o sospeso su Workspace = login impossibile, quindi accesso revocato anche se la scheda resta nel database.
 - Ogni unità può avere più capi, tutti con gli stessi permessi e lo stesso flusso di conferma; un capo può seguire più unità. Un capo assegnato ai Lupetti non modifica le Coccinelle.
 - I dati di un capo li modifica il capo stesso o chi ha accesso completo.
 - Ragazzi e genitori non accedono al sistema; in futuro riceveranno solo messaggi.
-- Un account del dominio che non è un capo (per esempio una segreteria) si esclude con un flag nella sua scheda `utenti`.
+- Il flag `escluso` nella scheda `utenti` revoca l'accesso (per esempio a un ex capo): le schede non si cancellano.
 
 ## Architettura e stack
 
@@ -59,10 +59,10 @@ Database D1 (SQLite) con giurisdizione UE: ogni voce sotto è una tabella, i per
 
 | Collezione | Contenuto |
 | --- | --- |
-| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, telefono casa, email); privacy (informativa con data, consensi 2A, 2B, 2C, note privacy); stato (attivo o archiviato) |
-| `associati/{id}` → genitori/tutori | Lista: relazione, anagrafica, CF, cellulare, email, flag "riceve comunicazioni", collegamento facoltativo al profilo se il tutore è anche associato. Archiviati automaticamente ai 18 anni |
+| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, email); flag "riceve comunicazioni"; privacy (informativa con data, consensi 2A, 2B, 2C, note privacy); stato (attivo o archiviato) |
+| `associati/{id}` → genitori/tutori | Lista: ruolo (madre, padre, tutore, affidatario, altro), anagrafica, CF, cellulare, email, collegamento facoltativo al profilo se il tutore è anche associato. Archiviati automaticamente ai 18 anni |
 | `associati/{id}/progressione/{voce}` | Voci dal catalogo di branca (prede, specialità, voli, tappe, brevetti…) o voci libere (data, tipo, descrizione). Le vecchie note generali diventano voci libere |
-| `relazioni/{id}` | Due associati + tipo (genitore/figlio, fratello/sorella, zio/nipote, cugino, coniuge, altro), con l'inversa creata in automatico. Vale anche per i capi |
+| `relazioni/{id}` | Due associati + tipo (genitore/figlio, fratello/sorella, zio/nipote, cugino, altro), con l'inversa creata in automatico. Vale anche per i capi |
 | `catalogo/{branca}` | Voci note di progressione per branca, gestite da chi ha accesso completo |
 | `riunioni/{id}` | Unità, data, tipo; per ogni associato presente, assente o giustificato, con motivazione facoltativa (anche comunicata prima della riunione) |
 | `modifiche/{id}` | Registro: autore, data, campo, prima/dopo, assistente usato, stato Buona Strada, chi ha confermato |
@@ -71,6 +71,7 @@ Database D1 (SQLite) con giurisdizione UE: ogni voce sotto è una tabella, i per
 - **`utenti/{email}`:** unità (una o più), accesso completo, Buona Strada, webmaster, esclusione; gestita dal webmaster tramite MCP admin.
 - **`anni_scout`:** nome (per esempio 2026/27), data di inizio, anno attuale. L'anno cambia alla data dei passaggi, che varia ogni anno: chi ha accesso completo preme "Crea nuovo anno" e da lì partono i passaggi.
 - **`tag/{id}`:** nome, tipo, stato (libero, ufficiale, archiviato), anno scout facoltativo, flag "esclusivo" (una sola voce di quel tipo per persona e anno, per esempio la squadriglia), creato da. Qualsiasi capo li crea e li usa su tutti gli associati; il webmaster vede tutti i tag con il loro utilizzo e decide quali rendere ufficiali, quali unire e quali archiviare.
+- **`tipi_tag`:** li decide solo il webmaster, nel file di configurazione del gruppo; dentro ogni tipo qualsiasi capo crea i tag che vuole. La configurazione d'esempio contiene squadriglia, sestiglia e varie. Il tipo **varie** raccoglie le proposte non categorizzate ed è il predefinito quando un capo non sceglie un tipo: nella revisione il webmaster sposta quei tag nel tipo giusto o crea un tipo nuovo.
 - **`associati_tag`:** associato, tag, anno scout, nota facoltativa, chi e quando. Salvati subito con registro, fuori dal flusso Buona Strada.
 - **Fuori dal sistema:** dati sanitari, che restano offline.
 - **Codici fiscali:** usati solo per Buona Strada, non mostrati nelle viste normali.
@@ -134,12 +135,11 @@ Ogni scelta architetturale si registra come ADR in `docs/adr/NNNN-titolo.md` nel
 3. Workspace solo per identità, ruoli nel database
 4. Un solo backend con endpoint MCP e API REST
 5. PWA in Svelte, non Next.js né AppSheet
-6. Allineamento manuale con Buona Strada, con conferma di una seconda persona
-7. Tag liberi con revisione del webmaster
-8. Beta e produzione sullo stesso database, migrazioni retrocompatibili
-9. Notifiche tramite webhook Google Chat
-10. Progetto open source, un'installazione separata per ogni gruppo
-11. Licenza AGPL-3.0 per il codice, per ora: permette l'uso commerciale ma obbliga chi offre il servizio a pubblicare le modifiche
+6. Beta e produzione sullo stesso database, migrazioni retrocompatibili
+7. Un'installazione separata per ogni gruppo
+8. Buona Strada fonte ufficiale, allineamento manuale tracciato nel registro
+
+Regole di dominio (chi conferma l'allineamento con Buona Strada, tag), strumenti di sviluppo e licenza non sono scelte architetturali: stanno in questo piano, in `CONTRIBUTING.md` e in `LICENSE`.
 
 **Open source e replicabilità**
 
@@ -147,9 +147,9 @@ Un altro gruppo deve poter partire da zero con un repository, un account Cloudfl
 
 - **Un'installazione per gruppo:** stesso codice, Worker, D1 e Access separati. Nessun dato condiviso tra gruppi: ogni gruppo è titolare dei propri dati.
 - **Migrazioni come fonte di verità:** lo schema esiste solo come migrazioni SQL numerate (`wrangler d1 migrations`), applicate in ordine dalla pipeline; mai modifiche a mano sul database.
-- **Dati di base (seed):** branche e unità standard AGESCI, cataloghi di progressione per branca, tipi di tag comuni. Ogni gruppo li adatta dopo l'installazione.
-- **Dati finti (seed di test):** associati, famiglie e riunioni inventati, usati da preview, test E2E e demo. Mai dati reali nel repository.
-- **Configurazione, non codice:** dominio, nome del gruppo, unità attive, colori e logo stanno in un file di configurazione e nei segreti di Cloudflare. Niente @agescipesaro1.it scritto nel codice.
+- **Dati di base:** branche, unità e tipi di tag dal file di configurazione del gruppo, che ognuno compila con ciò che gli serve partendo dall'esempio con le unità standard AGESCI; il catalogo di progressione dal Regolamento metodologico, solo per le branche configurate.
+- **Dati finti (seed di test):** associati, famiglie e riunioni inventati, generati da uno script e usati da preview, test E2E e demo. Nessun file SQL di dati nel repository, mai dati reali.
+- **Configurazione, non codice:** dominio, nome del gruppo, branche, unità, tipi di tag, colori e logo stanno in un file di configurazione e nei segreti di Cloudflare. Niente @agescipesaro1.it scritto nel codice.
 - **Import generico:** l'import dal foglio usa una mappatura delle colonne configurabile, partendo dal formato del nostro foglio.
 - **Aggiornamenti:** rilasci con versione e changelog; un gruppo aggiorna con il codice nuovo e la pipeline applica le migrazioni mancanti.
 - **Documentazione:** README, guida di installazione passo passo, ADR pubblici, guida per chi contribuisce.
@@ -239,6 +239,9 @@ _[Diagramma: roadmap · 7 fasi in sequenza — da aggiungere]_
 - [ ] Pubblicazione del calendario delle attività (Google Calendar o feed ICS per unità)
 - [ ] Creazione automatica dei contatti dei genitori nella rubrica dei capi (Google People API)
 - [ ] Pulsante "Scrivi su WhatsApp" nella scheda: apre la chat con il genitore tramite link wa.me, senza API e senza costi
+- [ ] Foto profilo dell'associato: caricamento dalla PWA, salvataggio su R2 con giurisdizione UE, servita dal Worker come le immagini dei distintivi del catalogo. È una foto interna, trattata come gli altri dati della scheda: nessun consenso aggiuntivo oltre ai consensi per le foto pubblicate. Quando l'associato viene archiviato la foto resta su R2
+- [ ] Documenti dell'associato in PDF (per esempio la richiesta di iscrizione e l'informativa privacy firmata, a supporto del campo `informativa`), in caricamento e consultazione dalla PWA: archiviati sul Google Drive del Workspace del gruppo, in una struttura di cartelle che PPU rispecchia (per esempio una cartella per associato). Preferibile accedere a Drive con l'account del capo che ha fatto login, così la visibilità dei documenti dipende anche dai permessi di Drive; altrimenti un account di servizio. Richiede un nuovo ADR, perché oggi Workspace serve solo per l'identità (ADR 0003)
+- [ ] Lista d'attesa in PPU, come unico punto per vederla e gestirla: richieste con dati del ragazzo e contatti della famiglia, data della richiesta, unità o anno di nascita, stato (in attesa, contattata, inserita, rinuncia) e note; una richiesta accolta diventa un associato con i suoi tutori. Import iniziale della lista attuale con la mappatura delle colonne configurabile, poi alimentazione automatica dal Google Form esistente: un Apps Script collegato al form invia ogni risposta a un endpoint del Worker, con firma HMAC e un segreto condiviso, senza servizi esterni e senza che PPU legga Workspace
 - [ ] Kit per altri gruppi: guida di installazione e script di setup (D1 in UE, Access, client OAuth)
 
 ## Punti aperti
@@ -252,3 +255,5 @@ _[Diagramma: roadmap · 7 fasi in sequenza — da aggiungere]_
 - [ ] Indirizzo da cui partiranno le mail ai genitori.
 - [ ] Licenza della documentazione per gli utenti (il codice è AGPL-3.0, per ora).
 - [ ] Notifiche: restare su Google Chat o aggiungere notifiche push nella PWA.
+- [ ] Lista d'attesa: campi del form da importare (solo quelli necessari), regole di ordinamento (data della richiesta, anno di nascita, fratelli già iscritti), per quanto tempo si conservano le richieste non accolte, informativa privacy sul form. L'endpoint chiamato dall'Apps Script deve stare fuori da Access (lo chiama Google, non un capo), quindi va deciso con un ADR (firma, protezione dai doppioni, limiti di frequenza).
+- [ ] Documenti su Drive: il Drive condiviso del gruppo esiste già, con una cartella dedicata a PPU; resta da definire la struttura delle cartelle. Accesso con l'account del capo: il login di Access dà solo l'identità, quindi serve un secondo consenso OAuth con un permesso su Drive, chiesto la prima volta che il capo apre i documenti (una schermata di Google, senza rifare il login), con il token conservato cifrato dal Worker; dall'MCP il permesso si può chiedere nello stesso login Google. In alternativa un account di servizio limitato a quella cartella; come si combinano i permessi di Drive con quelli di PPU, che restano comunque controllati nel livello di servizi; elenco dei tipi di documento ammessi (mai dati sanitari); cosa succede quando l'associato viene archiviato.

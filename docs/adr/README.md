@@ -16,14 +16,12 @@ Ogni scelta architetturale di PPU è registrata qui come ADR (Architecture Decis
 | --- | --- | --- |
 | [0001](0001-cloudflare-al-posto-di-firebase.md) | Cloudflare (Workers, Pages, D1) al posto di Firebase | Accettata |
 | [0002](0002-d1-relazionale-giurisdizione-ue.md) | D1 relazionale con giurisdizione UE | Accettata |
-| [0003](0003-workspace-solo-identita.md) | Workspace solo per identità, ruoli nel database | Accettata |
+| [0003](0003-workspace-solo-identita.md) | Workspace solo per identità, ruoli nel database | Accettata, superata in parte da 0011 |
 | [0004](0004-un-backend-mcp-e-rest.md) | Un solo backend con endpoint MCP e API REST | Accettata |
 | [0005](0005-pwa-in-svelte.md) | PWA in Svelte, non Next.js né AppSheet | Accettata |
-| [0006](0006-allineamento-buona-strada.md) | Allineamento manuale con Buona Strada, con conferma di una seconda persona | Accettata |
-| [0007](0007-tag-liberi-con-revisione.md) | Tag liberi con revisione del webmaster | Accettata |
-| [0008](0008-beta-e-produzione-stesso-database.md) | Beta e produzione sullo stesso database, migrazioni retrocompatibili | Accettata |
-| [0009](0009-notifiche-google-chat.md) | Notifiche tramite webhook Google Chat | Accettata |
-| [0010](0010-open-source-un-installazione-per-gruppo.md) | Progetto open source, un'installazione separata per ogni gruppo | Accettata |
-| [0011](0011-licenza-agpl.md) | Licenza AGPL-3.0 per il codice | Accettata |
-| [0012](0012-strumenti-di-sviluppo.md) | Strumenti di sviluppo: Node 26, pnpm, Biome | Proposta |
-| [0013](0013-unita-nel-database.md) | Unità nel database, gestite dall'MCP admin | Proposta |
+| [0006](0006-beta-e-produzione-stesso-database.md) | Beta e produzione sullo stesso database, migrazioni retrocompatibili | Accettata |
+| [0007](0007-un-installazione-per-gruppo.md) | Un'installazione separata per ogni gruppo | Accettata |
+| [0008](0008-buona-strada-fonte-ufficiale.md) | Buona Strada fonte ufficiale, allineamento manuale tracciato nel registro | Accettata |
+| [0009](0009-immagini-dei-distintivi-dal-worker.md) | Immagini dei distintivi scaricate e servite dal Worker | Accettata |
+| [0010](0010-drizzle-per-le-query.md) | Drizzle per le query, schema nelle migrazioni SQL | Accettata |
+| [0011](0011-accesso-solo-con-riga-in-utenti.md) | Accesso solo con una riga in `utenti` | Accettata |

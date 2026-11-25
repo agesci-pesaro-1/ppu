@@ -24,9 +24,9 @@ La mappatura dice, per ogni campo di PPU, da quale colonna del foglio leggerlo. 
 | --- | --- |
 | `versione` | Sempre `1`. |
 | `formatoData` | `"gg/mm/aaaa"` (predefinito) o `"aaaa-mm-gg"`. |
-| `associato` | Campo → colonna. Obbligatori `cognome` e `nome`. Campi possibili: `codice_censimento`, `cognome`, `nome`, `data_nascita`, `luogo_nascita`, `codice_fiscale`, `indirizzo`, `cap`, `comune`, `provincia`, `cellulare`, `telefono_casa`, `email`, `informativa`, `informativa_data`, `consenso_2a`, `consenso_2b`, `consenso_2c`, `note_privacy`. |
+| `associato` | Campo → colonna. Obbligatori `cognome` e `nome`. Campi possibili: `codice_censimento`, `cognome`, `nome`, `data_nascita`, `luogo_nascita`, `codice_fiscale`, `indirizzo`, `cap`, `comune`, `provincia`, `cellulare`, `email`, `riceve_comunicazioni` (se manca, sì), `informativa`, `informativa_data`, `consenso_2a`, `consenso_2b`, `consenso_2c`, `note_privacy`. |
 | `unita` | `colonna` e `valori`: per ogni valore che compare nel foglio, l'id dell'unità in PPU (`lupetti`, `coccinelle`, `esploratori`, `guide`, `noviziato`, `clan`, `coca`, o le unità del vostro gruppo). |
-| `tutori` | Fino a 4 genitori o tutori per riga: `relazione` (`madre`, `padre`, `tutore`, ...) e `campi` (`nome` obbligatorio, poi `cognome`, `codice_fiscale`, `cellulare`, `email`, `riceve_comunicazioni`). |
+| `tutori` | Fino a 4 genitori o tutori per riga: `ruolo` (`madre`, `padre`, `tutore`, `affidatario` o `altro`) e `campi` (`nome` obbligatorio, poi `cognome`, `codice_fiscale`, `cellulare`, `email`). |
 | `note` | Colonne di note generali: diventano voci libere di progressione (tipo predefinito `nota`). |
 | `valoriSi`, `valoriNo` | Valori aggiuntivi da leggere come sì o no nelle colonne dei consensi. |
 
@@ -35,7 +35,7 @@ Le colonne del foglio non citate nella mappatura vengono ignorate e l'anteprima 
 ### Come vengono letti i valori
 
 - **Date:** convertite in `aaaa-mm-gg`; una data inesistente (per esempio 31/02) è un errore.
-- **Sì/no** (informativa e consensi): `sì`, `si`, `x`, `1`, `vero`... valgono sì; vuoto, `no`, `0`... valgono no. Un valore non riconosciuto vale **no**, con un avviso: per un consenso è la scelta prudente.
+- **Sì/no** (comunicazioni, informativa e consensi): `sì`, `si`, `x`, `1`, `vero`... valgono sì; vuoto, `no`, `0`... valgono no. Un valore non riconosciuto vale **no**, con un avviso: per un consenso è la scelta prudente.
 - **Telefoni:** solo cifre, con prefisso internazionale (`+39` se manca).
 - **CAP:** se il foglio ha tolto lo zero iniziale (`1100`), viene completato (`01100`) con un avviso.
 - **Codici fiscali e provincia:** in maiuscolo.
@@ -48,24 +48,24 @@ Per ora l'import si chiama via API (in seguito ci sarà uno strumento nell'MCP a
 Prepara il corpo della richiesta (il file resta sul tuo computer):
 
 ```bash
-jq -n --rawfile csv foglio.csv --slurpfile m mappatura.json '{csv: $csv, mappatura: $m[0]}' > richiesta.json
+jq -n --rawfile csv foglio.csv --slurpfile m mappatura.json '{csv: $csv, mapping: $m[0]}' > richiesta.json
 ```
 
 Anteprima:
 
 ```bash
-curl -s -X POST https://<indirizzo-del-worker>/api/admin/import/anteprima \
+curl -s -X POST https://<indirizzo-del-worker>/api/admin/import/preview \
   -H "cf-access-token: $(cloudflared access token -app=https://<indirizzo-del-worker>)" \
   -H 'content-type: application/json' --data @richiesta.json
 ```
 
-La risposta contiene i conteggi, le colonne ignorate e, per ogni riga, solo numero di riga, cognome, nome, unità ed eventuali errori e avvisi per campo (mai contatti o codici fiscali). Correggi il foglio o la mappatura finché `conErrori` è 0: la conferma è rifiutata se c'è anche una sola riga con errori.
+La risposta contiene i conteggi, le colonne ignorate e, per ogni riga, solo numero di riga, cognome, nome, unità ed eventuali errori e avvisi per campo (mai contatti o codici fiscali). Correggi il foglio o la mappatura finché `counts.withErrors` è 0: la conferma è rifiutata se c'è anche una sola riga con errori.
 
 Conferma, con l'`hash` dell'anteprima:
 
 ```bash
 jq --arg hash '<hash>' '. + {hash: $hash}' richiesta.json > conferma.json
-curl -s -X POST https://<indirizzo-del-worker>/api/admin/import/conferma \
+curl -s -X POST https://<indirizzo-del-worker>/api/admin/import/confirm \
   -H "cf-access-token: $(cloudflared access token -app=https://<indirizzo-del-worker>)" \
   -H 'content-type: application/json' --data @conferma.json
 ```

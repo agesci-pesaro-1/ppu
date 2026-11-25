@@ -1,80 +1,78 @@
 import { Hono } from 'hono';
-import { type Config, leggiConfig } from '../config.ts';
+import { type Config, readConfig } from '../config.ts';
+import { createDb, type Db } from '../db/index.ts';
 import type { Env } from '../env.ts';
-import { ErrorePpu } from '../errori.ts';
-import { caricaUtente, emailDallaRichiesta, type Utente } from '../identita/index.ts';
-import { anteprimaImport, confermaImport } from '../import/servizio.ts';
+import { AppError } from '../errors.ts';
+import { emailFromRequest, loadUser, type User } from '../identity/index.ts';
+import { confirmImport, previewImport } from '../import/service.ts';
 
-export interface Variabili {
+export interface Variables {
   config: Config;
-  utente: Utente;
+  db: Db;
+  user: User;
 }
 
-export const api = new Hono<{ Bindings: Env; Variables: Variabili }>();
+export const api = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Identità su ogni chiamata della PWA: JWT di Access (o identità di test in preview).
+// Identity on every PWA call: Access JWT (or the test identity in preview).
 api.use('*', async (c, next) => {
-  const config = leggiConfig(c.env);
-  const email = await emailDallaRichiesta(c.req.raw, config);
+  const config = readConfig(c.env);
+  const email = await emailFromRequest(c.req.raw, config);
+  const db = createDb(c.env.DB);
   c.set('config', config);
-  c.set('utente', await caricaUtente(c.env.DB, email, config));
+  c.set('db', db);
+  c.set('user', await loadUser(db, email, config));
   await next();
 });
 
-/** Profilo dell'utente corrente: email, unità e ruoli. */
-api.get('/io', (c) => {
-  const u = c.get('utente');
+/** Current user's profile: email, units and roles. */
+api.get('/me', (c) => {
+  const u = c.get('user');
   return c.json({
     email: u.email,
-    unita: u.unita,
-    ruoli: {
-      accessoCompleto: u.accessoCompleto,
+    units: u.units,
+    roles: {
+      fullAccess: u.fullAccess,
       buonaStrada: u.buonaStrada,
       webmaster: u.webmaster,
       betaTester: u.betaTester,
     },
-    associatoId: u.associatoId,
+    memberId: u.memberId,
   });
 });
 
-async function corpoJson(req: Request): Promise<Record<string, unknown>> {
-  let corpo: unknown;
+async function jsonBody(req: Request): Promise<Record<string, unknown>> {
+  let body: unknown;
   try {
-    corpo = await req.json();
+    body = await req.json();
   } catch {
-    throw new ErrorePpu('richiesta_non_valida', 'Il corpo della richiesta deve essere JSON.');
+    throw new AppError('bad_request', 'Il corpo della richiesta deve essere JSON.');
   }
-  if (typeof corpo !== 'object' || corpo === null || Array.isArray(corpo)) {
-    throw new ErrorePpu(
-      'richiesta_non_valida',
-      'Il corpo della richiesta deve essere un oggetto JSON.',
-    );
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+    throw new AppError('bad_request', 'Il corpo della richiesta deve essere un oggetto JSON.');
   }
-  return corpo as Record<string, unknown>;
+  return body as Record<string, unknown>;
 }
 
-// Import dal foglio (solo webmaster: il permesso è controllato nel servizio).
-api.post('/admin/import/anteprima', async (c) => {
-  const corpo = await corpoJson(c.req.raw);
+// Import from the sheet (webmaster only: the service checks the permission).
+api.post('/admin/import/preview', async (c) => {
+  const body = await jsonBody(c.req.raw);
   return c.json(
-    await anteprimaImport(c.env.DB, c.get('utente'), {
-      csv: corpo.csv,
-      mappatura: corpo.mappatura,
-    }),
+    await previewImport(c.get('db'), c.get('user'), { csv: body.csv, mapping: body.mapping }),
   );
 });
 
-api.post('/admin/import/conferma', async (c) => {
-  const corpo = await corpoJson(c.req.raw);
+api.post('/admin/import/confirm', async (c) => {
+  const body = await jsonBody(c.req.raw);
   return c.json(
-    await confermaImport(c.env.DB, c.get('utente'), {
-      csv: corpo.csv,
-      mappatura: corpo.mappatura,
-      hash: corpo.hash,
+    await confirmImport(c.get('db'), c.get('user'), {
+      csv: body.csv,
+      mapping: body.mapping,
+      hash: body.hash,
     }),
   );
 });
 
 api.notFound(() => {
-  throw new ErrorePpu('non_trovato', 'Risorsa non trovata.');
+  throw new AppError('not_found', 'Risorsa non trovata.');
 });

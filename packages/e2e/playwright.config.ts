@@ -1,10 +1,11 @@
 import { defineConfig } from '@playwright/test';
 
-// Con E2E_BASE_URL i test girano contro un ambiente già pubblicato (la preview
-// della pull request). Senza, Playwright avvia `wrangler dev` su un D1 locale
-// preparato con migrazioni, seed base e seed demo.
-const urlEsterno = process.env.E2E_BASE_URL;
-const PORTA = 8787;
+// With E2E_BASE_URL the tests run against an already deployed environment (the
+// pull request's preview). Without it, Playwright starts `wrangler dev` on a
+// local D1 set up with the migrations, the example configuration, seed/base
+// and the demo data.
+const externalUrl = process.env.E2E_BASE_URL;
+const PORT = 8787;
 
 export default defineConfig({
   testDir: './tests',
@@ -13,15 +14,15 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['github']] : 'list',
   use: {
-    baseURL: urlEsterno ?? `http://localhost:${PORTA}`,
+    baseURL: externalUrl ?? `http://localhost:${PORT}`,
     trace: 'off',
   },
-  ...(urlEsterno
+  ...(externalUrl
     ? {}
     : {
         webServer: {
-          command: `pnpm --filter @ppu/worker dev:e2e --port ${PORTA}`,
-          url: `http://localhost:${PORTA}/salute`,
+          command: `pnpm --filter @ppu/worker dev:e2e --port ${PORT}`,
+          url: `http://localhost:${PORT}/health`,
           reuseExistingServer: !process.env.CI,
           timeout: 180_000,
         },

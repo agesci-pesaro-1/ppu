@@ -1,0 +1,85 @@
+// PPU Worker configuration.
+//
+// No group-specific values here. In the deployed environments the pipeline
+// generates wrangler.generated.json with scripts/wrangler-config.ts, filling
+// in domain, Access, database and routes from the GitHub variables
+// (docs/installazione/pipeline.md). The generator rejects TEST_MODE outside
+// local and preview.
+//
+// Comments only on whole lines: the generator strips them line by line.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "ppu",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // Locally, test mode is turned on from .dev.vars (see .dev.vars.example),
+  // never here: this section is also the base of the deployed environments.
+  "vars": {
+    "ENVIRONMENT": "local"
+  },
+  // KV of the MCP's OAuth provider (tokens and clients, hashed or encrypted).
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "00000000000000000000000000000000" }],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ppu-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "../../migrations"
+    }
+  ],
+  "env": {
+    // One per pull request: separate D1 with demo data, simulated identity.
+    "preview": {
+      "name": "ppu-preview",
+      "workers_dev": true,
+      "vars": {
+        "ENVIRONMENT": "preview",
+        "DOMAIN": "example.org",
+        "GROUP_NAME": "Anteprima PPU",
+        "TEST_MODE": "on"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ppu-preview",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "../../migrations"
+        }
+      ]
+    },
+    // On merge to main. Uses the production D1 (ADR 0006).
+    "beta": {
+      "name": "ppu-beta",
+      "workers_dev": false,
+      "vars": {
+        "ENVIRONMENT": "beta"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ppu",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "../../migrations"
+        }
+      ]
+    },
+    // Manual promotion from GitHub.
+    "production": {
+      "name": "ppu-production",
+      "workers_dev": false,
+      "vars": {
+        "ENVIRONMENT": "production"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ppu",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "../../migrations"
+        }
+      ]
+    }
+  }
+}

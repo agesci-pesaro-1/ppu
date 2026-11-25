@@ -1,2 +1,8 @@
 packages:
   - "packages/*"
+
+# Dipendenze autorizzate a eseguire script di installazione (binari nativi).
+# pnpm blocca tutti gli altri; in CI un blocco non autorizzato fa fallire l'install.
+allowBuilds:
+  esbuild: true
+  workerd: true

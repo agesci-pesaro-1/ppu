@@ -125,6 +125,27 @@ jobs:
               await github.rest.issues.createComment({ owner, repo, issue_number, body });
             }
 
+      # A Worker just created on workers.dev takes a while to reach every edge:
+      # meanwhile some requests get 404 or 500. Wait for /health to answer 200
+      # several times in a row before running the tests.
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Wait for the preview to be reachable
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          ok=0
+          for _ in $(seq 1 90); do
+            if [ "$(curl -s -o /dev/null -w '%{http_code}' "$URL/health")" = "200" ]; then
+              ok=$((ok + 1))
+              [ "$ok" -ge 10 ] && exit 0
+            else
+              ok=0
+            fi
+            sleep 2
+          done
+          echo "::error::The preview at $URL did not answer 200 consistently."
+          exit 1
+
       - if: steps.prerequisites.outputs.enabled == 'true'
         name: E2E tests on the preview
         env:

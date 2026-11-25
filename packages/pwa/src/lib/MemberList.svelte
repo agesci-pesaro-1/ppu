@@ -33,6 +33,14 @@
     pending = setTimeout(load, 250);
   }
 
+  // Branch colour (AGESCI manual) for avatars and filters.
+  const branchOf = $derived(new Map(units.map((u) => [u.id, u.branch])));
+  const KNOWN_BRANCHES = new Set(['lc', 'eg', 'rs', 'coca']);
+  function branchColor(unitId: string | undefined): string {
+    const b = unitId ? branchOf.get(unitId) : undefined;
+    return b && KNOWN_BRANCHES.has(b) ? `var(--branch-${b})` : 'var(--primary)';
+  }
+
   function filter(id: string) {
     selectedUnit = selectedUnit === id ? '' : id;
     load();
@@ -72,8 +80,9 @@
         class:active={selectedUnit === u.id}
         aria-pressed={selectedUnit === u.id}
         onclick={() => filter(u.id)}
+        style:--branch={branchColor(u.id)}
       >
-        {u.name} <span class="count">{u.members}</span>
+        <span class="dot" aria-hidden="true"></span>{u.name} <span class="count">{u.members}</span>
       </button>
     {/each}
   </div>
@@ -88,11 +97,11 @@
     <p class="message">Nessun associato trovato.</p>
   {:else}
     <p class="muted total">{list.length} {list.length === 1 ? 'associato' : 'associati'}</p>
-    <ul class="rows">
+    <ul class="rows glass">
       {#each list as a (a.id)}
         <li>
           <a href={`#/member/${a.id}`} class="row">
-            <span class="avatar" aria-hidden="true">{initials(a.lastName, a.firstName)}</span>
+            <span class="avatar" aria-hidden="true" style:--branch={branchColor(a.unit?.id)}>{initials(a.lastName, a.firstName)}</span>
             <span class="body">
               <span class="name"><strong>{a.lastName}</strong> {a.firstName}</span>
               <span class="details muted">
@@ -113,70 +122,100 @@
 
 <style>
   .search {
-    position: sticky;
-    top: 0;
     padding-top: 12px;
-    background: var(--background);
   }
   input {
     width: 100%;
     font: inherit;
     font-size: 1rem;
-    padding: 12px 16px;
+    padding: 13px 18px 13px 44px;
     border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface);
+    border: 1px solid var(--glass-border);
+    background: var(--glass)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23857aa0' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E")
+      no-repeat 16px center / 18px;
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      var(--glass-shadow);
     color: var(--text);
   }
+  input::placeholder {
+    color: var(--text-muted);
+  }
   input:focus {
-    outline: 2px solid var(--primary);
+    outline: 3px solid var(--focus-ring);
     outline-offset: 1px;
   }
   .filters {
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    padding: 12px 0 4px;
+    padding: 14px 2px 6px;
+    margin: 0 -2px;
     scrollbar-width: none;
   }
   .filters button {
     flex: none;
-    border: 1px solid var(--border);
-    background: var(--surface);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: inset 0 1px 0 var(--glass-highlight);
     border-radius: 999px;
-    padding: 6px 12px;
-    font-size: 0.9rem;
+    padding: 7px 14px;
+    font-size: 0.88rem;
+    font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
+    transition:
+      background 0.2s,
+      color 0.2s,
+      transform 0.15s;
+  }
+  .filters button:active {
+    transform: scale(0.96);
   }
   .filters button.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: var(--on-primary);
+    background: var(--filled);
+    border-color: transparent;
+    color: var(--on-filled);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.25),
+      0 6px 16px -6px color-mix(in srgb, var(--brand-primary) 70%, transparent);
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--branch);
+    box-shadow: 0 0 0 2px rgb(255 255 255 / 0.6);
   }
   .count {
     opacity: 0.7;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
   }
   .read-only-note {
-    font-size: 0.8rem;
-    margin: 6px 0;
+    font-size: 0.78rem;
+    margin: 6px 2px;
   }
   .total {
-    font-size: 0.85rem;
-    margin: 8px 0 4px;
+    font-size: 0.82rem;
+    margin: 10px 4px 6px;
   }
   .rows {
     list-style: none;
     margin: 0;
-    padding: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    padding: 4px 0;
     border-radius: var(--radius);
     overflow: hidden;
   }
   .rows li + li {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--separator);
   }
   .row {
     display: flex;
@@ -184,22 +223,29 @@
     padding: 12px 16px;
     color: inherit;
     text-decoration: none;
-    align-items: flex-start;
+    align-items: center;
+    transition: background 0.15s;
+  }
+  .row:hover {
+    background: var(--primary-soft);
   }
   .row:active {
-    background: var(--primary-soft);
+    background: color-mix(in srgb, var(--brand-primary) 16%, transparent);
   }
   .avatar {
     flex: none;
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
-    background: var(--primary-soft);
-    color: var(--primary);
+    background:
+      radial-gradient(circle at 30% 25%, var(--glass-highlight), transparent 60%),
+      color-mix(in srgb, var(--branch) 30%, var(--glass-strong));
+    border: 2px solid var(--branch);
+    color: var(--text);
     display: grid;
     place-items: center;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
   .body {
     display: flex;
@@ -207,9 +253,9 @@
     min-width: 0;
   }
   .details {
-    font-size: 0.85rem;
+    font-size: 0.84rem;
   }
   .tags {
-    margin-top: 2px;
+    margin-top: 3px;
   }
 </style>

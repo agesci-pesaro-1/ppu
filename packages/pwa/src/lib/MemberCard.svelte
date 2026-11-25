@@ -31,7 +31,7 @@
   };
 </script>
 
-<a class="back" href="#/">← Elenco</a>
+<a class="back glass" href="#/"><span aria-hidden="true">‹</span> Elenco</a>
 
 {#if error}
   <p class="message error" role="alert">{error}</p>
@@ -39,7 +39,7 @@
   <p class="message">Caricamento…</p>
 {:else}
   {@const c = card}
-  <section class="heading">
+  <section class="heading glass">
     <span class="avatar" aria-hidden="true">{initials(c.lastName, c.firstName)}</span>
     <div>
       <h1>{c.firstName} {c.lastName}</h1>
@@ -182,62 +182,96 @@
 
 <style>
   .back {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     margin: 12px 0 0;
+    padding: 6px 14px 6px 10px;
+    border-radius: 999px;
     text-decoration: none;
     font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .back span {
+    font-size: 1.3rem;
+    line-height: 1;
   }
   .heading {
+    position: relative;
+    overflow: hidden;
     display: flex;
-    gap: 14px;
+    gap: 16px;
     align-items: center;
-    margin-top: 12px;
+    margin-top: 14px;
+    padding: 18px;
+    border-radius: var(--radius);
+  }
+  /* Coloured brand glow behind the heading. */
+  .heading::before {
+    content: "";
+    position: absolute;
+    inset: -40% 40% 30% -20%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--brand-accent) 35%, transparent), transparent);
+    pointer-events: none;
+  }
+  .heading > * {
+    position: relative;
   }
   .heading h1 {
-    font-size: 1.35rem;
+    font-size: 1.45rem;
     margin: 0;
+    line-height: 1.2;
   }
   .heading p {
-    margin: 2px 0;
+    margin: 3px 0;
   }
   .avatar {
     flex: none;
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    background: var(--primary-soft);
-    color: var(--primary);
+    background:
+      radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.35), transparent 55%),
+      linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+    box-shadow:
+      0 0 0 3px var(--glass-border),
+      0 8px 20px -8px color-mix(in srgb, var(--brand-primary) 80%, transparent);
+    color: #ffffff;
     display: grid;
     place-items: center;
+    font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
   .archived {
     background: var(--warning-bg);
     color: var(--warning);
   }
   .read-only-note {
-    font-size: 0.8rem;
-    margin: 8px 0 0;
+    font-size: 0.78rem;
+    margin: 10px 4px 0;
   }
   dl {
     display: grid;
     grid-template-columns: max-content 1fr;
-    gap: 6px 12px;
+    gap: 8px 14px;
     margin: 0;
   }
   dt {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
   }
   dd {
     margin: 0;
     overflow-wrap: anywhere;
   }
+  dd a {
+    font-weight: 500;
+  }
   .guardian + .guardian {
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
-    padding-top: 8px;
+    border-top: 1px solid var(--separator);
+    margin-top: 10px;
+    padding-top: 10px;
   }
   .guardian p {
     margin: 2px 0;
@@ -257,10 +291,12 @@
     gap: 6px;
   }
   .consents li {
-    padding: 2px 10px;
+    padding: 3px 12px;
     border-radius: 999px;
-    font-size: 0.85rem;
-    border: 1px solid currentColor;
+    font-size: 0.84rem;
+    font-weight: 500;
+    border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+    background: color-mix(in srgb, currentColor 10%, transparent);
   }
   .yes {
     color: var(--yes);
@@ -273,7 +309,7 @@
     padding: 0;
     margin: 0;
     display: grid;
-    gap: 6px;
+    gap: 8px;
   }
   .plain li {
     display: flex;

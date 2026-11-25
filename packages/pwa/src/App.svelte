@@ -73,13 +73,18 @@
 </script>
 
 <header class="topbar">
-  <div class="topbar-row">
+  <div class="topbar-row glass">
     <a class="brand" href="#/">
-      <img src="/icon.svg" alt="" width="28" height="28" />
-      <span>{view.kind === 'ready' ? view.me.group : 'PPU'}</span>
+      <span class="logo" class:group-logo={!!__BRAND__.logo}>
+        <img src={__BRAND__.logo ?? __BRAND__.icon} alt="" />
+      </span>
+      <span class="brand-text">
+        <span class="title">{view.kind === 'ready' ? view.me.group : (__BRAND__.groupName ?? 'PPU')}</span>
+        <span class="subtitle">Progressione Personale Unitaria</span>
+      </span>
     </a>
     {#if view.kind === 'ready'}
-      <div class="user">
+      <div class="user" title={view.me.email}>
         <span class="email">{view.me.email}</span>
         <span class="roles">{describeRoles(view.me)}</span>
       </div>
@@ -101,7 +106,7 @@
   {:else if view.kind === 'error'}
     <div class="message">
       <p class="error">{view.message}</p>
-      <button type="button" class="retry" onclick={start}>Riprova</button>
+      <button type="button" class="retry glass" onclick={start}>Riprova</button>
     </div>
   {:else if cardId !== null}
     {#key cardId}
@@ -117,43 +122,75 @@
     position: sticky;
     top: 0;
     z-index: 10;
-    background: var(--primary);
-    color: var(--on-primary);
-    padding-top: env(safe-area-inset-top);
+    max-width: 752px;
+    margin: 0 auto;
+    padding: calc(10px + env(safe-area-inset-top)) 16px 4px;
   }
   .topbar-row {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 10px 16px;
+    border-radius: var(--radius);
+    padding: 8px 14px 8px 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    background: var(--glass-strong);
   }
   .brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     color: inherit;
     text-decoration: none;
-    font-weight: 700;
-    font-size: 1.05rem;
     min-width: 0;
   }
-  .brand span {
+  /* The group logo must not be altered (AGESCI manual): it sits on a neutral white background. */
+  .logo {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 2px 8px -2px rgb(33 22 56 / 0.25);
+  }
+  .group-logo {
+    background: #ffffff;
+    padding: 3px;
+  }
+  .logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    line-height: 1.15;
+    color: var(--primary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .brand img {
-    border-radius: 7px;
-    flex: none;
+  .subtitle {
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .user {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     min-width: 0;
     text-align: right;
   }
@@ -162,17 +199,23 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 52vw;
+    max-width: 42vw;
   }
   .roles {
-    opacity: 0.85;
+    color: var(--text-muted);
   }
   .test-band {
+    margin-top: 8px;
+    border-radius: 999px;
     background: var(--warning-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid color-mix(in srgb, var(--brand-accent) 50%, transparent);
     color: var(--warning);
-    font-size: 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 500;
     text-align: center;
-    padding: 4px 16px;
+    padding: 5px 16px;
   }
   .test-band button {
     background: none;
@@ -181,12 +224,17 @@
     text-decoration: underline;
     cursor: pointer;
     color: inherit;
+    font-weight: 700;
   }
   .retry {
     margin-top: 8px;
-    padding: 8px 16px;
+    padding: 10px 20px;
     border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface);
+    cursor: pointer;
+  }
+  @media (max-width: 420px) {
+    .subtitle {
+      display: none;
+    }
   }
 </style>

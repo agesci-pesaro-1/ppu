@@ -9,6 +9,16 @@ Interfaccia per i capi, in Svelte 5 + Vite, installabile sul telefono. È servit
 - **Sola lettura** per ora: le modifiche (con anteprima e conferma) arriveranno nelle prossime versioni.
 - **Scegli un ruolo**: solo in anteprima e in locale (modalità di test), per provare i diversi utenti dei dati demo. In beta e produzione il login lo fa Cloudflare Access.
 
+## Aspetto e marchio
+
+Tema "vetro liquido": superfici traslucide sfocate sopra macchie di colore del marchio, chiaro o scuro secondo il sistema, opaco con *trasparenze ridotte* o *contrasto elevato*. Segue il manuale d'immagine coordinata AGESCI (2016): scala del viola, colori di branca per avatar e filtri (giallo L/C, verde E/G, rosso R/S, lilla Co.Ca.), font Roboto e Roboto Slab inclusi nella PWA (nessuna richiesta a Google Fonts). Il logo del gruppo non si altera: sta sempre su fondo bianco.
+
+Logo, colori e nome del gruppo non sono nel repository: li legge `brand.ts` durante la build dalle variabili `PPU_LOGO` (percorso o indirizzo https), `PPU_COLORS` e `PPU_GROUP_NAME` (vedi `docs/installazione/pipeline.md`). Senza variabili si usano un'icona generica e la palette predefinita.
+
+```bash
+PPU_LOGO=~/logo.jpg PPU_GROUP_NAME="Gruppo Esempio 1" pnpm --filter @ppu/pwa build
+```
+
 ## Privacy
 
 Il service worker mette in cache solo i file dell'app. Le chiamate a `/api` vanno sempre in rete: nessun dato personale resta sul telefono. L'interfaccia nasconde e mostra, ma i permessi li decide il Worker.

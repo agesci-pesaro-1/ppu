@@ -22,6 +22,9 @@
 </script>
 
 <section aria-labelledby="pick-title">
+  {#if __BRAND__.logo}
+    <div class="emblem"><img src={__BRAND__.logo} alt={__BRAND__.groupName ?? ''} /></div>
+  {/if}
   <h1 id="pick-title">Scegli un ruolo</h1>
   <p class="muted">
     Questa è un'anteprima con <strong>dati inventati</strong>. Scegli con quale utente provare
@@ -33,7 +36,7 @@
   <ul class="role-list">
     {#each users as u (u.email)}
       <li>
-        <button type="button" onclick={() => pick(u.email)}>
+        <button type="button" class="glass" onclick={() => pick(u.email)}>
           <span class="name">{u.label}</span>
           <span class="muted description">{u.description}</span>
           <span class="muted email">{u.email}</span>
@@ -44,34 +47,57 @@
 </section>
 
 <style>
+  /* Group logo on a neutral white background, unaltered (AGESCI manual). */
+  .emblem {
+    width: 132px;
+    height: 132px;
+    margin: 24px auto 4px;
+    padding: 12px;
+    border-radius: 36px;
+    background: #ffffff;
+    box-shadow:
+      0 0 0 6px var(--glass-border),
+      0 18px 40px -16px color-mix(in srgb, var(--brand-primary) 60%, transparent);
+  }
+  .emblem img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
   h1 {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     margin: 20px 0 6px;
+    color: var(--primary);
   }
   .role-list {
     list-style: none;
     padding: 0;
-    margin: 16px 0;
+    margin: 18px 0;
     display: grid;
-    gap: 10px;
+    gap: 12px;
   }
   button {
     width: 100%;
     text-align: left;
-    background: var(--surface);
-    border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 12px 16px;
+    padding: 14px 18px;
     display: flex;
     flex-direction: column;
     gap: 2px;
     cursor: pointer;
+    transition:
+      transform 0.15s,
+      background 0.2s;
+  }
+  button:hover {
+    background: var(--glass-strong);
   }
   button:active {
-    background: var(--primary-soft);
+    transform: scale(0.985);
   }
   .name {
     font-weight: 600;
+    color: var(--primary);
   }
   .description {
     font-size: 0.9rem;

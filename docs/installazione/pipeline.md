@@ -33,6 +33,8 @@ Senza i segreti di Cloudflare, preview e rilascio si saltano con un avviso: la C
 | --- | --- | --- |
 | `PPU_DOMAIN` | `example.org` | Dominio Google Workspace del gruppo |
 | `PPU_GROUP_NAME` | `Gruppo Esempio 1` | Facoltativa |
+| `PPU_LOGO` | `https://example.org/logo.svg` | Facoltativa. Indirizzo https del logo del gruppo (svg, png, jpg o webp), scaricato durante la build della PWA: barra in alto, schermata iniziale e icona dell'app installata |
+| `PPU_COLORS` | `#462679 #fdc500 #791d42` | Facoltativa. Tre colori del tema: primario, accento, secondario. Senza, viola e giallo AGESCI con bordeaux |
 | `PPU_ACCESS_TEAM_DOMAIN` | `esempio.cloudflareaccess.com` | Team di Cloudflare Access |
 | `PPU_D1_NAME` | `ppu` | Nome del D1 di produzione, condiviso da beta e produzione |
 | `PPU_D1_ID` | `xxxxxxxx-xxxx-...` | ID del D1 di produzione |

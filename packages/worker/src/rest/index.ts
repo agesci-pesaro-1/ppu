@@ -4,6 +4,7 @@ import { createDb, type Db } from '../db/index.ts';
 import type { Env } from '../env.ts';
 import { AppError } from '../errors.ts';
 import { emailFromRequest, loadUser, type User } from '../identity/index.ts';
+import { confirmImport, previewImport } from '../import/service.ts';
 
 export interface Variables {
   config: Config;
@@ -38,6 +39,38 @@ api.get('/me', (c) => {
     },
     memberId: u.memberId,
   });
+});
+
+async function jsonBody(req: Request): Promise<Record<string, unknown>> {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    throw new AppError('bad_request', 'Il corpo della richiesta deve essere JSON.');
+  }
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+    throw new AppError('bad_request', 'Il corpo della richiesta deve essere un oggetto JSON.');
+  }
+  return body as Record<string, unknown>;
+}
+
+// Import from the sheet (webmaster only: the service checks the permission).
+api.post('/admin/import/preview', async (c) => {
+  const body = await jsonBody(c.req.raw);
+  return c.json(
+    await previewImport(c.get('db'), c.get('user'), { csv: body.csv, mapping: body.mapping }),
+  );
+});
+
+api.post('/admin/import/confirm', async (c) => {
+  const body = await jsonBody(c.req.raw);
+  return c.json(
+    await confirmImport(c.get('db'), c.get('user'), {
+      csv: body.csv,
+      mapping: body.mapping,
+      hash: body.hash,
+    }),
+  );
 });
 
 api.notFound(() => {

@@ -29,9 +29,9 @@ export const MEMBER_FIELDS = {
   riceve_comunicazioni: plain,
   informativa: bs(),
   informativa_data: bs(),
-  consenso_2a: bs(),
-  consenso_2b: bs(),
-  consenso_2c: bs(),
+  consenso_attivita: bs(),
+  consenso_immagini: bs(),
+  consenso_commerciale: bs(),
   note_privacy: plain,
 } as const satisfies Record<string, FieldMeta>;
 

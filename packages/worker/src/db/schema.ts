@@ -107,9 +107,9 @@ export const members = sqliteTable('associati', {
   receivesCommunications: flag('riceve_comunicazioni', true),
   privacyNotice: flag('informativa', false),
   privacyNoticeDate: text('informativa_data'),
-  consent2a: flag('consenso_2a', false),
-  consent2b: flag('consenso_2b', false),
-  consent2c: flag('consenso_2c', false),
+  consentActivities: flag('consenso_attivita', false),
+  consentImages: flag('consenso_immagini', false),
+  consentMarketing: flag('consenso_commerciale', false),
   privacyNotes: text('note_privacy'),
   status: text('stato', { enum: ['attivo', 'archiviato'] })
     .notNull()

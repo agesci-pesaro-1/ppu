@@ -72,6 +72,7 @@ interface Person {
   birthDate: string;
   unit: string;
   previousUnit?: string;
+  /** Privacy consents A (activities), B (images), C (marketing). */
   consents?: [number, number, number];
 }
 
@@ -352,7 +353,7 @@ people.forEach((p, i) => {
   const n = i + 1;
   ids.set(keyOf(p), n);
   const adult = p.birthDate < '2008-11-12';
-  const [c2a, c2b, c2c] = p.consents ?? [1, 1, 1];
+  const [activities, images, marketing] = p.consents ?? [1, 1, 1];
   insert('associati', {
     id: n,
     codice_censimento: String(900000 + n),
@@ -371,9 +372,9 @@ people.forEach((p, i) => {
     riceve_comunicazioni: n % 11 === 0 ? 0 : 1,
     informativa: 1,
     informativa_data: '2025-10-05',
-    consenso_2a: c2a,
-    consenso_2b: c2b,
-    consenso_2c: c2c,
+    consenso_attivita: activities,
+    consenso_immagini: images,
+    consenso_commerciale: marketing,
     note_privacy: null,
   });
   insert('storico_unita', { associato_id: n, unita_id: p.unit, anno_scout_id: CURRENT_YEAR });

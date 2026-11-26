@@ -51,7 +51,11 @@ Lupetti, Coccinelle, Esploratori, Guide, Clan (rover e scolte), Noviziato, Co.Ca
 - Le letture di dati sensibili si registrano nella tabella `accessi`.
 - Genitori/tutori archiviati automaticamente al compimento dei 18 anni.
 - Dati sanitari: **fuori dal sistema**.
-- I consensi (informativa, 2A, 2B, 2C) sono campi sì/no; gli strumenti li rispettano (per esempio il controllo foto).
+- I consensi sono campi sì/no, con il nome della finalità e non della lettera del modulo; gli strumenti li rispettano:
+  - `informativa` (con `informativa_data`): informativa consegnata e firmata;
+  - `consenso_attivita` (punto A): dati usati e diffusi per le attività associative (iscrizione, obblighi di legge, campi, eventi). Serve per l'iscrizione: se manca è un'anomalia da segnalare;
+  - `consenso_immagini` (punto B): foto e video. Blocca la presenza nelle foto pubblicate, non la foto profilo interna;
+  - `consenso_commerciale` (punto C): promozione commerciale del "Sistema AGESCI" (scout shop). PPU non fa promozione: si conserva solo per l'allineamento con Buona Strada.
 - Mai dati reali nel repository, nei test, nelle fixture o nei log. Solo dati finti.
 - Nessun livello gratuito di API AI che possa usare i dati per l'addestramento.
 

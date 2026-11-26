@@ -59,7 +59,7 @@ Database D1 (SQLite) con giurisdizione UE: ogni voce sotto è una tabella, i per
 
 | Collezione | Contenuto |
 | --- | --- |
-| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, email); flag "riceve comunicazioni"; privacy (informativa con data, consensi 2A, 2B, 2C, note privacy); stato (attivo o archiviato) |
+| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, email); flag "riceve comunicazioni"; privacy (informativa con data, consensi per finalità: attività associative `consenso_attivita` (A), foto e video `consenso_immagini` (B), promozione commerciale `consenso_commerciale` (C); note privacy); stato (attivo o archiviato) |
 | `associati/{id}` → genitori/tutori | Lista: ruolo (madre, padre, tutore, affidatario, altro), anagrafica, CF, cellulare, email, collegamento facoltativo al profilo se il tutore è anche associato. Archiviati automaticamente ai 18 anni |
 | `associati/{id}/progressione/{voce}` | Voci dal catalogo di branca (prede, specialità, voli, tappe, brevetti…) o voci libere (data, tipo, descrizione). Le vecchie note generali diventano voci libere |
 | `relazioni/{id}` | Due associati + tipo (genitore/figlio, fratello/sorella, zio/nipote, cugino, altro), con l'inversa creata in automatico. Vale anche per i capi |
@@ -246,7 +246,7 @@ _[Diagramma: roadmap · 7 fasi in sequenza — da aggiungere]_
 
 ## Punti aperti
 
-- [ ] Significato esatto dei consensi 2A, 2B, 2C e quali azioni devono bloccare.
+- [x] Significato esatto dei consensi A, B, C e quali azioni devono bloccare: A serve per l'iscrizione (se manca è un'anomalia), B blocca la presenza nelle foto pubblicate, C non blocca nulla in PPU (vedi CLAUDE.md).
 - [ ] Procedura dei passaggi dopo "Crea nuovo anno": chi sposta i ragazzi e come (lo storico resta comunque visibile al nuovo capo).
 - [ ] Elenco dei referenti Buona Strada da assegnare.
 - [ ] Periodo di conservazione dei dati archiviati.

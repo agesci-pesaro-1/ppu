@@ -8,7 +8,7 @@ import { refreshGoogleToken } from './identity/google.ts';
 import { isInDomain, loadUser, TEST_USER_HEADER } from './identity/index.ts';
 import { handleMcp, MCP_PATH } from './mcp/index.ts';
 import { authorizeApp, type McpProps } from './oauth/authorize.ts';
-import { api } from './rest/index.ts';
+import { api, demo } from './rest/index.ts';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -18,6 +18,7 @@ app.get('/health', (c) => {
   return c.json({ status: 'ok', environment: config.environment });
 });
 
+app.route('/api/demo', demo);
 app.route('/api', api);
 app.route('/', authorizeApp);
 

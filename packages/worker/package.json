@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "db:local": "scripts/setup-local-db.sh",
-    "dev:e2e": "scripts/setup-local-db.sh .wrangler/e2e && wrangler dev --persist-to .wrangler/e2e --var TEST_MODE:on --var DOMAIN:example.org",
+    "dev:e2e": "pnpm --filter @ppu/pwa build && scripts/setup-local-db.sh .wrangler/e2e && wrangler dev --persist-to .wrangler/e2e --var TEST_MODE:on --var DOMAIN:example.org",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

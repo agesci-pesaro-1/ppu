@@ -25,3 +25,4 @@ Ogni scelta architetturale di PPU è registrata qui come ADR (Architecture Decis
 | [0009](0009-immagini-dei-distintivi-dal-worker.md) | Immagini dei distintivi scaricate e servite dal Worker | Accettata |
 | [0010](0010-drizzle-per-le-query.md) | Drizzle per le query, schema nelle migrazioni SQL | Accettata |
 | [0011](0011-accesso-solo-con-riga-in-utenti.md) | Accesso solo con una riga in `utenti` | Accettata |
+| [0012](0012-pwa-servita-dal-worker.md) | PWA servita dallo stesso Worker dell'API (supera l'hosting dell'ADR 0005) | Proposta |

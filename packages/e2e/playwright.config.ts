@@ -16,6 +16,11 @@ export default defineConfig({
   use: {
     baseURL: externalUrl ?? `http://localhost:${PORT}`,
     trace: 'off',
+    // Chromium already installed elsewhere (e.g. a development environment with
+    // a different Playwright version): PW_CHROMIUM_PATH=/path/to/chrome
+    ...(process.env.PW_CHROMIUM_PATH
+      ? { launchOptions: { executablePath: process.env.PW_CHROMIUM_PATH } }
+      : {}),
   },
   ...(externalUrl
     ? {}

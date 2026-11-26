@@ -19,6 +19,22 @@
   "vars": {
     "ENVIRONMENT": "local"
   },
+  // PWA (packages/pwa) served as static assets by the same Worker (ADR 0012):
+  // same origin as the API. API, MCP and OAuth paths always go to the Worker;
+  // the others are PWA files, falling back to index.html.
+  "assets": {
+    "directory": "../pwa/dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*",
+      "/mcp",
+      "/mcp/*",
+      "/oauth/*",
+      "/authorize",
+      "/.well-known/*",
+      "/health"
+    ]
+  },
   // KV of the MCP's OAuth provider (tokens and clients, hashed or encrypted).
   "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "00000000000000000000000000000000" }],
   "d1_databases": [
@@ -33,6 +49,19 @@
     // One per pull request: separate D1 with demo data, simulated identity.
     "preview": {
       "name": "ppu-preview",
+      "assets": {
+        "directory": "../pwa/dist",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": [
+          "/api/*",
+          "/mcp",
+          "/mcp/*",
+          "/oauth/*",
+          "/authorize",
+          "/.well-known/*",
+          "/health"
+        ]
+      },
       "workers_dev": true,
       "vars": {
         "ENVIRONMENT": "preview",
@@ -52,6 +81,19 @@
     // On merge to main. Uses the production D1 (ADR 0006).
     "beta": {
       "name": "ppu-beta",
+      "assets": {
+        "directory": "../pwa/dist",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": [
+          "/api/*",
+          "/mcp",
+          "/mcp/*",
+          "/oauth/*",
+          "/authorize",
+          "/.well-known/*",
+          "/health"
+        ]
+      },
       "workers_dev": false,
       "vars": {
         "ENVIRONMENT": "beta"
@@ -68,6 +110,19 @@
     // Manual promotion from GitHub.
     "production": {
       "name": "ppu-production",
+      "assets": {
+        "directory": "../pwa/dist",
+        "not_found_handling": "single-page-application",
+        "run_worker_first": [
+          "/api/*",
+          "/mcp",
+          "/mcp/*",
+          "/oauth/*",
+          "/authorize",
+          "/.well-known/*",
+          "/health"
+        ]
+      },
       "workers_dev": false,
       "vars": {
         "ENVIRONMENT": "production"

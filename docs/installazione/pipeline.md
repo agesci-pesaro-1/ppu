@@ -33,6 +33,8 @@ Senza i segreti di Cloudflare, preview e rilascio si saltano con un avviso: la C
 | --- | --- | --- |
 | `PPU_DOMAIN` | `example.org` | Dominio Google Workspace del gruppo |
 | `PPU_GROUP_NAME` | `Gruppo Esempio 1` | Facoltativa |
+| `PPU_LOGO` | `https://example.org/logo.svg` | Facoltativa. Indirizzo https del logo del gruppo (svg, png, jpg o webp), scaricato durante la build della PWA: barra in alto, schermata iniziale e icona dell'app installata |
+| `PPU_COLORS` | `#462679 #fdc500 #791d42` | Facoltativa. Tre colori del tema: primario, accento, secondario. Senza, viola e giallo AGESCI con bordeaux |
 | `PPU_ACCESS_TEAM_DOMAIN` | `esempio.cloudflareaccess.com` | Team di Cloudflare Access |
 | `PPU_D1_NAME` | `ppu` | Nome del D1 di produzione, condiviso da beta e produzione |
 | `PPU_D1_ID` | `xxxxxxxx-xxxx-...` | ID del D1 di produzione |
@@ -55,7 +57,7 @@ Le variabili dell'environment hanno la precedenza su quelle del repository con l
 Una sola volta, da chi amministra l'account Cloudflare del gruppo:
 
 1. Creare il D1 di produzione **con giurisdizione UE**. La giurisdizione si sceglie solo alla creazione: dalla dashboard (*Storage & Databases → D1 → Create*, *Jurisdiction: EU*) oppure con `wrangler d1 create ppu --jurisdiction eu`. Annotare nome e ID in `PPU_D1_NAME` e `PPU_D1_ID`.
-2. Creare in Cloudflare Access un'applicazione per ciascun indirizzo pubblico (beta e produzione), con Google Workspace come provider e la regola sul dominio; per la beta, la regola ammette solo i tester. Copiare l'*Application Audience (AUD) Tag* in `PPU_ACCESS_AUD` dell'environment corrispondente.
+2. Creare in Cloudflare Access, per ciascun indirizzo pubblico (beta e produzione), un'applicazione su tutto l'indirizzo con Google come provider, la regola sul dominio e i percorsi dell'MCP come percorsi pubblici (`/mcp`, `/oauth/*`, `/authorize`, `/.well-known/*`). Copiare l'*Application Audience (AUD) Tag* dell'applicazione in `PPU_ACCESS_AUD` dell'environment corrispondente. Dettagli in [cloudflare-e-google.md](cloudflare-e-google.md), passo 2.6.
 3. Creare il KV namespace per l'OAuth dell'MCP e annotarne l'ID in `PPU_KV_OAUTH_ID`.
 4. Mettere nel repository il file di configurazione del gruppo, `config/gruppo.json` (`seed/README.md`). Ogni rilascio applica migrazioni, dati del gruppo e seed base, in quest'ordine: si possono riapplicare senza toccare ciò che c'è già. Senza il file il rilascio salta questo passo con un avviso.
 5. Registrare il **primo webmaster**. Entra in PPU solo chi ha una riga nella tabella `utenti` (ADR 0011), quindi senza questo passo nessuno può entrare, nemmeno nell'MCP admin. Il modo più semplice è la variabile `PPU_INITIAL_WEBMASTER`: il rilascio la registra solo se non c'è ancora nessun webmaster, con una riga nel registro `modifiche`. In alternativa, dalla dashboard di Cloudflare (*Storage & Databases → D1 →* database di produzione *→ Console*), una sola volta:
@@ -68,7 +70,7 @@ Una sola volta, da chi amministra l'account Cloudflare del gruppo:
 
 La guida completa passo passo, con Google Cloud e Cloudflare Access, è in [cloudflare-e-google.md](cloudflare-e-google.md).
 
-Il Worker di beta e produzione **non** è pubblicato su `workers.dev`: è raggiungibile solo dalla rotta configurata, protetta da Access. Senza il JWT di Access ogni chiamata risponde 401.
+Il Worker di beta e produzione **non** è pubblicato su `workers.dev`: è raggiungibile solo dalla rotta configurata, protetta da Access. Serve anche la PWA come asset statici (ADR 0012): la pipeline esegue `pnpm --filter @ppu/pwa build` prima di `wrangler deploy`. Senza il JWT di Access ogni chiamata all'API risponde 401.
 
 ## Preview
 

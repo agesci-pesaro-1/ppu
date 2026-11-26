@@ -133,6 +133,15 @@ jobs:
               WHERE changes() > 0;"
 
       - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Build the PWA
+        env:
+          # Optional group branding: logo, colours and name.
+          PPU_LOGO: ${{ vars.PPU_LOGO }}
+          PPU_COLORS: ${{ vars.PPU_COLORS }}
+          PPU_GROUP_NAME: ${{ vars.PPU_GROUP_NAME }}
+        run: pnpm --filter @ppu/pwa build
+
+      - if: steps.prerequisites.outputs.enabled == 'true'
         name: Deploy the Worker
         working-directory: packages/worker
         run: |

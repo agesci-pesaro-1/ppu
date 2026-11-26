@@ -1,0 +1,244 @@
+/*
+ * PPU "liquid glass" theme.
+ *
+ * The brand colours (--brand-primary, --brand-accent, --brand-secondary) come
+ * from index.html, generated at build time from the group's configuration
+ * (brand.ts). Only derived tones live here, plus the fixed values of the AGESCI
+ * 2016 visual identity manual: purple scale, branch colours, Roboto / Roboto Slab.
+ */
+
+:root {
+  /* Branch colours from the AGESCI manual. */
+  --branch-lc: #fdc500;
+  --branch-eg: #21a067;
+  --branch-rs: #e74030;
+  --branch-coca: #9b66a5;
+
+  --background: #f1eef7;
+  --text: #211638;
+  --text-muted: #5f557a;
+  --primary: var(--brand-primary);
+  --filled: var(--brand-primary);
+  --on-filled: #ffffff;
+  --primary-soft: color-mix(in srgb, var(--brand-primary) 10%, transparent);
+  --focus-ring: color-mix(in srgb, var(--brand-accent) 70%, transparent);
+
+  /* Glass: translucent surface, bright edge, tinted shadow. */
+  --glass: rgb(255 255 255 / 0.55);
+  --glass-strong: rgb(255 255 255 / 0.72);
+  --glass-border: rgb(255 255 255 / 0.75);
+  --glass-highlight: rgb(255 255 255 / 0.9);
+  --glass-shadow:
+    0 10px 30px -12px color-mix(in srgb, var(--brand-primary) 35%, transparent),
+    0 2px 6px -2px rgb(33 22 56 / 0.08);
+  --separator: color-mix(in srgb, var(--brand-primary) 12%, transparent);
+  --glass-blur: blur(22px) saturate(180%);
+
+  --warning: #7a5300;
+  --warning-bg: color-mix(in srgb, var(--brand-accent) 30%, rgb(255 255 255 / 0.6));
+  --error: #b3261e;
+  --yes: #17784b;
+  --no: var(--brand-secondary);
+  --radius: 22px;
+  --radius-small: 14px;
+
+  --font: "Roboto Variable", Roboto, Tahoma, system-ui, sans-serif;
+  --font-heading: "Roboto Slab Variable", "Roboto Slab", Georgia, serif;
+
+  color-scheme: light;
+  font-family: var(--font);
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #120c1f;
+    --text: #f2eefa;
+    --text-muted: #b6abcc;
+    /* Full purple is too dark as text on a dark background: lighten it towards #AEB0D9. */
+    --primary: color-mix(in srgb, var(--brand-primary) 30%, #c9c3ef);
+    --filled: color-mix(in srgb, var(--brand-primary) 85%, #ffffff);
+    --primary-soft: color-mix(in srgb, var(--brand-primary) 35%, transparent);
+    --glass: rgb(46 32 72 / 0.5);
+    --glass-strong: rgb(46 32 72 / 0.72);
+    --glass-border: rgb(255 255 255 / 0.12);
+    --glass-highlight: rgb(255 255 255 / 0.18);
+    --glass-shadow: 0 12px 32px -12px rgb(0 0 0 / 0.6);
+    --separator: rgb(255 255 255 / 0.08);
+    --warning: #ffd75e;
+    --warning-bg: color-mix(in srgb, var(--brand-accent) 22%, rgb(30 20 40 / 0.7));
+    --error: #ff8a7d;
+    --yes: #5fd39b;
+    --no: #f08aab;
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  min-height: 100dvh;
+  background: transparent;
+}
+
+/* Background: blurred colour blobs behind the glass, fixed while scrolling. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      38rem 32rem at -8% -6%,
+      color-mix(in srgb, var(--brand-primary) 42%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(
+      30rem 26rem at 108% 4%,
+      color-mix(in srgb, var(--brand-accent) 45%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(
+      34rem 30rem at 92% 104%,
+      color-mix(in srgb, var(--brand-secondary) 36%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(
+      26rem 24rem at 4% 82%,
+      color-mix(in srgb, var(--brand-primary) 22%, transparent),
+      transparent 70%
+    ),
+    var(--background);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--primary);
+  text-underline-offset: 0.15em;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Reusable glass surface. */
+.glass,
+.card {
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    var(--glass-shadow);
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px calc(32px + env(safe-area-inset-bottom));
+}
+
+.card {
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin: 14px 0;
+}
+
+.card h2 {
+  font-family: var(--font);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  margin: 0 0 10px;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  border: 1px solid var(--separator);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin: 2px 4px 2px 0;
+}
+
+.message {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.error {
+  color: var(--error);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+/* Without backdrop blur (older browsers) the glass becomes opaque. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --glass: var(--glass-strong);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass: #ffffff;
+    --glass-strong: #ffffff;
+  }
+  body::before {
+    background: var(--background);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) and (prefers-color-scheme: dark) {
+  :root {
+    --glass: #241a38;
+    --glass-strong: #241a38;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --glass: var(--glass-strong);
+    --glass-border: var(--text-muted);
+  }
+}

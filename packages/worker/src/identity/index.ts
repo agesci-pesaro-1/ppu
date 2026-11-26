@@ -8,6 +8,30 @@ import { emailFromAccess } from './access.ts';
 /** Header used by test mode (local and preview only). */
 export const TEST_USER_HEADER = 'X-Ppu-Test-User';
 
+/**
+ * Test mode cookie: a browser cannot send the header, so the PWA in preview
+ * picks the role with this cookie. Ignored outside local and preview (ensured
+ * by `config.testMode`, which `readConfig` rejects elsewhere).
+ */
+export const TEST_USER_COOKIE = 'ppu_test_user';
+
+/** Reads a cookie from the request, without dependencies. */
+export function readCookie(request: Request, name: string): string | null {
+  const header = request.headers.get('Cookie');
+  if (!header) return null;
+  for (const part of header.split(';')) {
+    const [key, ...value] = part.trim().split('=');
+    if (key === name) {
+      try {
+        return decodeURIComponent(value.join('='));
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
 export interface User {
   email: string;
   /** The leader's own member record, for "own data". */
@@ -26,11 +50,11 @@ export function isInDomain(email: string, domain: string): boolean {
   return at > 0 && e.slice(at + 1) === domain;
 }
 
-/** Gets the email from the request: Access JWT, or the test header. */
+/** Gets the email from the request: Access JWT, or the test header or cookie. */
 export async function emailFromRequest(request: Request, config: Config): Promise<string> {
   let email: string | null = null;
   if (config.testMode) {
-    email = request.headers.get(TEST_USER_HEADER);
+    email = request.headers.get(TEST_USER_HEADER) || readCookie(request, TEST_USER_COOKIE);
   }
   if (!email && config.access) {
     email = await emailFromAccess(request, config.access);

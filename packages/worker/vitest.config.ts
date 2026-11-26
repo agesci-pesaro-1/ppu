@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,6 +17,9 @@ async function generatedMigration(name: string, sql: string) {
 }
 
 export default defineConfig(async () => {
+  // wrangler.jsonc declares the PWA assets: the Worker tests do not need them,
+  // but the folder must exist even before the PWA build.
+  mkdirSync(path('../pwa/dist'), { recursive: true });
   const migrations = await readD1Migrations(path('../../migrations'));
   // Initial data as in preview (seed/README.md): example configuration,
   // seed/base, demo data. Configuration and demo SQL come from the scripts.

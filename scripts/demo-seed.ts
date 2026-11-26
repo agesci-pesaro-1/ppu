@@ -445,7 +445,7 @@ for (const p of people) {
       nome: linked ? 'Stefano' : firstName,
       codice_fiscale: `DEMOT${String(guardianId).padStart(11, '0')}`,
       cellulare: `+39 301 000 ${String(guardianId).padStart(4, '0')}`,
-      email: `${slug(firstName)}.${slug(p.lastName)}.${guardianId}@${DOMAIN}`,
+      email: `${slug(linked ? 'Stefano' : firstName)}.${slug(p.lastName)}.${guardianId}@${DOMAIN}`,
       associato_collegato_id: linked,
       archiviato: ofAge ? 1 : 0,
       archiviato_il: archivedAt,

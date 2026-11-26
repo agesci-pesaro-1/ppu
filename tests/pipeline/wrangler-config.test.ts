@@ -23,6 +23,7 @@ interface Section {
   vars: Record<string, string>;
   d1_databases: { database_id: string }[];
   kv_namespaces: { binding: string; id: string }[];
+  assets?: { directory: string; not_found_handling: string; run_worker_first: string[] };
   routes?: unknown;
 }
 const section = (c: Record<string, unknown>, env: string): Section =>
@@ -88,5 +89,21 @@ describe('wrangler-config', () => {
     assert.equal(s.vars.ENVIRONMENT, 'preview');
     assert.equal(s.vars.DOMAIN, 'example.org');
     assert.equal(s.vars.TEST_MODE, 'on');
+  });
+
+  it('every deployed environment serves the PWA, with API, MCP and OAuth always to the Worker', () => {
+    for (const environment of ['preview', 'beta', 'production'] as const) {
+      const c = generateConfig(base, {
+        environment,
+        ...deployed,
+        ...(environment === 'preview' ? { domain: undefined } : {}),
+      });
+      const a = section(c, environment).assets;
+      assert.equal(a?.directory, '../pwa/dist', environment);
+      assert.equal(a?.not_found_handling, 'single-page-application', environment);
+      for (const path of ['/api/*', '/mcp', '/mcp/*', '/oauth/*', '/authorize', '/.well-known/*']) {
+        assert.ok(a?.run_worker_first.includes(path), `${environment}: ${path}`);
+      }
+    }
   });
 });

@@ -21,11 +21,11 @@ Il tipo "Interno" e il controllo del Worker sul claim `hd` garantiscono che entr
 
 | Nome | Tipo | Valore |
 | --- | --- | --- |
-| `OAUTH_KV` | KV namespace | Token e client OAuth (salvati come hash o cifrati). Crealo con `wrangler kv namespace create OAUTH_KV` e metti l'id in `wrangler.jsonc` |
+| `OAUTH_KV` | KV namespace | Token e client OAuth (salvati come hash o cifrati). Crealo dalla dashboard e metti l'ID nella variabile GitHub `PPU_KV_OAUTH_ID`: la pipeline lo inserisce nella configurazione |
 | `GOOGLE_CLIENT_ID` | segreto | ID client del passo 1 |
 | `GOOGLE_CLIENT_SECRET` | segreto | Segreto client del passo 1 |
 
-I segreti si impostano dalla pipeline di deploy (segreti del repository GitHub), mai da una macchina locale. Senza `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` l'endpoint resta protetto ma il login non è disponibile.
+I segreti si impostano dalla pipeline di deploy (segreti del repository GitHub `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`, caricati nel Worker a ogni rilascio), mai da una macchina locale. Guida passo passo: [cloudflare-e-google.md](cloudflare-e-google.md). Senza `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` l'endpoint resta protetto ma il login non è disponibile.
 
 Non serve una chiave per i cookie: consenso e `state` sono legati al browser dalla libreria `@cloudflare/workers-oauth-provider` con cookie `__Host-`.
 

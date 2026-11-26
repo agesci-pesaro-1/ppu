@@ -65,12 +65,29 @@ jobs:
           test -n "$id"
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
+      # One KV for every preview: OAuth is secondary in previews (they use the
+      # simulated identity) and the namespace holds no data.
+      - if: steps.prerequisites.outputs.enabled == 'true'
+        name: Preview OAuth KV (if missing)
+        id: kv
+        working-directory: packages/worker
+        run: |
+          find_kv() { pnpm exec wrangler kv namespace list | jq -r '.[] | select(.title == "ppu-preview-oauth" or (.title | endswith("-ppu-preview-oauth"))) | .id' | head -1; }
+          id="$(find_kv)"
+          if [ -z "$id" ]; then
+            pnpm exec wrangler kv namespace create ppu-preview-oauth
+            id="$(find_kv)"
+          fi
+          test -n "$id"
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
       - if: steps.prerequisites.outputs.enabled == 'true'
         name: Generate the configuration
         env:
           PPU_ENVIRONMENT: preview
           PPU_D1_NAME: ${{ env.NAME }}
           PPU_D1_ID: ${{ steps.d1.outputs.id }}
+          PPU_KV_OAUTH_ID: ${{ steps.kv.outputs.id }}
           PPU_WORKER_NAME: ${{ env.NAME }}
         run: node scripts/wrangler-config.ts
 

@@ -12,6 +12,7 @@
 //   PPU_GROUP_NAME          group name (optional)
 //   PPU_ACCESS_TEAM_DOMAIN  <team>.cloudflareaccess.com (beta and production)
 //   PPU_ACCESS_AUD          audience of the Access application (beta and production)
+//   PPU_KV_OAUTH_ID         id of the OAUTH_KV namespace of the OAuth provider (required)
 //   PPU_ROUTE               custom domain of the Worker (optional)
 
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -25,6 +26,7 @@ export interface Options {
   environment: DeployedEnvironment;
   d1Name: string;
   d1Id: string;
+  kvOauthId: string;
   workerName?: string | undefined;
   domain?: string | undefined;
   groupName?: string | undefined;
@@ -77,6 +79,8 @@ export function generateConfig(base: Json, o: Options): Json {
   const generated: Json = {
     ...section,
     vars,
+    // KV bindings are not inherited by environments: declared here.
+    kv_namespaces: [{ binding: 'OAUTH_KV', id: required(o.kvOauthId, 'PPU_KV_OAUTH_ID') }],
     d1_databases: [
       {
         ...d1,
@@ -112,6 +116,7 @@ function main(): void {
     environment,
     d1Name: e.PPU_D1_NAME ?? '',
     d1Id: e.PPU_D1_ID ?? '',
+    kvOauthId: e.PPU_KV_OAUTH_ID ?? '',
     workerName: e.PPU_WORKER_NAME,
     domain: e.PPU_DOMAIN,
     groupName: e.PPU_GROUP_NAME,

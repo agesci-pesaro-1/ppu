@@ -12,6 +12,7 @@ const base = JSON.parse(
 const deployed = {
   d1Name: 'ppu',
   d1Id: '11111111-1111-1111-1111-111111111111',
+  kvOauthId: 'abcdefabcdefabcdefabcdefabcdef12',
   domain: 'Example.ORG',
   accessTeamDomain: 'demo.cloudflareaccess.com',
   accessAud: 'aud-123',
@@ -21,6 +22,7 @@ interface Section {
   name: string;
   vars: Record<string, string>;
   d1_databases: { database_id: string }[];
+  kv_namespaces: { binding: string; id: string }[];
   routes?: unknown;
 }
 const section = (c: Record<string, unknown>, env: string): Section =>
@@ -45,6 +47,7 @@ describe('wrangler-config', () => {
     assert.equal(s.vars.DOMAIN, 'example.org');
     assert.equal(s.vars.ACCESS_AUD, 'aud-123');
     assert.equal(s.d1_databases[0]?.database_id, deployed.d1Id);
+    assert.deepEqual(s.kv_namespaces, [{ binding: 'OAUTH_KV', id: deployed.kvOauthId }]);
     assert.deepEqual(s.routes, [{ pattern: 'ppu-beta.example.org', custom_domain: true }]);
     assert.deepEqual(Object.keys(c.env as object), ['beta']);
     assertNoTestMode(c, 'beta');
@@ -56,6 +59,7 @@ describe('wrangler-config', () => {
     assert.throws(() => generateConfig(base, { ...p, accessAud: '' }), /PPU_ACCESS_AUD/);
     assert.throws(() => generateConfig(base, { ...p, domain: undefined }), /PPU_DOMAIN/);
     assert.throws(() => generateConfig(base, { ...p, d1Id: '' }), /PPU_D1_ID/);
+    assert.throws(() => generateConfig(base, { ...p, kvOauthId: '' }), /PPU_KV_OAUTH_ID/);
   });
 
   it('rejects TEST_MODE in beta and production', () => {
@@ -76,6 +80,7 @@ describe('wrangler-config', () => {
       environment: 'preview',
       d1Name: 'ppu-preview-pr-7',
       d1Id: '22222222-2222-2222-2222-222222222222',
+      kvOauthId: 'abcdefabcdefabcdefabcdefabcdef34',
       workerName: 'ppu-preview-pr-7',
     });
     const s = section(c, 'preview');

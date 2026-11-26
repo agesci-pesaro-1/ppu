@@ -1,29 +1,41 @@
 // FAKE data: emails on example.org, tax codes with the DEMO prefix.
 import { env, exports } from 'cloudflare:workers';
 import { describe, expect, it } from 'vitest';
-import example from '../../../docs/installazione/import-esempio.json';
+import template from '../../../docs/installazione/import-modello.csv?raw';
 import { TEST_USER_HEADER } from '../src/identity/index.ts';
 
 const WEBMASTER = 'webmaster@example.org';
 
-const HEADER =
-  'Cognome;Nome;Data di nascita;Luogo di nascita;Codice fiscale;Censimento;Unità;Indirizzo;CAP;Comune;Prov;Cellulare;Email;Informativa;2A;2B;2C;Madre nome;Madre cognome;Madre cellulare;Madre email;Padre nome;Padre cognome;Padre cellulare;Note';
+const [HEADER = ''] = template.split('\n');
+const COLUMNS = HEADER.split(';');
 
-const VALID_CSV = [
-  HEADER,
-  'Prova;Lino;14/03/2017;Valdifiori;DEMOIMP000000001;800001;L;Via Finta 1;00000;Valdifiori;xx;;;Sì;x;x;;Lia;Prova;333 000 0001;lia.prova@example.org;Ugo;Prova;333 000 0002;"Ama i giochi; bravo a nodi"',
-  'Esempio;Rita;02/02/2013;Valdifiori;DEMOIMP000000002;800002;G;Via Finta 2;1100;Valdifiori;XX;;;si;si;no;si;Ada;;333 000 0003;;;;;',
-  'Campione;Dario;05/05/2005;Valdifiori;;800003;R;;;;;333 000 0004;dario@example.org;si;si;si;si;Eva;Campione;333 000 0005;;;;;Ex capo squadriglia',
-  'Arcangeli;Tommaso;14/03/2017;Valdifiori;;900001;L;;;;;;;si;si;si;si;;;;;;;;',
-].join('\n');
+/** A row of the standard format from the given values (missing columns stay empty). */
+const row = (values: Record<string, string>) => COLUMNS.map((c) => values[c] ?? '').join(';');
+
+// The template's three rows, plus a member already in the demo seed.
+const VALID_CSV = `${template.trimEnd()}\n${row({ codice_censimento: '900001', cognome: 'Arcangeli', nome: 'Tommaso' })}`;
 
 const INVALID_CSV = [
   HEADER,
-  'Errata;Data;31/02/2015;;;800010;L;;;;;;;si;si;si;si;;;;;;;;',
-  'Errata;Unita;01/01/2015;;;800011;Z;;;;;;;si;si;si;si;;;;;;;;',
-  'Doppio;Uno;01/01/2015;;DEMOIMP000000099;800012;L;;;;;;;si;si;si;si;;;;;;;;',
-  'Doppio;Due;01/01/2015;;DEMOIMP000000099;800012;L;;;;;;;si;si;si;si;;;;;;;;',
-  ';SenzaCognome;01/01/2015;;DEMO000000000001;;L;;;;;;;si;si;si;si;;;;;;;;',
+  row({ codice_censimento: '800010', cognome: 'Errata', nome: 'Data', data_nascita: '31/02/2015' }),
+  row({ codice_censimento: '800011', cognome: 'Errata', nome: 'Unita', unita: 'reparto' }),
+  row({
+    codice_censimento: '800012',
+    cognome: 'Doppio',
+    nome: 'Uno',
+    codice_fiscale: 'DEMOIMP000000099',
+    tutore1_ruolo: 'Madre',
+    tutore1_nome: 'Ada',
+  }),
+  row({
+    codice_censimento: '800012',
+    cognome: 'Doppio',
+    nome: 'Due',
+    codice_fiscale: 'DEMOIMP000000099',
+  }),
+  row({ nome: 'SenzaCognome', codice_fiscale: 'DEMO000000000001' }),
+  row({ cognome: 'Errato', nome: 'Consenso', consenso_immagini: 'forse' }),
+  row({ cognome: 'Errato', nome: 'Tutore', tutore1_ruolo: 'nonna', tutore2_cognome: 'Solo' }),
 ].join('\n');
 
 const call = (path: string, email: string, body: unknown) =>
@@ -38,22 +50,21 @@ const call = (path: string, email: string, body: unknown) =>
 interface Preview {
   hash: string;
   counts: Record<string, number>;
-  ignoredColumns: string[];
   rows: { line: number; status: string; lastName: string; errors: string[]; warnings: string[] }[];
 }
 
-describe('import from the sheet', () => {
+describe('import in the standard format', () => {
   it('only the webmaster can use it', async () => {
     for (const email of ['capogruppo@example.org', 'capo.eg@example.org']) {
-      const r = await call('preview', email, { csv: VALID_CSV, mapping: example });
+      const r = await call('preview', email, { csv: VALID_CSV });
       expect(r.status).toBe(403);
-      const c = await call('confirm', email, { csv: VALID_CSV, mapping: example, hash: 'x' });
+      const c = await call('confirm', email, { csv: VALID_CSV, hash: 'x' });
       expect(c.status).toBe(403);
     }
   });
 
   it('the preview shows the plan without contacts or tax codes', async () => {
-    const r = await call('preview', WEBMASTER, { csv: VALID_CSV, mapping: example });
+    const r = await call('preview', WEBMASTER, { csv: VALID_CSV });
     expect(r.status).toBe(200);
     const text = await r.text();
     expect(text).not.toContain('DEMOIMP');
@@ -69,18 +80,26 @@ describe('import from the sheet', () => {
       notes: 2,
     });
     expect(p.rows.map((x) => x.status)).toEqual(['create', 'create', 'create', 'existing']);
-    expect(p.rows[1]?.warnings).toContain('cap: CAP completato con lo zero iniziale');
-    expect(p.rows[1]?.warnings.some((x) => x.includes('cognome mancante'))).toBe(true);
+    expect(p.rows[1]?.warnings).toEqual([]);
     expect(p.rows[2]?.warnings.some((x) => x.includes('maggiorenne'))).toBe(true);
     expect(p.hash).toMatch(/^[0-9a-f]{64}$/);
   });
 
   it('reports invalid dates, unknown units, duplicates and required fields', async () => {
-    const r = await call('preview', WEBMASTER, { csv: INVALID_CSV, mapping: example });
+    const r = await call('preview', WEBMASTER, { csv: INVALID_CSV });
     const p = (await r.json()) as Preview;
-    expect(p.rows.map((x) => x.status)).toEqual(['error', 'error', 'create', 'error', 'error']);
+    expect(p.rows.map((x) => x.status)).toEqual([
+      'error',
+      'error',
+      'create',
+      'error',
+      'error',
+      'error',
+      'error',
+    ]);
     expect(p.rows[0]?.errors).toEqual(['data_nascita: data inesistente']);
-    expect(p.rows[1]?.errors).toEqual(['unita: valore non presente nella mappatura']);
+    expect(p.rows[1]?.errors).toEqual(['unita: unità sconosciuta in PPU']);
+    expect(p.rows[2]?.warnings).toContain("tutore1: cognome mancante, usato quello dell'associato");
     expect(p.rows[3]?.errors).toEqual([
       'codice_censimento: duplicato della riga 4',
       'codice_fiscale: duplicato della riga 4',
@@ -89,10 +108,18 @@ describe('import from the sheet', () => {
       'cognome: obbligatorio',
       'codice_fiscale: già presente in PPU',
     ]);
+    expect(p.rows[5]?.errors).toEqual([
+      'consenso_immagini: valore sì/no non valido (usa "si" o "no")',
+    ]);
+    expect(p.rows[6]?.errors).toEqual([
+      'tutore1_ruolo: ruolo non valido (uno tra: madre, padre, tutore, affidatario, altro)',
+      'tutore1_nome: obbligatorio se il tutore è presente',
+      'tutore2_ruolo: ruolo non valido (uno tra: madre, padre, tutore, affidatario, altro)',
+      'tutore2_nome: obbligatorio se il tutore è presente',
+    ]);
 
     const c = await call('confirm', WEBMASTER, {
       csv: INVALID_CSV,
-      mapping: example,
       hash: p.hash,
     });
     expect(c.status).toBe(400);
@@ -101,20 +128,37 @@ describe('import from the sheet', () => {
     ).toBe(0);
   });
 
-  it('rejects mapping columns missing from the file', async () => {
-    const r = await call('preview', WEBMASTER, { csv: 'Cognome;Nome\nA;B', mapping: example });
-    expect(r.status).toBe(400);
-    expect(await r.json()).toMatchObject({
+  it('rejects columns outside the format and files without the required ones', async () => {
+    const unknown = await call('preview', WEBMASTER, { csv: 'cognome;nome;Data di nascita\nA;B;' });
+    expect(unknown.status).toBe(400);
+    expect(await unknown.json()).toMatchObject({
       error: { message: expect.stringContaining('"Data di nascita"') },
+    });
+    const missing = await call('preview', WEBMASTER, { csv: 'cognome;unita\nA;lupetti' });
+    expect(missing.status).toBe(400);
+    expect(await missing.json()).toMatchObject({
+      error: { message: expect.stringContaining('nome') },
+    });
+  });
+
+  it('accepts a subset of the columns, in any order and case, and unit names', async () => {
+    const r = await call('preview', WEBMASTER, {
+      csv: 'Nome,COGNOME,unita\nLina,Ridotta,clan/fuoco',
+    });
+    expect(r.status).toBe(200);
+    const p = (await r.json()) as Preview;
+    expect(p.rows[0]).toMatchObject({
+      status: 'create',
+      lastName: 'Ridotta',
+      unit: 'clan',
+      errors: [],
     });
   });
 
   it('rejects the confirmation if the file changed after the preview', async () => {
-    const p = (await (
-      await call('preview', WEBMASTER, { csv: VALID_CSV, mapping: example })
-    ).json()) as Preview;
+    const p = (await (await call('preview', WEBMASTER, { csv: VALID_CSV })).json()) as Preview;
     const changed = VALID_CSV.replace('Lino', 'Lina');
-    const r = await call('confirm', WEBMASTER, { csv: changed, mapping: example, hash: p.hash });
+    const r = await call('confirm', WEBMASTER, { csv: changed, hash: p.hash });
     expect(r.status).toBe(409);
     expect(
       await env.DB.prepare("SELECT count(*) n FROM associati WHERE cognome = 'Prova'").first('n'),
@@ -122,10 +166,8 @@ describe('import from the sheet', () => {
   });
 
   it('the confirmation writes members, history, guardians, notes and log together', async () => {
-    const p = (await (
-      await call('preview', WEBMASTER, { csv: VALID_CSV, mapping: example })
-    ).json()) as Preview;
-    const r = await call('confirm', WEBMASTER, { csv: VALID_CSV, mapping: example, hash: p.hash });
+    const p = (await (await call('preview', WEBMASTER, { csv: VALID_CSV })).json()) as Preview;
+    const r = await call('confirm', WEBMASTER, { csv: VALID_CSV, hash: p.hash });
     expect(r.status).toBe(200);
     const outcome = (await r.json()) as {
       operation: string;
@@ -193,9 +235,7 @@ describe('import from the sheet', () => {
     ]);
 
     // Repeating the same import duplicates nothing: the rows are already present.
-    const again = (await (
-      await call('preview', WEBMASTER, { csv: VALID_CSV, mapping: example })
-    ).json()) as Preview;
+    const again = (await (await call('preview', WEBMASTER, { csv: VALID_CSV })).json()) as Preview;
     expect(again.counts).toMatchObject({ toCreate: 0, existing: 4 });
   });
 
@@ -208,7 +248,7 @@ describe('import from the sheet', () => {
       }),
     );
     expect(r.status).toBe(400);
-    const s = await call('preview', WEBMASTER, { csv: 42, mapping: example });
+    const s = await call('preview', WEBMASTER, { csv: 42 });
     expect(s.status).toBe(400);
   });
 });

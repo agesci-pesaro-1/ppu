@@ -1,10 +1,10 @@
-// Initial import from the group's sheet, reserved to the webmaster.
+// Initial import in PPU's standard format (see format.ts), reserved to the webmaster.
 //
 // Stateless on the server, in two calls:
-//   1. previewImport(csv, mapping) → full plan + hash;
-//   2. confirmImport(csv, mapping, hash) → plans again, checks that the hash
-//      matches (same file, same mapping, same database state) and applies
-//      everything in a single db.batch(), change log included.
+//   1. previewImport(csv) → full plan + hash;
+//   2. confirmImport(csv, hash) → plans again, checks that the hash matches
+//      (same file, same database state) and applies everything in a single
+//      db.batch(), change log included.
 //
 // The CSV content is never logged nor returned in full: the preview only shows
 // line number, name, unit and per-field errors.
@@ -29,14 +29,18 @@ import { CsvError, type CsvTable, parseCsv } from './csv.ts';
 import {
   GUARDIAN_FIELD_KIND,
   type GuardianRole,
-  type ImportableGuardianField,
+  guardianColumn,
+  guardianRole,
+  IMPORTABLE_MEMBER_FIELDS,
   type ImportableMemberField,
-  type Mapping,
+  MAX_GUARDIANS,
   MEMBER_FIELD_KIND,
+  NOTE_COLUMN,
+  NOTE_TYPE,
+  readHeaders,
   transform,
-  usedColumns,
-  validateMapping,
-} from './mapping.ts';
+  UNIT_COLUMN,
+} from './format.ts';
 
 /** Limits to stay within D1's limits on parameter and request size. */
 export const MAX_CSV_CHARS = 1_000_000;
@@ -69,10 +73,11 @@ export interface PlannedRow {
 
 export interface Plan {
   rows: PlannedRow[];
-  ignoredColumns: string[];
 }
 
 export interface PlanContext {
+  /** Unit id or name, lowercase → unit id. */
+  units: ReadonlyMap<string, string>;
   existingCensusCodes: ReadonlySet<string>;
   existingTaxCodes: ReadonlySet<string>;
   /** Today's date (YYYY-MM-DD), to archive the guardians of adult members. */
@@ -87,41 +92,25 @@ const adultThreshold = (today: string): string =>
 // Planning (pure, no database)
 // ---------------------------------------------------------------------------
 
-function columnIndex(table: CsvTable): Map<string, number> {
-  return new Map(table.headers.map((h, i) => [h.toLowerCase(), i]));
-}
-
-export function plan(table: CsvTable, m: Mapping, context: PlanContext): Plan {
-  const index = columnIndex(table);
-  const missing = usedColumns(m).filter((c) => !index.has(c.trim().toLowerCase()));
-  if (missing.length > 0) {
-    throw new AppError(
-      'bad_request',
-      `Colonne della mappatura assenti nel file: ${missing.map((c) => `"${c}"`).join(', ')}.`,
-    );
-  }
-  const used = new Set(usedColumns(m).map((c) => c.trim().toLowerCase()));
-  const ignoredColumns = table.headers.filter((h) => h !== '' && !used.has(h.toLowerCase()));
-
-  const unitValues = new Map(
-    Object.entries(m.unita?.valori ?? {}).map(([k, v]) => [k.trim().toLowerCase(), v]),
-  );
+export function plan(table: CsvTable, context: PlanContext): Plan {
+  const index = readHeaders(table.headers);
   const seenCensusCodes = new Map<string, number>();
   const seenTaxCodes = new Map<string, number>();
   const threshold = adultThreshold(context.today);
 
   const rows = table.rows.map((r): PlannedRow => {
-    const cell = (column: string): string =>
-      r.values[index.get(column.trim().toLowerCase()) ?? -1] ?? '';
+    const cell = (column: string): string => {
+      const i = index.get(column);
+      return i === undefined ? '' : (r.values[i] ?? '');
+    };
     const errors: string[] = [];
     const warnings: string[] = [];
 
+    // Only the columns present in the file: a missing column takes the schema's default.
     const member: PlannedRow['member'] = { unita_id: null };
-    for (const [field, column] of Object.entries(m.associato) as [
-      ImportableMemberField,
-      string,
-    ][]) {
-      const result = transform(cell(column), MEMBER_FIELD_KIND[field], m);
+    for (const field of IMPORTABLE_MEMBER_FIELDS) {
+      if (!index.has(field)) continue;
+      const result = transform(cell(field), MEMBER_FIELD_KIND[field]);
       if (!result.ok) {
         errors.push(`${field}: ${result.error}`);
         member[field] = null;
@@ -133,61 +122,61 @@ export function plan(table: CsvTable, m: Mapping, context: PlanContext): Plan {
     if (!member.cognome) errors.push('cognome: obbligatorio');
     if (!member.nome) errors.push('nome: obbligatorio');
 
-    if (m.unita) {
-      const raw = cell(m.unita.colonna).trim();
+    if (index.has(UNIT_COLUMN)) {
+      const raw = cell(UNIT_COLUMN).trim();
       if (raw === '') {
         warnings.push('unita: mancante');
       } else {
-        const id = unitValues.get(raw.toLowerCase());
+        const id = context.units.get(raw.toLowerCase());
         if (id) member.unita_id = id;
-        else errors.push('unita: valore non presente nella mappatura');
+        else errors.push('unita: unità sconosciuta in PPU');
       }
     }
 
     const adult = typeof member.data_nascita === 'string' && member.data_nascita <= threshold;
 
     const plannedGuardians: PlannedGuardian[] = [];
-    (m.tutori ?? []).forEach((t, i) => {
-      const values: Partial<Record<ImportableGuardianField, Value>> = {};
-      let present = false;
-      for (const [field, column] of Object.entries(t.campi) as [
-        ImportableGuardianField,
-        string,
-      ][]) {
-        const text = cell(column);
-        if (text.trim() !== '') present = true;
-        const result = transform(text, GUARDIAN_FIELD_KIND[field], m);
-        if (!result.ok) errors.push(`tutore ${i + 1} ${field}: ${result.error}`);
+    for (let n = 1; n <= MAX_GUARDIANS; n += 1) {
+      const where = `tutore${n}`;
+      const text = (f: Parameters<typeof guardianColumn>[1]) => cell(guardianColumn(n, f));
+      const values: Partial<Record<keyof typeof GUARDIAN_FIELD_KIND, Value>> = {};
+      let present = text('ruolo').trim() !== '';
+      for (const field of Object.keys(
+        GUARDIAN_FIELD_KIND,
+      ) as (keyof typeof GUARDIAN_FIELD_KIND)[]) {
+        const raw = text(field);
+        if (raw.trim() !== '') present = true;
+        const result = transform(raw, GUARDIAN_FIELD_KIND[field]);
+        if (!result.ok) errors.push(`${where}_${field}: ${result.error}`);
         else {
           values[field] = result.value;
-          if (result.warning) warnings.push(`tutore ${i + 1} ${field}: ${result.warning}`);
+          if (result.warning) warnings.push(`${where}_${field}: ${result.warning}`);
         }
       }
-      if (!present) return;
-      if (!values.nome) {
-        warnings.push(`tutore ${i + 1}: senza nome, non importato`);
-        return;
-      }
+      if (!present) continue;
+      const role = guardianRole(text('ruolo'));
+      if (!role.ok) errors.push(`${where}_ruolo: ${role.error}`);
+      if (!values.nome) errors.push(`${where}_nome: obbligatorio se il tutore è presente`);
+      if (!role.ok || !values.nome) continue;
       let lastName = values.cognome;
       if (!lastName) {
         lastName = member.cognome;
-        warnings.push(`tutore ${i + 1}: cognome mancante, usato quello dell'associato`);
+        warnings.push(`${where}: cognome mancante, usato quello dell'associato`);
       }
       plannedGuardians.push({
-        ruolo: t.ruolo,
+        ruolo: role.value,
         cognome: String(lastName ?? ''),
         nome: String(values.nome),
         codice_fiscale: values.codice_fiscale ?? null,
         cellulare: values.cellulare ?? null,
         email: values.email ?? null,
       });
-    });
+    }
     if (adult && plannedGuardians.length > 0)
       warnings.push('associato maggiorenne: tutori importati come archiviati');
 
-    const notes = (m.note ?? [])
-      .map((n) => ({ type: n.tipo ?? 'nota', description: cell(n.colonna).trim() }))
-      .filter((n) => n.description !== '');
+    const note = cell(NOTE_COLUMN).trim();
+    const notes = note === '' ? [] : [{ type: NOTE_TYPE, description: note }];
 
     // Duplicates: in the database and within the file.
     const censusCode =
@@ -226,7 +215,7 @@ export function plan(table: CsvTable, m: Mapping, context: PlanContext): Plan {
       warnings,
     };
   });
-  return { rows, ignoredColumns };
+  return { rows };
 }
 
 async function sha256(text: string): Promise<string> {
@@ -244,7 +233,6 @@ export function planHash(p: Plan): Promise<string> {
 
 export interface ImportRequest {
   csv: unknown;
-  mapping: unknown;
 }
 
 export interface ImportPreview {
@@ -257,7 +245,6 @@ export interface ImportPreview {
     guardians: number;
     notes: number;
   };
-  ignoredColumns: string[];
   /** Only what is needed to check the plan: no contacts nor tax codes. */
   rows: {
     line: number;
@@ -287,11 +274,6 @@ async function preparePlan(db: Db, request: ImportRequest): Promise<Plan> {
   if (request.csv.length > MAX_CSV_CHARS) {
     throw new AppError('bad_request', 'File troppo grande: dividilo in più import.');
   }
-  const unitRows = await db.select({ id: units.id }).from(units);
-  const mapping = validateMapping(
-    request.mapping,
-    unitRows.map((u) => u.id),
-  );
   let table: CsvTable;
   try {
     table = parseCsv(request.csv);
@@ -302,13 +284,20 @@ async function preparePlan(db: Db, request: ImportRequest): Promise<Plan> {
   if (table.rows.length > MAX_ROWS) {
     throw new AppError('bad_request', `Al massimo ${MAX_ROWS} righe per import.`);
   }
-  const [censusCodes, taxCodes] = await db.batch([
+  const [unitRows, censusCodes, taxCodes] = await db.batch([
+    db.select({ id: units.id, name: units.name }).from(units),
     db.select({ v: members.censusCode }).from(members).where(isNotNull(members.censusCode)),
     db.select({ v: members.taxCode }).from(members).where(isNotNull(members.taxCode)),
   ]);
   const values = (rows: { v: string | null }[]) =>
     new Set(rows.flatMap((r) => (r.v === null ? [] : [r.v])));
-  return plan(table, mapping, {
+  const unitKeys = new Map<string, string>();
+  for (const u of unitRows) {
+    unitKeys.set(u.name.trim().toLowerCase(), u.id);
+    unitKeys.set(u.id.toLowerCase(), u.id); // the id wins over a name equal to another id
+  }
+  return plan(table, {
+    units: unitKeys,
     existingCensusCodes: values(censusCodes),
     existingTaxCodes: values(taxCodes),
     today: new Date().toISOString().slice(0, 10),
@@ -335,7 +324,6 @@ export async function previewImport(
       guardians: toCreate.reduce((n, r) => n + r.guardians.length, 0),
       notes: toCreate.reduce((n, r) => n + r.notes.length, 0),
     },
-    ignoredColumns: p.ignoredColumns,
     rows: p.rows.map((r) => ({
       line: r.line,
       status: r.status,
@@ -373,7 +361,7 @@ const MEMBER_COLUMNS = [
   'note_privacy',
 ] as const;
 
-/** Flags and their value when the mapping does not name a column (the schema's default). */
+/** Flags and their value when the file has no column for them (the schema's default). */
 const FLAG_DEFAULTS: Partial<Record<(typeof MEMBER_COLUMNS)[number], 0 | 1>> = {
   riceve_comunicazioni: 1,
   informativa: 0,
@@ -424,14 +412,14 @@ export async function confirmImport(
   if ((await planHash(p)) !== request.hash) {
     throw new AppError(
       'conflict',
-      "Il file, la mappatura o i dati sono cambiati dopo l'anteprima: ripeti l'anteprima.",
+      "Il file o i dati sono cambiati dopo l'anteprima: ripeti l'anteprima.",
     );
   }
   const withErrors = p.rows.filter((r) => r.status === 'error').length;
   if (withErrors > 0) {
     throw new AppError(
       'bad_request',
-      `${withErrors} righe hanno errori: correggi il file o la mappatura e ripeti l'anteprima.`,
+      `${withErrors} righe hanno errori: correggi il file e ripeti l'anteprima.`,
     );
   }
   const toCreate = p.rows.filter((r) => r.status === 'create');
@@ -519,8 +507,8 @@ export async function confirmImport(
     statements.push(insertFromJson(db, progression, noteRows, { creato_da: sql`${user.email}` }));
   }
   // Change log: one row per created entity (NULL field = whole row created).
-  // The rows are NOT marked "da_riportare": the data comes from the sheet, which
-  // is aligned with Buona Strada (the official source). Marking them would
+  // The rows are NOT marked "da_riportare": the file is prepared from data
+  // aligned with Buona Strada (the official source). Marking them would
   // create hundreds of fake changes to report for data Buona Strada already has.
   statements.push(
     insertFromJson(db, changes, log, {

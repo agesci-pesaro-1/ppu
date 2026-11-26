@@ -106,7 +106,7 @@ Fase 0 — Fondamenta. Ordine suggerito:
 4. Worker con login Google, lettura della tabella `utenti`, registro modifiche e accessi.
 5. Pipeline GitHub Actions (lint, test, build, preview, E2E).
 6. MCP admin.
-7. Import dal foglio esistente con mappatura delle colonne configurabile.
+7. Import degli associati da un CSV nel formato standard di PPU (ADR 0012); ogni gruppo converte il proprio foglio.
 
 ## Comandi
 

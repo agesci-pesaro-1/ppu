@@ -28,3 +28,4 @@ blob-report/
 *.ods
 *.csv
 !seed/**/*.csv
+!docs/installazione/import-modello.csv

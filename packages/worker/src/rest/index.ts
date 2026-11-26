@@ -54,12 +54,10 @@ async function jsonBody(req: Request): Promise<Record<string, unknown>> {
   return body as Record<string, unknown>;
 }
 
-// Import from the sheet (webmaster only: the service checks the permission).
+// Import in the standard format (webmaster only: the service checks the permission).
 api.post('/admin/import/preview', async (c) => {
   const body = await jsonBody(c.req.raw);
-  return c.json(
-    await previewImport(c.get('db'), c.get('user'), { csv: body.csv, mapping: body.mapping }),
-  );
+  return c.json(await previewImport(c.get('db'), c.get('user'), { csv: body.csv }));
 });
 
 api.post('/admin/import/confirm', async (c) => {
@@ -67,7 +65,6 @@ api.post('/admin/import/confirm', async (c) => {
   return c.json(
     await confirmImport(c.get('db'), c.get('user'), {
       csv: body.csv,
-      mapping: body.mapping,
       hash: body.hash,
     }),
   );

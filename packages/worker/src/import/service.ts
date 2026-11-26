@@ -367,9 +367,9 @@ const MEMBER_COLUMNS = [
   'riceve_comunicazioni',
   'informativa',
   'informativa_data',
-  'consenso_2a',
-  'consenso_2b',
-  'consenso_2c',
+  'consenso_attivita',
+  'consenso_immagini',
+  'consenso_commerciale',
   'note_privacy',
 ] as const;
 
@@ -377,9 +377,9 @@ const MEMBER_COLUMNS = [
 const FLAG_DEFAULTS: Partial<Record<(typeof MEMBER_COLUMNS)[number], 0 | 1>> = {
   riceve_comunicazioni: 1,
   informativa: 0,
-  consenso_2a: 0,
-  consenso_2b: 0,
-  consenso_2c: 0,
+  consenso_attivita: 0,
+  consenso_immagini: 0,
+  consenso_commerciale: 0,
 };
 
 /**

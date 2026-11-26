@@ -278,9 +278,9 @@ export const MEMBER_FIELD_KIND: Record<ImportableMemberField, FieldKind> = {
   riceve_comunicazioni: 'yes_no',
   informativa: 'yes_no',
   informativa_data: 'date',
-  consenso_2a: 'yes_no',
-  consenso_2b: 'yes_no',
-  consenso_2c: 'yes_no',
+  consenso_attivita: 'yes_no',
+  consenso_immagini: 'yes_no',
+  consenso_commerciale: 'yes_no',
   note_privacy: 'text',
 };
 

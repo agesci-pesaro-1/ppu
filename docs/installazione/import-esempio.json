@@ -15,9 +15,9 @@
     "cellulare": "Cellulare",
     "email": "Email",
     "informativa": "Informativa",
-    "consenso_2a": "2A",
-    "consenso_2b": "2B",
-    "consenso_2c": "2C"
+    "consenso_attivita": "2A",
+    "consenso_immagini": "2B",
+    "consenso_commerciale": "2C"
   },
   "unita": {
     "colonna": "Unità",

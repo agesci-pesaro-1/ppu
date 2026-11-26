@@ -136,7 +136,7 @@ describe('import from the sheet', () => {
     expect(outcome).toMatchObject({ members: 3, guardians: 4, notes: 2, existing: 1 });
 
     const lino = await env.DB.prepare(
-      "SELECT id, data_nascita, codice_fiscale, unita_id, provincia, informativa, consenso_2c, riceve_comunicazioni FROM associati WHERE codice_censimento = '800001'",
+      "SELECT id, data_nascita, codice_fiscale, unita_id, provincia, informativa, consenso_commerciale, riceve_comunicazioni FROM associati WHERE codice_censimento = '800001'",
     ).first<Record<string, unknown>>();
     expect(lino).toMatchObject({
       data_nascita: '2017-03-14',
@@ -144,7 +144,7 @@ describe('import from the sheet', () => {
       unita_id: 'lupetti',
       provincia: 'XX',
       informativa: 1,
-      consenso_2c: 0,
+      consenso_commerciale: 0,
       riceve_comunicazioni: 1,
     });
     const history = await env.DB.prepare(

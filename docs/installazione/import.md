@@ -26,9 +26,11 @@ La mappatura dice, per ogni campo di PPU, da quale colonna del foglio leggerlo. 
 | `formatoData` | `"gg/mm/aaaa"` (predefinito) o `"aaaa-mm-gg"`. |
 | `associato` | Campo → colonna. Obbligatori `cognome` e `nome`. Campi possibili: `codice_censimento`, `cognome`, `nome`, `data_nascita`, `luogo_nascita`, `codice_fiscale`, `indirizzo`, `cap`, `comune`, `provincia`, `cellulare`, `email`, `riceve_comunicazioni` (se manca, sì), `informativa`, `informativa_data`, `consenso_attivita`, `consenso_immagini`, `consenso_commerciale`, `note_privacy`. |
 | `unita` | `colonna` e `valori`: per ogni valore che compare nel foglio, l'id dell'unità in PPU (`lupetti`, `coccinelle`, `esploratori`, `guide`, `noviziato`, `clan`, `coca`, o le unità del vostro gruppo). |
-| `tutori` | Fino a 4 genitori o tutori per riga: `ruolo` (`madre`, `padre`, `tutore`, `affidatario` o `altro`) e `campi` (`nome` obbligatorio, poi `cognome`, `codice_fiscale`, `cellulare`, `email`). |
+| `tutori` | Fino a 4 genitori o tutori per riga: `ruolo` (`madre`, `padre`, `tutore`, `affidatario` o `altro`) e `campi` (`nome` obbligatorio, poi `cognome`, `data_nascita`, `luogo_nascita`, `codice_fiscale`, `cellulare`, `email`). |
 | `note` | Colonne di note generali: diventano voci libere di progressione (tipo predefinito `nota`). |
 | `valoriSi`, `valoriNo` | Valori aggiuntivi da leggere come sì o no nelle colonne dei consensi. |
+
+Per il foglio «Censiti» c'è una mappatura già pronta, [`import-foglio-censiti.json`](import-foglio-censiti.json): lì il Fuoco va nell'unità `clan`; se il vostro gruppo ha un'unità Fuoco separata, aggiungila dall'MCP admin e cambia il valore nella mappatura.
 
 Le colonne del foglio non citate nella mappatura vengono ignorate e l'anteprima le elenca, così puoi controllare di non averne dimenticata nessuna.
 

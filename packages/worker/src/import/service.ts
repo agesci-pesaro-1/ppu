@@ -25,7 +25,7 @@ import { AppError } from '../errors.ts';
 import type { User } from '../identity/index.ts';
 import { newOperation } from '../services/audit-log.ts';
 import { canAdminister, ensure } from '../services/permissions.ts';
-import { CsvError, type CsvTable, parseCsv } from './csv.ts';
+import { CsvError, type CsvTable, columnKey, parseCsv } from './csv.ts';
 import {
   GUARDIAN_FIELD_KIND,
   type GuardianRole,
@@ -49,6 +49,8 @@ export interface PlannedGuardian {
   ruolo: GuardianRole;
   cognome: string;
   nome: string;
+  data_nascita: Value;
+  luogo_nascita: Value;
   codice_fiscale: Value;
   cellulare: Value;
   email: Value;
@@ -88,20 +90,20 @@ const adultThreshold = (today: string): string =>
 // ---------------------------------------------------------------------------
 
 function columnIndex(table: CsvTable): Map<string, number> {
-  return new Map(table.headers.map((h, i) => [h.toLowerCase(), i]));
+  return new Map(table.headers.map((h, i) => [columnKey(h), i]));
 }
 
 export function plan(table: CsvTable, m: Mapping, context: PlanContext): Plan {
   const index = columnIndex(table);
-  const missing = usedColumns(m).filter((c) => !index.has(c.trim().toLowerCase()));
+  const missing = usedColumns(m).filter((c) => !index.has(columnKey(c)));
   if (missing.length > 0) {
     throw new AppError(
       'bad_request',
       `Colonne della mappatura assenti nel file: ${missing.map((c) => `"${c}"`).join(', ')}.`,
     );
   }
-  const used = new Set(usedColumns(m).map((c) => c.trim().toLowerCase()));
-  const ignoredColumns = table.headers.filter((h) => h !== '' && !used.has(h.toLowerCase()));
+  const used = new Set(usedColumns(m).map(columnKey));
+  const ignoredColumns = table.headers.filter((h) => h !== '' && !used.has(columnKey(h)));
 
   const unitValues = new Map(
     Object.entries(m.unita?.valori ?? {}).map(([k, v]) => [k.trim().toLowerCase(), v]),
@@ -111,8 +113,7 @@ export function plan(table: CsvTable, m: Mapping, context: PlanContext): Plan {
   const threshold = adultThreshold(context.today);
 
   const rows = table.rows.map((r): PlannedRow => {
-    const cell = (column: string): string =>
-      r.values[index.get(column.trim().toLowerCase()) ?? -1] ?? '';
+    const cell = (column: string): string => r.values[index.get(columnKey(column)) ?? -1] ?? '';
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -177,6 +178,8 @@ export function plan(table: CsvTable, m: Mapping, context: PlanContext): Plan {
         ruolo: t.ruolo,
         cognome: String(lastName ?? ''),
         nome: String(values.nome),
+        data_nascita: values.data_nascita ?? null,
+        luogo_nascita: values.luogo_nascita ?? null,
         codice_fiscale: values.codice_fiscale ?? null,
         cellulare: values.cellulare ?? null,
         email: values.email ?? null,

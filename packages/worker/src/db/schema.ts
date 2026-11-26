@@ -151,6 +151,9 @@ export const guardians = sqliteTable('tutori', {
   archivedAt: text('archiviato_il'),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
+  // migration 0003
+  birthDate: text('data_nascita'),
+  birthPlace: text('luogo_nascita'),
 });
 
 export const relationships = sqliteTable('relazioni', {

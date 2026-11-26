@@ -39,6 +39,8 @@ export const GUARDIAN_FIELDS = {
   ruolo: bs(),
   cognome: bs(),
   nome: bs(),
+  data_nascita: bs(),
+  luogo_nascita: bs(),
   codice_fiscale: bs(true),
   cellulare: bs(),
   email: bs(),

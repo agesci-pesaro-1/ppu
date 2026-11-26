@@ -16,6 +16,8 @@ export type ImportableMemberField = Exclude<MemberField, 'unita_id'>;
 export const IMPORTABLE_GUARDIAN_FIELDS = [
   'cognome',
   'nome',
+  'data_nascita',
+  'luogo_nascita',
   'codice_fiscale',
   'cellulare',
   'email',
@@ -243,6 +245,15 @@ export function taxCode(text: string): Result<string> {
   return { ok: true, value: t };
 }
 
+/** AGESCI census code: digits only; a very short value is probably a placeholder. */
+export function censusCode(text: string): Result<string> {
+  const t = text.trim();
+  if (!/^\d+$/.test(t)) return { ok: false, error: 'codice censimento non numerico' };
+  if (t.length < 5)
+    return { ok: true, value: t, warning: 'codice censimento sospetto (troppo corto)' };
+  return { ok: true, value: t };
+}
+
 export function postcode(text: string): Result<string> {
   const t = text.trim();
   // A spreadsheet may have dropped the leading zero.
@@ -260,10 +271,11 @@ export type FieldKind =
   | 'email'
   | 'tax_code'
   | 'postcode'
+  | 'census_code'
   | 'uppercase';
 
 export const MEMBER_FIELD_KIND: Record<ImportableMemberField, FieldKind> = {
-  codice_censimento: 'text',
+  codice_censimento: 'census_code',
   cognome: 'text',
   nome: 'text',
   data_nascita: 'date',
@@ -287,6 +299,8 @@ export const MEMBER_FIELD_KIND: Record<ImportableMemberField, FieldKind> = {
 export const GUARDIAN_FIELD_KIND: Record<ImportableGuardianField, FieldKind> = {
   cognome: 'text',
   nome: 'text',
+  data_nascita: 'date',
+  luogo_nascita: 'text',
   codice_fiscale: 'tax_code',
   cellulare: 'phone',
   email: 'email',
@@ -298,7 +312,8 @@ export function transform(
   kind: FieldKind,
   m: Pick<Mapping, 'formatoData' | 'valoriSi' | 'valoriNo'>,
 ): Result<string | number | null> {
-  const t = text.trim();
+  // A leading apostrophe is the spreadsheets' "text" marker, not data.
+  const t = text.trim().replace(/^'/, '').trim();
   if (kind === 'yes_no') return yesNo(t, m.valoriSi, m.valoriNo);
   if (t === '') return { ok: true, value: null };
   switch (kind) {
@@ -312,6 +327,8 @@ export function transform(
       return taxCode(t);
     case 'postcode':
       return postcode(t);
+    case 'census_code':
+      return censusCode(t);
     case 'uppercase':
       return { ok: true, value: t.toUpperCase() };
     default:

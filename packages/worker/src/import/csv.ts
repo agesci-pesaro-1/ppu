@@ -90,7 +90,8 @@ export function parseCsv(text: string): CsvTable {
   const separator = detectSeparator(clean);
   const [header, ...data] = records(clean, separator);
   if (!header) throw new CsvError('Intestazione mancante.');
-  const headers = header.values.map((h) => h.trim());
+  // Headers may contain line breaks or double spaces (multi-line cells).
+  const headers = header.values.map((h) => h.replace(/\s+/g, ' ').trim());
   const seen = new Set<string>();
   for (const h of headers) {
     const key = h.toLowerCase();
@@ -106,4 +107,9 @@ export function parseCsv(text: string): CsvTable {
     }
   }
   return { separator, headers, rows };
+}
+
+/** Comparison key between column names: normalised spaces, case-insensitive. */
+export function columnKey(name: string): string {
+  return name.replace(/\s+/g, ' ').trim().toLowerCase();
 }

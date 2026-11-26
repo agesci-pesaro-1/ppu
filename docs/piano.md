@@ -59,7 +59,7 @@ Database D1 (SQLite) con giurisdizione UE: ogni voce sotto è una tabella, i per
 
 | Collezione | Contenuto |
 | --- | --- |
-| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, email); flag "riceve comunicazioni"; privacy (informativa con data, consensi 2A, 2B, 2C, note privacy); stato (attivo o archiviato) |
+| `associati/{id}` | ID interno (chiave); codice censimento univoco ma facoltativo; cognome, nome, data e luogo di nascita; unità attuale e storico unità per anno scout; residenza (indirizzo, CAP, comune, provincia); contatti personali (cellulare, email); flag "riceve comunicazioni"; privacy (informativa con data, consensi per finalità: attività associative `consenso_attivita` (A), foto e video `consenso_immagini` (B), promozione commerciale `consenso_commerciale` (C); note privacy); stato (attivo o archiviato) |
 | `associati/{id}` → genitori/tutori | Lista: ruolo (madre, padre, tutore, affidatario, altro), anagrafica, CF, cellulare, email, collegamento facoltativo al profilo se il tutore è anche associato. Archiviati automaticamente ai 18 anni |
 | `associati/{id}/progressione/{voce}` | Voci dal catalogo di branca (prede, specialità, voli, tappe, brevetti…) o voci libere (data, tipo, descrizione). Le vecchie note generali diventano voci libere |
 | `relazioni/{id}` | Due associati + tipo (genitore/figlio, fratello/sorella, zio/nipote, cugino, altro), con l'inversa creata in automatico. Vale anche per i capi |
@@ -150,7 +150,7 @@ Un altro gruppo deve poter partire da zero con un repository, un account Cloudfl
 - **Dati di base:** branche, unità e tipi di tag dal file di configurazione del gruppo, che ognuno compila con ciò che gli serve partendo dall'esempio con le unità standard AGESCI; il catalogo di progressione dal Regolamento metodologico, solo per le branche configurate.
 - **Dati finti (seed di test):** associati, famiglie e riunioni inventati, generati da uno script e usati da preview, test E2E e demo. Nessun file SQL di dati nel repository, mai dati reali.
 - **Configurazione, non codice:** dominio, nome del gruppo, branche, unità, tipi di tag, colori e logo stanno in un file di configurazione e nei segreti di Cloudflare. Niente @agescipesaro1.it scritto nel codice.
-- **Import generico:** l'import dal foglio usa una mappatura delle colonne configurabile, partendo dal formato del nostro foglio.
+- **Import generico:** l'import accetta un solo formato CSV standard di PPU, con le colonne dello schema e un modello con dati finti (ADR 0012); ogni gruppo converte il proprio foglio una volta.
 - **Aggiornamenti:** rilasci con versione e changelog; un gruppo aggiorna con il codice nuovo e la pipeline applica le migrazioni mancanti.
 - **Documentazione:** README, guida di installazione passo passo, ADR pubblici, guida per chi contribuisce.
 
@@ -190,7 +190,7 @@ _[Diagramma: roadmap · 7 fasi in sequenza — da aggiungere]_
 - [ ] Configurazione per gruppo (dominio, nome, unità, branding), nessun valore fisso nel codice
 - [ ] Tabella utenti (unità, accesso completo, Buona Strada, webmaster, tester beta)
 - [ ] Login Google limitato al dominio configurato
-- [ ] Import iniziale dal foglio attuale, con mappatura delle colonne e genitori in lista
+- [ ] Import iniziale degli associati dal formato CSV standard, con i genitori sulla riga del figlio
 - [ ] Registro modifiche e accessi
 - [ ] MCP admin per il webmaster
 
@@ -241,12 +241,12 @@ _[Diagramma: roadmap · 7 fasi in sequenza — da aggiungere]_
 - [ ] Pulsante "Scrivi su WhatsApp" nella scheda: apre la chat con il genitore tramite link wa.me, senza API e senza costi
 - [ ] Foto profilo dell'associato: caricamento dalla PWA, salvataggio su R2 con giurisdizione UE, servita dal Worker come le immagini dei distintivi del catalogo. È una foto interna, trattata come gli altri dati della scheda: nessun consenso aggiuntivo oltre ai consensi per le foto pubblicate. Quando l'associato viene archiviato la foto resta su R2
 - [ ] Documenti dell'associato in PDF (per esempio la richiesta di iscrizione e l'informativa privacy firmata, a supporto del campo `informativa`), in caricamento e consultazione dalla PWA: archiviati sul Google Drive del Workspace del gruppo, in una struttura di cartelle che PPU rispecchia (per esempio una cartella per associato). Preferibile accedere a Drive con l'account del capo che ha fatto login, così la visibilità dei documenti dipende anche dai permessi di Drive; altrimenti un account di servizio. Richiede un nuovo ADR, perché oggi Workspace serve solo per l'identità (ADR 0003)
-- [ ] Lista d'attesa in PPU, come unico punto per vederla e gestirla: richieste con dati del ragazzo e contatti della famiglia, data della richiesta, unità o anno di nascita, stato (in attesa, contattata, inserita, rinuncia) e note; una richiesta accolta diventa un associato con i suoi tutori. Import iniziale della lista attuale con la mappatura delle colonne configurabile, poi alimentazione automatica dal Google Form esistente: un Apps Script collegato al form invia ogni risposta a un endpoint del Worker, con firma HMAC e un segreto condiviso, senza servizi esterni e senza che PPU legga Workspace
+- [ ] Lista d'attesa in PPU, come unico punto per vederla e gestirla: richieste con dati del ragazzo e contatti della famiglia, data della richiesta, unità o anno di nascita, stato (in attesa, contattata, inserita, rinuncia) e note; una richiesta accolta diventa un associato con i suoi tutori. Import iniziale della lista attuale da un formato CSV standard, come per gli associati, poi alimentazione automatica dal Google Form esistente: un Apps Script collegato al form invia ogni risposta a un endpoint del Worker, con firma HMAC e un segreto condiviso, senza servizi esterni e senza che PPU legga Workspace
 - [ ] Kit per altri gruppi: guida di installazione e script di setup (D1 in UE, Access, client OAuth)
 
 ## Punti aperti
 
-- [ ] Significato esatto dei consensi 2A, 2B, 2C e quali azioni devono bloccare.
+- [x] Significato esatto dei consensi A, B, C e quali azioni devono bloccare: A serve per l'iscrizione (se manca è un'anomalia), B blocca la presenza nelle foto pubblicate, C non blocca nulla in PPU (vedi CLAUDE.md).
 - [ ] Procedura dei passaggi dopo "Crea nuovo anno": chi sposta i ragazzi e come (lo storico resta comunque visibile al nuovo capo).
 - [ ] Elenco dei referenti Buona Strada da assegnare.
 - [ ] Periodo di conservazione dei dati archiviati.
